@@ -1,4 +1,4 @@
-openapi: 3.0.3
+openapi: 3.1.1
 info:
   title: M2M Gateway API
   description: The M2M Gateway API is for communication by 3rd party servers for automated tasks in the Framework
@@ -74,6 +74,7 @@ paths:
   /transactions/{transactionId}/test:  
     post:
       tags:
+        - Transaction
         - Transaction Execution
         - Test
       description: Simulates the execution of a transaction
@@ -98,29 +99,62 @@ paths:
               description: You need to provide a value for every parameter in the transaction via the name of the parameter
               properties:
                 params:
-                  type: object
-                  example:
-                    {
-                      "recipientAddress": "0x3e6a2f0CBA03d293B54c9fCF354948903007a798",
-                      "amount": "463",
-                    }
-                  additionalProperties:
-                    type: string
+                  $ref: '#/components/schemas/JSONValue'
       responses:
         200:
           description: "Success"
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/TransactionExecution"
+                $ref: '#/components/schemas/JSONValue'
         500:
           $ref: "#/components/responses/DatabaseError"
-          
+
+  /transactions/{transactionId}/estimate:  
+    post:
+      tags:
+        - Transaction
+        - Transaction Execution
+      description: Estimates the cost of executing the transaction with the given parameters. Returns data about the fees and amount of gas.
+      parameters:
+        - name: transactionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            description: internal ID of the transaction object
+            example: 4b4bab2d-673d-4b91-8e09-f1402962cd3e
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: You need to provide a value for every parameter in the transaction via the name of the parameter
+              properties:
+                params:
+                  $ref: '#/components/schemas/JSONValue'
+                escrowWalletId:
+                  type: string
+                  format: uuid
+                  example: 8a6e0804-2bd0-4672-b79d-d97027f90720
+      responses:
+        200:
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionEstimate"
+        500:
+          $ref: "#/components/responses/DatabaseError"
+   
   /transactions/{transactionId}/execute:  
     post:
       tags:
+        - Transaction
         - Transaction Execution
-      description: Starts the execution of the transaction
+      description: Starts the execution of the transaction. You can only execute transactions that are payable or nonpayable. Use /read for view and pure transactions.
       parameters:
         - name: transactionId
           in: path
@@ -142,14 +176,14 @@ paths:
               description: You need to provide a value for every parameter in the transaction via the name of the parameter
               properties:
                 params:
-                  type: object
-                  example:
-                    {
-                      "recipientAddress": "0x3e6a2f0CBA03d293B54c9fCF354948903007a798",
-                      "amount": "463",
-                    }
-                  additionalProperties:
-                    type: string
+                  $ref: '#/components/schemas/JSONValue'
+                escrowWalletId:
+                  type: string
+                  format: uuid
+                  example: 8a6e0804-2bd0-4672-b79d-d97027f90720
+                memo:
+                  type: string
+                  description: You may include any text you like when you execute a transaction, as a note to yourself about why it was done. This text can be JSON or similar if you want to store formatted data.
       responses:
         200:
           description: "Success"
@@ -157,6 +191,44 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/TransactionExecution"
+        500:
+          $ref: "#/components/responses/DatabaseError"
+
+  /transactions/{transactionId}/read:  
+    post:
+      tags:
+        - Transaction
+        - Transaction Execution
+      description: Gets the result of a view or pure function; this will error on payable and nonpayable transactions.
+      parameters:
+        - name: transactionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            description: internal ID of the transaction object
+            example: 4b4bab2d-673d-4b91-8e09-f1402962cd3e
+      security:
+        - OAuth2ClientCredentials:
+          - read:api
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: You need to provide a value for every parameter in the transaction via the name of the parameter
+              properties:
+                params:
+                  $ref: '#/components/schemas/JSONValue'
+      responses:
+        200:
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JSONValue'
         500:
           $ref: "#/components/responses/DatabaseError"
   
@@ -185,7 +257,7 @@ paths:
               type: object
               properties:
                 chain:
-                  $ref: "#/components/schemas/ChainId"
+                  $ref: "#/components/schemas/EChain"
                 contractAddress:
                   $ref: "#/components/schemas/ContractAddress"
                 escrowWalletId:
@@ -201,27 +273,19 @@ paths:
                 functionName:
                   type: string
                   example: mint
-                params:
+                stateMutability:
+                  $ref: "#/components/schemas/ESolidityStateMutability"
+                inputs:
                   type: array
                   items:
-                    type: object
-                    properties:
-                      name:
-                        type: string
-                        example: amount
-                      type:
-                        $ref: "#/components/schemas/ESolidityAbiParameterType"
-                      index:
-                        type: integer
-                        example: 0
-                        description: This is the relative index in the contract function. It should start at 0, and must not skip any numbers.
-                      value:
-                        type: string
-                        description: This is an optional value. This
-                    required:
-                      - name
-                      - type
-                      - index
+                    $ref: "#/components/schemas/NewSolidityStructParam"
+                outputs:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/NewSolidityStructParam"
+                callbackUrl:
+                  type: string
+                  example: https://example.com/webhook
               required:
                 - chain
                 - contractAddress
@@ -229,7 +293,8 @@ paths:
                 - name
                 - description
                 - functionName
-                - params
+                - stateMutability
+                - inputs
       responses:
         200:
           description: Returns the transaction object.
@@ -270,8 +335,7 @@ paths:
           in: query
           required: false
           schema:
-            type: string
-            example: "43113"
+            $ref: "#/components/schemas/EChain"
         - name: name
           in: query
           required: false
@@ -283,6 +347,11 @@ paths:
           required: false
           schema:
             $ref: "#/components/schemas/EDeletedStatusSelector"
+        - name: contractAddress
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/ContractAddress"
       security:
         - OAuth2ClientCredentials:
           - read:api
@@ -300,6 +369,70 @@ paths:
                         items:
                           $ref: "#/components/schemas/Transaction"
                   - $ref: "#/components/schemas/PagedResponse"
+
+        500:
+          $ref: "#/components/responses/DatabaseError"
+
+  /business/{businessId}/transactions/abi:
+    post:
+      tags:
+        - Transaction
+      description: Imports a complete ethereum ABI and creates Transactions for each "function" type entry.
+      parameters:
+        - name: businessId
+          in: path
+          description: The internal uuid of the Business you are interested in
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 8a6e0804-2bd0-4672-b79d-d97027f90720
+      security:
+        - OAuth2ClientCredentials:
+          - read:api
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                chain:
+                  $ref: "#/components/schemas/EChain"
+                contractAddress:
+                  $ref: "#/components/schemas/ContractAddress"
+                escrowWalletId:
+                  type: string
+                  format: uuid
+                  example: 8a6e0804-2bd0-4672-b79d-d97027f90720
+                name:
+                  type: string
+                  example: Mint Token
+                description:
+                  type: string
+                  example: This calls the mint() method on our ERC20 contract
+                functionName:
+                  type: string
+                  example: mint
+                abi:
+                  $ref: "#/components/schemas/EthereumAbi"
+              required:
+                - chain
+                - contractAddress
+                - escrowWalletId
+                - name
+                - description
+                - functionName
+                - params
+      responses:
+        200:
+          description: Returns the transaction object.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Transaction"
 
         500:
           $ref: "#/components/responses/DatabaseError"
@@ -445,8 +578,7 @@ paths:
           in: query
           required: false
           schema:
-            type: string
-            example: "43113"
+            $ref: "#/components/schemas/EChain"
         - name: status
           in: query
           required: false
@@ -604,8 +736,7 @@ paths:
           description: The specific chain to get the wallets for
           required: false
           schema:
-            type: integer
-            description: The chain ID to get the wallets for
+            $ref: "#/components/schemas/EChain"
         - name: pageSize
           in: query
           required: false
@@ -655,7 +786,7 @@ paths:
               type: object
               properties:
                 chain:
-                  $ref: "#/components/schemas/ChainId"
+                  $ref: "#/components/schemas/EChain"
       security:
         - OAuth2ClientCredentials:
           - read:api
@@ -766,6 +897,181 @@ paths:
         403:
           $ref: "#/components/responses/PermissionError"
   
+  /structs/{structId}:
+    put:
+      tags:
+        - Solidity Structs
+      description: Updates an existing solidity struct. You can get the structId from the SolidityStructParam.typeStructId, which are either input or output params of a Transaction.
+      parameters:
+        - name: structId
+          in: path
+          description: The ID of the existing Solidity Struct
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 8a6e0804-2bd0-4672-b79d-d97027f90720
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+              description: You must provide at least one value to update
+      security:
+        - OAuth2ClientCredentials:
+          - read:api
+      responses:
+        200:
+          description: The updated Solidity Struct
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SolidityStruct"
+        403:
+          $ref: "#/components/responses/PermissionError"
+        500:
+          $ref: "#/components/responses/DatabaseError"
+      
+  /business/{businessId}/structs/{structId}/params:
+    post:
+      tags:
+        - Solidity Structs
+      description: Adds a param to an existing struct. Because of the way the indexes work, you can only add params to the end of a struct. You can use /structs/{structId}/params to later rearrange all the indexes of the params if required.
+      parameters:
+        - name: businessId
+          in: path
+          description: The ID of the business that owns the struct. You must have permissions in the business to add a param.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 8a6e0804-2bd0-4672-b79d-d97027f90720
+        - name: structId
+          in: path
+          description: The ID of the existing Solidity Struct
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 8a6e0804-2bd0-4672-b79d-d97027f90720
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NewSolidityStructParam"
+      security:
+        - OAuth2ClientCredentials:
+          - read:api
+      responses:
+        200:
+          description: The updated Solidity Struct
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SolidityStruct"
+        403:
+          $ref: "#/components/responses/PermissionError"
+        500:
+          $ref: "#/components/responses/DatabaseError"
+  
+    put:
+      tags:
+        - Solidity Structs
+      description: Update the params of an existing struct. Normally, you would do updates one at a time, but since the parameter indexes must be kept in order, you can update multiple params at once with this call.
+      parameters:
+        - name: businessId
+          in: path
+          description: The ID of the business that owns the struct. You must have permissions in the business to add a param.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 8a6e0804-2bd0-4672-b79d-d97027f90720
+        - name: structId
+          in: path
+          description: The ID of the existing Solidity Struct
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 8a6e0804-2bd0-4672-b79d-d97027f90720
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                updates:
+                  type: array
+                  items:
+                    allOf:
+                      - $ref: "#/components/schemas/SolidityStructParamUpdate"
+                      - type: object
+                        properties:
+                          id: 
+                            type: string
+                            format: uuid
+                            example: 8a6e0804-2bd0-4672-b79d-d97027f90720
+                        required:
+                          - id
+              description: You must provide at least one update object
+      security:
+        - OAuth2ClientCredentials:
+          - read:api
+      responses:
+        200:
+          description: The updated Solidity Struct
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SolidityStruct"
+        403:
+          $ref: "#/components/responses/PermissionError"
+        500:
+          $ref: "#/components/responses/DatabaseError"
+
+  /structs/{structId}/params/{structParamId}:
+    delete:
+      tags:
+        - Solidity Structs
+      description: Removes a param from an existing solidity struct. Because the indexes must be kept valid at all times, you can only practically remove the last param from the struct. If you need to remove a param in the middle, call PUT /structs/{structId}/params and rearrange the param indexes first. 
+      parameters:
+        - name: structId
+          in: path
+          description: The ID of the existing Solidity Struct
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 8a6e0804-2bd0-4672-b79d-d97027f90720
+        - name: structParamId
+          in: path
+          description: The ID of the existing Solidity Struct param that you want to remove.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 8a6e0804-2bd0-4672-b79d-d97027f90720
+      security:
+        - OAuth2ClientCredentials:
+          - read:api
+      responses:
+        200:
+          description: The updated Solidity Struct
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SolidityStruct"
+        403:
+          $ref: "#/components/responses/PermissionError"
+        500:
+          $ref: "#/components/responses/DatabaseError"
 
 components:
   securitySchemes:
@@ -811,6 +1117,10 @@ components:
           $ref: "#/components/schemas/PageSize"
         totalResults:
           $ref: "#/components/schemas/TotalResults"
+      required:
+        - page
+        - pageSize
+        - totalResults
 
     EntityBookKeepingWithoutDeleted:
       type: object
@@ -823,6 +1133,9 @@ components:
           type: number
           format: unix-timestamp
           example: 1659485172
+      required:
+        - updated
+        - created
 
     EntityBookKeeping:
       allOf:
@@ -831,6 +1144,8 @@ components:
             deleted:
               type: boolean
               example: false
+          required:
+            - deleted
         - $ref: "#/components/schemas/EntityBookKeepingWithoutDeleted"
     
     ETransactionExecutionStatus:
@@ -838,8 +1153,8 @@ components:
       enum:
         - Submitted
         - Completed
-        -  Retrying
-        -  Failed
+        - Retrying
+        - Failed
     
     ESolidityAbiParameterType:
       type: string
@@ -850,6 +1165,15 @@ components:
         - int
         - string
         - uint
+        - struct
+
+    ESolidityStateMutability:
+      type: string
+      enum:
+        - nonpayable
+        - payable
+        - view
+        - pure
         
     EDeletedStatusSelector:
       type: string
@@ -867,6 +1191,12 @@ components:
         - Retrying
         - Failed
 
+    EEventName:
+      type: string
+      enum:
+        - TransactionExecutionFailure
+        - TransactionExecutionSuccess
+        
     EChain:
       type: integer
       description: The ChainId of a supported chain on 1Shot API
@@ -886,24 +1216,15 @@ components:
         - 592
         - 81
         - 97
-        - 101
         - 324
         - 8453
         - 84532
         - 88888
         - 11297108109
         - 42220
-
-    EEventName:
-      type: string
-      enum:
-        - TransactionExecutionFailure
-        - TransactionExecutionSuccess
-        
-    ChainId:
-      type: number
-      description: "Id of a chain"
-      example: 1337
+        - 130
+        - 480
+        - 81457
 
     ContractAddress:
       type: string
@@ -936,7 +1257,7 @@ components:
               format: uuid
               description: The User ID of the person that owns this wallet. Admin escrow wallets will not have this value. An escrow wallet will have either a user ID or a business ID.
             chainId:
-              $ref: "#/components/schemas/ChainId"
+              $ref: "#/components/schemas/EChain"
             name:
               type: string
               description: The name of the escrow wallet.
@@ -949,7 +1270,16 @@ components:
             accountBalanceDetails:
               allOf:
                 - $ref: "#/components/schemas/AccountBalanceDetails"
-                - nullable: true
+                - type: object
+                  nullable: true
+          required:
+            - id
+            - accountAddress
+            - businessId
+            - userId
+            - chainId
+            - name
+            - isAdmin
         - $ref: "#/components/schemas/EntityBookKeepingWithoutDeleted"
         
     AccountBalanceDetails:
@@ -962,7 +1292,7 @@ components:
           type: string
           example: ETH
         chainId:
-          $ref: "#/components/schemas/ChainId"
+          $ref: "#/components/schemas/EChain"
         tokenAddress:
           $ref: "#/components/schemas/ContractAddress"
         accountAddress:
@@ -980,9 +1310,17 @@ components:
         usdValueTimestamp:
           type: number
           format: unix-timestamp
+      required:
+        - type
+        - ticker
+        - chainId
+        - tokenAddress
+        - accountAddress
+        - balance
+        - decimals
       
     Transaction:
-      description: A new transaction
+      description: A single defined transaction, corresponding a method call on a smart contract on a chain. You can have multiple Transactions defined for the same method in the contract if you want to use different setups for static parameters.
       allOf:
         - type: object
           properties:
@@ -997,7 +1335,7 @@ components:
               description: The business that owns this transaction
               example: 100d2e83-dddd-480d-88ad-74a71c214912
             chain:
-              $ref: "#/components/schemas/ChainId"
+              $ref: "#/components/schemas/EChain"
             contractAddress:
               $ref: "#/components/schemas/ContractAddress"
             escrowWalletId:
@@ -1021,13 +1359,53 @@ components:
               type: array
               items: 
                 $ref: "#/components/schemas/SolidityStructParam"
+            outputs:
+              type: array
+              items: 
+                $ref: "#/components/schemas/SolidityStructParam"
+            stateMutability: 
+              $ref: "#/components/schemas/ESolidityStateMutability"
             callbackUrl:
               type: string
+              nullable: true
+              description: The current destination for webhooks to be sent when this transaction is executed. Will be null if no webhook is assigned.
+              example: "https://example.com/webhook"
             publicKey:
               type: string
               format: base64
+              nullable: true
+              description: The current public key for verifying the integrity of the webhook when this transaction is executed. 1Shot will sign its webhooks with a private key and provide a signature for the webhook that can be validated with this key. It will be null if there is no webhook destination specified.
+          required:
+            - id
+            - businessId
+            - chain
+            - contractAddress
+            - escrowWalletId
+            - name
+            - description
+            - functionName
+            - params
+            - outputs
+            - stateMutability
+            - callbackUrl
+            - publicKey
         - $ref: "#/components/schemas/EntityBookKeeping"
-          
+       
+    NewSolidityStruct:
+      description: The values required to create a completely new Solidity Struct.
+      type: object
+      properties: 
+        name: 
+          type: string
+          description: The name of the struct. Structs are used to define the parameters of a transaction, but these structs don't have names.
+        params:
+          type: array
+          items:
+            $ref: "#/components/schemas/NewSolidityStructParam"
+      required:
+        - businessId
+        - params
+            
     SolidityStruct:
       description: A struct object as defined in solidity ABI
       allOf:
@@ -1043,63 +1421,98 @@ components:
               format: uuid
               description: Internal ID of the business that owns this struct
               example: 100d2e83-dddd-480d-88ad-74a71c214912
-            name: 
-              type: string
-              description: The name of the struct. Structs are used to define the parameters of a transaction, but these structs don't have names.
-            params:
-              type: array
-              items:
-                $ref: "#/components/schemas/SolidityStructParam"
+          required:
+            - id
+            - businessId
         - $ref: "#/components/schemas/EntityBookKeeping"
+        - allOf:
+          - $ref: "#/components/schemas/NewSolidityStruct"
+          - type: object
+            properties:
+              params:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SolidityStructParam"
         
-      
-      
-    SolidityStructParam:
-      description: A single defined parameter for a transaction. This is 
+        
+    SolidityStructParamUpdate:
       type: object
+      description: These are the properties that may be updated on a Solidity Struct Param.
       properties:
-        id:
-          type: string
-          format: uuid
-          description: Internal ID of the parameter.
-          example: 100d2e83-dddd-480d-88ad-74a71c214912
-        structId:
-          type: string
-          format: uuid
-          description: Internal ID struct that owns this parameter.
-          example: 100d2e83-dddd-480d-88ad-74a71c214912
         name:
           type: string
-          description: A name to assign to the parameter. You will pass values to the parameter using this name. For clarity, this should be the name of the parameter on the underlying contract method, but you can set it as whatever you want.
+          example: amount
+        description:
+          type: string
+          example: Description of the parameter
         type:
           $ref: "#/components/schemas/ESolidityAbiParameterType"
-        typeStructId:
-          type: string
-          format: uuid
-          description: The ID of the sub-struct if the type is "struct"
-          example: 100d2e83-dddd-480d-88ad-74a71c214912
-        typeSize:
-          type: integer
-          description: The size of the type for int, uint and bytes. Also used for fixed and ufixed; it is the first size of the type. This must follow the rules for the type; valid values for bytes are 1 to 32, for others is 256 % 8.
-        typeSize2:
-          type: integer
-          description: The second size for the type. Only used for fixed and ufixed types.
-        isArray:
-          type: boolean
-          description: Set to true if the parameter takes an array of the type.
-        arraySize:
-          type: integer
-          description: If the type array takes a fixed number of elements (IE, 5), this will be set.
         index:
           type: integer
-          description: The index of the parameter in the contract method. This starts at 0 and must not skip numbers
+          example: 0
+          description: This is the relative index in the contract function. It should start at 0, and must not skip any numbers.
         value:
           type: string
-          description: The static value of the parameter, stored in the transaction itself. All parameters have to have a value at execution, but it can be a mix of static and dynamic parameters
+          description: "This is an optional, static value for the parameter. If you set this, you will never be required or able to pass a value for this parameter when you execute the transaction, it will use the set value. This is useful for creating dedicated endpoints with specific functionalities, particularly when tied to API Credentials that can only execute specific transactions. For example, you can have a 'transfer' transaction that is hardcoded to a specific amount, or to a specific receiver address."
+        typeSize:
+          type: number
+          description: "This is an optional field that specifies the main size of the Solidity type. For example, if your type is uint, by default it is a uint256. If you want a uint8 instead, set this value to 8. It works for int, uint, fixed, ufixed, and bytes types. Valid values for bytes are 1 to 32, for others it is 256 % 8"
+        typeSize2:
+          type: integer
+          description: This is identical to typeSize but only used for fixed and ufixed sizes. This is the second size of the fixed field, for example, fixed(typeSize)x(typeSize2).
+        isArray:
+          type: boolean
+          description: If this parameter is an array type set this to true. By default, arrays can be of any size so you don't need to set arraySize.
+        arraySize:
+          type: integer
+          description: If the parameter is a fixed size array, set this value.
+        typeStructId:
+          type: string
+          description: The ID of the sub-struct if the type is "struct". When creating a param, you must set only one of either typeStructId (to re-use an existing Solidity Struct) or typeStruct (creates a new struct for the param)
         typeStruct:
           allOf:
-            - $ref: "#/components/schemas/SolidityStruct"
-            - description: The sub-struct if the type is "struct"
+            - $ref: "#/components/schemas/NewSolidityStruct"
+            - type: object
+              description: The sub-struct if the type is "struct", which will be created for use by this parameter. When creating a param, you must set only one of either typeStructId (to re-use an existing Solidity Struct) or typeStruct (creates a new struct for the param)
+
+    NewSolidityStructParam:
+      allOf:
+        - $ref: "#/components/schemas/SolidityStructParamUpdate"
+        - type: object
+          description: These are the required values when creating a new Solidity Struct Parameter.
+          required:
+            - name
+            - type
+            - index
+
+    SolidityStructParam:
+      description: A single defined parameter for a transaction after it has been created.
+      allOf:
+        - type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+              description: Internal ID of the parameter.
+              example: 100d2e83-dddd-480d-88ad-74a71c214912
+            structId:
+              type: string
+              format: uuid
+              description: Internal ID struct that owns this parameter.
+              example: 100d2e83-dddd-480d-88ad-74a71c214912
+          required:
+            - id
+            - structId
+        - allOf:
+          - $ref: "#/components/schemas/NewSolidityStructParam"
+          - type: object
+            properties:
+              typeStruct:
+                allOf:
+                  - $ref: "#/components/schemas/SolidityStruct"
+                  - type: object
+                    description: The sub-struct if the type is "struct", which will be created for use by this parameter. When creating a param, you must set only one of either typeStructId (to re-use an existing Solidity Struct) or typeStruct (creates a new struct for the param)
+              
     
     TransactionExecution:
       description: A single execution of a transaction- ie, a function call
@@ -1132,11 +1545,176 @@ components:
               $ref: "#/components/schemas/ETransactionExecutionStatus"
             chainTransactionId:
               type: string
+              nullable: true
               format: uuid
               description: The ID of the actual chain transaction in the internal chain service.
               example: f4e3d951-85ad-42fa-8e21-75545145c7cb
+            memo:
+              type: string
+              nullable: true
+              description: Optional text supplied when the transaction is executed. This can be a note to the user about why the execution was done, or formatted information such as JSON that can be used by the user's system.
             completedTimestamp:
               type: number
+              nullable: true
               format: unix-timestamp
               example: 1659485172
+          required:
+            - id
+            - transactionId
+            - apiCredentialId
+            - userId
+            - status
+            - chainTransactionId
+            - transactionHash
+            - completedTimestamp
         - $ref: "#/components/schemas/EntityBookKeeping"
+        
+    JSONValue:
+      description: A JSON-compatible value
+      oneOf:
+        - type: string
+        - type: number
+        - type: boolean
+        - type: array
+          items:
+            $ref: '#/components/schemas/JSONValue'
+        - type: object
+          additionalProperties:
+            $ref: '#/components/schemas/JSONValue'
+
+    TransactionEstimate:
+      description: A summary of values required to estimate the cost of executing a transaction
+      properties:
+        chain:
+          $ref: "#/components/schemas/EChain"
+        contractAddress:
+          $ref: "#/components/schemas/ContractAddress"
+        functionName:
+          type: string
+        gasAmount:
+          type: string
+          description: The amount of gas units it will use
+        maxFeePerGas:
+          type: string
+          nullable: true
+        maxPriorityFeePerGas:
+          type: string
+          nullable: true
+        gasPrice:
+          type: string
+          nullable: true
+      required:
+        - chain
+        - contractAddress
+        - functionName
+        - gasAmount
+        - maxFeePerGas
+        - maxPriorityFeePerGas
+        - gasPrice
+
+    AbiParameter:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+          example: uint256
+        internalType:
+          type: string
+        components:
+          type: array
+          items:
+            $ref: '#/components/schemas/AbiParameter'
+        indexed:
+          type: boolean
+      required:
+        - type
+
+    AbiFunction:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [function]
+        name:
+          type: string
+        stateMutability:
+          type: string
+          enum: [pure, view, nonpayable, payable]
+        inputs:
+          type: array
+          items:
+            $ref: '#/components/schemas/AbiParameter'
+        outputs:
+          type: array
+          items:
+            $ref: '#/components/schemas/AbiParameter'
+      required:
+        - type
+        - name
+        - inputs
+        - outputs
+        - stateMutability
+
+    AbiEvent:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [event]
+        name:
+          type: string
+        inputs:
+          type: array
+          items:
+            $ref: '#/components/schemas/AbiParameter'
+        anonymous:
+          type: boolean
+      required:
+        - type
+        - name
+        - inputs
+
+    AbiConstructor:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [constructor]
+        inputs:
+          type: array
+          items:
+            $ref: '#/components/schemas/AbiParameter'
+        stateMutability:
+          type: string
+          enum: [nonpayable, payable]
+      required:
+        - type
+        - inputs
+        - stateMutability
+
+    AbiFallback:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [fallback]
+        stateMutability:
+          type: string
+          enum: [nonpayable, payable]
+      required:
+        - type
+        - stateMutability
+
+    EthereumAbi:
+      type: array
+      items:
+        oneOf:
+          - $ref: '#/components/schemas/AbiFunction'
+          - $ref: '#/components/schemas/AbiConstructor'
+          - $ref: '#/components/schemas/AbiEvent'
+          - $ref: '#/components/schemas/AbiFallback'
+          
+    
+    
