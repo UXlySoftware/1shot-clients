@@ -1,4 +1,30 @@
-import { verify } from '@noble/ed25519';
+import { verify, etc } from '@noble/ed25519';
+import { sha512 } from '@noble/hashes/sha512';
+
+// Initialize the ed25519 library with SHA-512
+etc.sha512Sync = (...m) => sha512(etc.concatBytes(...m));
+
+/**
+ * Recursively sorts object keys alphabetically
+ * @param obj - The object to sort
+ * @returns A new object with sorted keys
+ */
+function sortObjectKeys(obj: Record<string, any>): Record<string, any> {
+  if (obj === null || typeof obj !== 'object') {
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map(sortObjectKeys);
+  }
+
+  return Object.keys(obj)
+    .sort()
+    .reduce((result: Record<string, any>, key: string) => {
+      result[key] = sortObjectKeys(obj[key]);
+      return result;
+    }, {});
+}
 
 /**
  * Validates a webhook signature using ED25519.
@@ -26,7 +52,7 @@ export async function validateWebhook(
     // Extract the signature from the data
     const { signature, ...dataWithoutSignature } = data;
 
-    if (!signature) {
+    if (signature == null) {
       return false;
     }
 
@@ -36,11 +62,15 @@ export async function validateWebhook(
     // Convert the signature from base64 to bytes
     const signatureBytes = Buffer.from(signature, 'base64');
 
-    // Create a canonical JSON string from the data
-    const message = JSON.stringify(dataWithoutSignature, Object.keys(dataWithoutSignature).sort());
+    // Sort all object keys recursively and create a canonical JSON string
+    const sortedData = sortObjectKeys(dataWithoutSignature);
+    const message = JSON.stringify(sortedData);
+    
+    // Convert the message to UTF-8 bytes
+    const messageBytes = new TextEncoder().encode(message);
 
     // Verify the signature
-    return await verify(signatureBytes, message, publicKeyBytes);
+    return await verify(signatureBytes, messageBytes, publicKeyBytes);
   } catch (error) {
     // If any error occurs during validation, return false
     return false;
