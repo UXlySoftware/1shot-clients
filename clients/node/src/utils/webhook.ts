@@ -65,7 +65,7 @@ export async function validateWebhook(
     // Sort all object keys recursively and create a canonical JSON string
     const sortedData = sortObjectKeys(dataWithoutSignature);
     const message = JSON.stringify(sortedData);
-    
+
     // Convert the message to UTF-8 bytes
     const messageBytes = new TextEncoder().encode(message);
 
