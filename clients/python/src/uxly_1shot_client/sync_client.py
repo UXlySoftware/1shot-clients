@@ -14,8 +14,8 @@ from uxly_1shot_client.wallets import SyncWallets
 T = TypeVar("T")
 
 
-class SyncClient(BaseClient):
-    """Synchronous client for the 1Shot API."""
+class Client(BaseClient):
+    """Client for the 1Shot API."""
 
     def __init__(
         self,

@@ -13,10 +13,10 @@ pip install uxly-1shot-client
 ### Synchronous Client
 
 ```python
-from uxly_1shot_client import SyncClient
+from uxly_1shot_client import Client
 
 # Initialize the client
-client = SyncClient(
+client = Client(
     api_key="your_api_key",
     api_secret="your_api_secret",
     base_url="https://api.1shotapi.com/v1"  # Optional, defaults to this URL
