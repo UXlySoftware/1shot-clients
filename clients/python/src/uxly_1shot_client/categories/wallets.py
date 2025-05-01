@@ -6,7 +6,6 @@ from pydantic import BaseModel, Field, validator
 
 from uxly_1shot_client.models.common import PagedResponse
 from uxly_1shot_client.models.wallet import EscrowWallet
-from uxly_1shot_client.base import BaseClient
 
 
 class WalletListParams(BaseModel):
@@ -44,8 +43,16 @@ class WalletUpdateParams(BaseModel):
     description: Optional[str] = Field(None, description="Optional description of the escrow wallet, can be used to describe it's purpose")
 
 
-class Wallets(BaseClient):
+class Wallets:
     """Wallets module for the 1Shot API."""
+
+    def __init__(self, client: Union["SyncClient", "AsyncClient"]) -> None:
+        """Initialize the wallets module.
+
+        Args:
+            client: The client instance
+        """
+        self._client = client
 
     def _get_list_url(self, business_id: str) -> str:
         """Get the URL for listing wallets.
@@ -56,7 +63,7 @@ class Wallets(BaseClient):
         Returns:
             The URL for listing wallets
         """
-        return f"{self.base_url}/business/{business_id}/wallets"
+        return f"/business/{business_id}/wallets"
 
     def _get_create_url(self, business_id: str) -> str:
         """Get the URL for creating a wallet.
@@ -67,7 +74,7 @@ class Wallets(BaseClient):
         Returns:
             The URL for creating a wallet
         """
-        return f"{self.base_url}/business/{business_id}/wallets"
+        return f"/business/{business_id}/wallets"
 
     def _get_get_url(self, escrow_wallet_id: str) -> str:
         """Get the URL for getting a wallet.
@@ -78,7 +85,7 @@ class Wallets(BaseClient):
         Returns:
             The URL for getting a wallet
         """
-        return f"{self.base_url}/wallets/{escrow_wallet_id}"
+        return f"/wallets/{escrow_wallet_id}"
 
     def _get_update_url(self, escrow_wallet_id: str) -> str:
         """Get the URL for updating a wallet.
@@ -89,7 +96,7 @@ class Wallets(BaseClient):
         Returns:
             The URL for updating a wallet
         """
-        return f"{self.base_url}/wallets/{escrow_wallet_id}"
+        return f"/wallets/{escrow_wallet_id}"
 
     def _get_delete_url(self, escrow_wallet_id: str) -> str:
         """Get the URL for deleting a wallet.
@@ -100,7 +107,11 @@ class Wallets(BaseClient):
         Returns:
             The URL for deleting a wallet
         """
-        return f"{self.base_url}/wallets/{escrow_wallet_id}"
+        return f"/wallets/{escrow_wallet_id}"
+
+
+class SyncWallets(Wallets):
+    """Synchronous wallets module for the 1Shot API."""
 
     def list(
         self, business_id: str, params: Optional[WalletListParams] = None
@@ -117,9 +128,9 @@ class Wallets(BaseClient):
         url = self._get_list_url(business_id)
         if params:
             query_params = params.dict(by_alias=True, exclude_none=True)
-            response = self._request("GET", url, params=query_params)
+            response = self._client._request("GET", url, params=query_params)
         else:
-            response = self._request("GET", url)
+            response = self._client._request("GET", url)
         return PagedResponse[EscrowWallet].model_validate(response)
 
     def create(self, business_id: str, params: WalletCreateParams) -> EscrowWallet:
@@ -133,7 +144,7 @@ class Wallets(BaseClient):
             The created wallet
         """
         url = self._get_create_url(business_id)
-        response = self._request("POST", url, json=params.dict(exclude_none=True))
+        response = self._client._request("POST", url, json=params.dict(exclude_none=True))
         return EscrowWallet.model_validate(response)
 
     def get(
@@ -150,7 +161,7 @@ class Wallets(BaseClient):
         """
         url = self._get_get_url(escrow_wallet_id)
         params = {"includeBalances": str(include_balances).lower()} if include_balances is not None else None
-        response = self._request("GET", url, params=params)
+        response = self._client._request("GET", url, params=params)
         return EscrowWallet.model_validate(response)
 
     def update(
@@ -166,7 +177,7 @@ class Wallets(BaseClient):
             The updated wallet
         """
         url = self._get_update_url(escrow_wallet_id)
-        response = self._request("PUT", url, json=params.dict(exclude_none=True))
+        response = self._client._request("PUT", url, json=params.dict(exclude_none=True))
         return EscrowWallet.model_validate(response)
 
     def delete(self, escrow_wallet_id: str) -> Dict[str, bool]:
@@ -179,66 +190,11 @@ class Wallets(BaseClient):
             A dictionary with a success flag
         """
         url = self._get_delete_url(escrow_wallet_id)
-        return self._request("DELETE", url)
+        return self._client._request("DELETE", url)
 
 
-class AsyncWallets(BaseClient):
+class AsyncWallets(Wallets):
     """Asynchronous wallets module for the 1Shot API."""
-
-    def _get_list_url(self, business_id: str) -> str:
-        """Get the URL for listing wallets.
-
-        Args:
-            business_id: The business ID
-
-        Returns:
-            The URL for listing wallets
-        """
-        return f"{self.base_url}/business/{business_id}/wallets"
-
-    def _get_create_url(self, business_id: str) -> str:
-        """Get the URL for creating a wallet.
-
-        Args:
-            business_id: The business ID
-
-        Returns:
-            The URL for creating a wallet
-        """
-        return f"{self.base_url}/business/{business_id}/wallets"
-
-    def _get_get_url(self, escrow_wallet_id: str) -> str:
-        """Get the URL for getting a wallet.
-
-        Args:
-            escrow_wallet_id: The wallet ID
-
-        Returns:
-            The URL for getting a wallet
-        """
-        return f"{self.base_url}/wallets/{escrow_wallet_id}"
-
-    def _get_update_url(self, escrow_wallet_id: str) -> str:
-        """Get the URL for updating a wallet.
-
-        Args:
-            escrow_wallet_id: The wallet ID
-
-        Returns:
-            The URL for updating a wallet
-        """
-        return f"{self.base_url}/wallets/{escrow_wallet_id}"
-
-    def _get_delete_url(self, escrow_wallet_id: str) -> str:
-        """Get the URL for deleting a wallet.
-
-        Args:
-            escrow_wallet_id: The wallet ID
-
-        Returns:
-            The URL for deleting a wallet
-        """
-        return f"{self.base_url}/wallets/{escrow_wallet_id}"
 
     async def list(
         self, business_id: str, params: Optional[WalletListParams] = None
@@ -255,9 +211,9 @@ class AsyncWallets(BaseClient):
         url = self._get_list_url(business_id)
         if params:
             query_params = params.dict(by_alias=True, exclude_none=True)
-            response = await self._request("GET", url, params=query_params)
+            response = await self._client._request("GET", url, params=query_params)
         else:
-            response = await self._request("GET", url)
+            response = await self._client._request("GET", url)
         return PagedResponse[EscrowWallet].model_validate(response)
 
     async def create(self, business_id: str, params: WalletCreateParams) -> EscrowWallet:
@@ -271,7 +227,7 @@ class AsyncWallets(BaseClient):
             The created wallet
         """
         url = self._get_create_url(business_id)
-        response = await self._request("POST", url, json=params.dict(exclude_none=True))
+        response = await self._client._request("POST", url, json=params.dict(exclude_none=True))
         return EscrowWallet.model_validate(response)
 
     async def get(
@@ -288,7 +244,7 @@ class AsyncWallets(BaseClient):
         """
         url = self._get_get_url(escrow_wallet_id)
         params = {"includeBalances": str(include_balances).lower()} if include_balances is not None else None
-        response = await self._request("GET", url, params=params)
+        response = await self._client._request("GET", url, params=params)
         return EscrowWallet.model_validate(response)
 
     async def update(
@@ -304,7 +260,7 @@ class AsyncWallets(BaseClient):
             The updated wallet
         """
         url = self._get_update_url(escrow_wallet_id)
-        response = await self._request("PUT", url, json=params.dict(exclude_none=True))
+        response = await self._client._request("PUT", url, json=params.dict(exclude_none=True))
         return EscrowWallet.model_validate(response)
 
     async def delete(self, escrow_wallet_id: str) -> Dict[str, bool]:
@@ -317,4 +273,4 @@ class AsyncWallets(BaseClient):
             A dictionary with a success flag
         """
         url = self._get_delete_url(escrow_wallet_id)
-        return await self._request("DELETE", url) 
+        return await self._client._request("DELETE", url) 

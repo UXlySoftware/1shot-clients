@@ -6,10 +6,10 @@ from typing import Any, Dict, Optional, TypeVar, Generic
 import requests
 
 from uxly_1shot_client.base import BaseClient, TokenResponse
-from uxly_1shot_client.executions import SyncExecutions
-from uxly_1shot_client.structs import SyncStructs
-from uxly_1shot_client.transactions import SyncTransactions
-from uxly_1shot_client.wallets import SyncWallets
+from uxly_1shot_client.categories.executions import SyncExecutions
+from uxly_1shot_client.categories.structs import SyncStructs
+from uxly_1shot_client.categories.transactions import SyncTransactions
+from uxly_1shot_client.categories.wallets import SyncWallets
 
 T = TypeVar("T")
 

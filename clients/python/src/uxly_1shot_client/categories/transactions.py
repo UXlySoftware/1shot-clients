@@ -13,8 +13,6 @@ from uxly_1shot_client.models.transaction import (
     Transaction,
     ListTransactionsParams,
 )
-from uxly_1shot_client.base import BaseClient
-
 
 class Transactions:
     """Transactions module for the 1Shot API."""

@@ -65,9 +65,3 @@ class TransactionExecution(BaseModel):
     updated: int = Field(..., description="The last update timestamp")
     created: int = Field(..., description="The creation timestamp")
     deleted: bool = Field(..., description="Whether the execution is deleted")
-
-    class Config:
-        """Pydantic model configuration."""
-
-        populate_by_name = True
-        alias_generator = lambda x: x.replace("_", "")
