@@ -9,18 +9,18 @@ class Transaction(BaseModel):
     """A transaction model."""
 
     id: str = Field(..., description="The transaction ID")
-    business_id: str = Field(..., description="The business ID")
+    business_id: str = Field(..., alias="businessId", description="The business ID")
     chain: int = Field(..., description="The chain ID")
-    contract_address: str = Field(..., description="The contract address")
-    escrow_wallet_id: str = Field(..., description="The escrow wallet ID")
+    contract_address: str = Field(..., alias="contractAddress", description="The contract address")
+    escrow_wallet_id: str = Field(..., alias="escrowWalletId", description="The escrow wallet ID")
     name: str = Field(..., description="The transaction name")
     description: str = Field(..., description="The transaction description")
-    function_name: str = Field(..., description="The function name")
-    state_mutability: str = Field(..., description="The state mutability")
+    function_name: str = Field(..., alias="functionName", description="The function name")
+    state_mutability: str = Field(..., alias="stateMutability", description="The state mutability")
     inputs: List[Dict[str, Any]] = Field(..., description="The input parameters")
     outputs: List[Dict[str, Any]] = Field(..., description="The output parameters")
-    callback_url: Optional[str] = Field(None, description="The callback URL")
-    public_key: Optional[str] = Field(None, description="The public key")
+    callback_url: Optional[str] = Field(None, alias="callbackUrl", description="The callback URL")
+    public_key: Optional[str] = Field(None, alias="publicKey", description="The public key")
     updated: int = Field(..., description="The last update timestamp")
     created: int = Field(..., description="The creation timestamp")
     deleted: bool = Field(..., description="Whether the transaction is deleted")
@@ -30,7 +30,7 @@ class TransactionExecution(BaseModel):
     """Transaction execution model."""
 
     id: str = Field(..., description="The execution ID")
-    transaction_id: str = Field(..., description="The transaction ID")
+    transaction_id: str = Field(..., alias="transactionId", description="The transaction ID")
     status: str = Field(..., description="The execution status")
     params: Dict[str, Any] = Field(..., description="The execution parameters")
     result: Optional[Dict[str, Any]] = Field(None, description="The execution result")
@@ -57,9 +57,9 @@ class TransactionParams(BaseModel):
 class TransactionEstimate(BaseModel):
     """Transaction cost estimate model."""
 
-    gas_limit: int = Field(..., description="The estimated gas limit")
-    gas_price: str = Field(..., description="The estimated gas price")
-    total_cost: str = Field(..., description="The total estimated cost")
+    gas_limit: int = Field(..., alias="gasLimit", description="The estimated gas limit")
+    gas_price: str = Field(..., alias="gasPrice", description="The estimated gas price")
+    total_cost: str = Field(..., alias="totalCost", description="The total estimated cost")
     currency: str = Field(..., description="The currency of the cost estimate")
 
     @validator('gas_limit')
@@ -83,5 +83,5 @@ class TransactionTestResult(BaseModel):
     success: bool = Field(..., description="Whether the test was successful")
     result: Optional[Dict[str, Any]] = Field(None, description="The test result")
     error: Optional[str] = Field(None, description="The error message if any")
-    gas_used: Optional[int] = Field(None, description="The gas used in the test")
+    gas_used: Optional[int] = Field(None, alias="gasUsed", description="The gas used in the test")
     logs: Optional[List[Dict[str, Any]]] = Field(None, description="The transaction logs") 

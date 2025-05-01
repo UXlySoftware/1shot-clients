@@ -22,7 +22,7 @@ class BaseClient:
         self,
         api_key: str,
         api_secret: str,
-        base_url: str = "https://api.1shotapi.com/v1",
+        base_url: str = "https://api.1shotapi.com/v0",
     ) -> None:
         """Initialize the client.
 

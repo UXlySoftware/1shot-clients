@@ -16,5 +16,5 @@ class PagedResponse(BaseModel, Generic[T]):
 
     response: List[T] = Field(..., description="The list of items in the current page")
     page: int = Field(..., description="The current page number")
-    page_size: int = Field(..., description="The page size")
-    total_results: int = Field(..., description="The total number of results") 
+    page_size: int = Field(..., alias="pageSize", description="The page size")
+    total_results: int = Field(..., alias="totalResults", description="The total number of results") 

@@ -1,41 +1,40 @@
-
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field
 
 class Log(BaseModel):
-    _type: str
+    _type: str = Field(..., alias="type")
     address: str
-    blockHash: str
-    blockNumber: int
+    block_hash: str = Field(..., alias="blockHash")
+    block_number: int = Field(..., alias="blockNumber")
     data: str
     index: int
     topics: List[str]
-    transactionHash: str
-    transactionIndex: int
+    transaction_hash: str = Field(..., alias="transactionHash")
+    transaction_index: int = Field(..., alias="transactionIndex")
 
 class TransactionReceipt(BaseModel):
-    _type: str
-    blobGasPrice: Optional[str] = None
-    blobGasUsed: Optional[str] = None
-    blockHash: str
-    blockNumber: int
-    contractAddress: Optional[str] = None
-    cumulativeGasUsed: str
+    _type: str = Field(..., alias="type")
+    blob_gas_price: Optional[str] = Field(None, alias="blobGasPrice")
+    blob_gas_used: Optional[str] = Field(None, alias="blobGasUsed")
+    block_hash: str = Field(..., alias="blockHash")
+    block_number: int = Field(..., alias="blockNumber")
+    contract_address: Optional[str] = Field(None, alias="contractAddress")
+    cumulative_gas_used: str = Field(..., alias="cumulativeGasUsed")
     from_: str = Field(..., alias="from")
-    gasPrice: str
-    gasUsed: str
+    gas_price: str = Field(..., alias="gasPrice")
+    gas_used: str = Field(..., alias="gasUsed")
     hash: str
     index: int
     logs: List[Log]
-    logsBloom: str
+    logs_bloom: str = Field(..., alias="logsBloom")
     status: int
     to: str
 
 class FragmentInput(BaseModel):
-    arrayChildren: Optional[None]  # Matches null in JSON
-    arrayLength: Optional[None]
-    baseType: str
+    array_children: Optional[None] = Field(None, alias="arrayChildren")  # Matches null in JSON
+    array_length: Optional[None] = Field(None, alias="arrayLength")
+    base_type: str = Field(..., alias="baseType")
     components: Optional[None]
     indexed: bool
     name: str
@@ -55,18 +54,18 @@ class ParsedLogEntry(BaseModel):
     topic: str
 
 class Data(BaseModel):
-    businessId: str
+    business_id: str = Field(..., alias="businessId")
     chain: int
     logs: Optional[List[ParsedLogEntry]] = None
     transaction_execution_id: str = Field(..., alias="transactionExecutionId")
     transaction_execution_memo: Optional[str] = Field(None, alias="transactionExecutionMemo")
     transaction_id: str = Field(..., alias="transactionId")
     transaction_receipt: Optional[TransactionReceipt] = Field(None, alias="transactionReceipt")
-    userId: Optional[str] = None
+    user_id: Optional[str] = Field(None, alias="userId")
 
 class WebhookPayload(BaseModel):
-    eventName: str
+    event_name: str = Field(..., alias="eventName")
     data: Data
     timestamp: int
-    apiVersion: int
+    api_version: int = Field(..., alias="apiVersion")
     signature: str
