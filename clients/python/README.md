@@ -217,7 +217,7 @@ This package is published to PyPI using modern Python packaging tools. Here's ho
 
 1. Install the required tools:
 ```bash
-pip install hatch twine
+pip install hatch hatchling twine
 ```
 
 2. Update the version in `pyproject.toml`:
@@ -233,16 +233,20 @@ hatch build
 
 4. Test the build:
 ```bash
-hatch run python -m pip install dist/*.whl
+# On Windows:
+hatch run python -m pip install dist\uxly_1shot_client-1.0.0-py3-none-any.whl
+
+# On Unix-like systems (Linux/macOS):
+hatch run python -m pip install dist/uxly_1shot_client-1.0.0-py3-none-any.whl
 ```
 
 5. Upload to PyPI:
 ```bash
 # First, upload to TestPyPI to verify everything works
-twine upload --repository testpypi dist/*
+twine upload --repository testpypi dist/uxly_1shot_client-1.0.0-py3-none-any.whl dist/uxly_1shot_client-1.0.0.tar.gz
 
 # If everything looks good, upload to the real PyPI
-twine upload dist/*
+twine upload dist/uxly_1shot_client-1.0.0-py3-none-any.whl dist/uxly_1shot_client-1.0.0.tar.gz
 ```
 
 Note: You'll need to have a PyPI account and configure your credentials. You can do this by:

@@ -83,3 +83,4 @@ class WebhookVerifier:
             InvalidSignature: If the signature is invalid
         """
         return verify_webhook(body, signature, self.public_key) 
+    
