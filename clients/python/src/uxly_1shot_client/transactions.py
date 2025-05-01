@@ -173,7 +173,7 @@ class SyncTransactions(Transactions):
         Raises:
             requests.exceptions.RequestException: If the request fails
         """
-        response = self._client.request(
+        response = self._client._request(
             "POST",
             self._get_test_url(transaction_id),
             data={"params": params.validate_params()},
@@ -193,7 +193,7 @@ class SyncTransactions(Transactions):
         Raises:
             requests.exceptions.RequestException: If the request fails
         """
-        response = self._client.request(
+        response = self._client._request(
             "POST",
             self._get_estimate_url(transaction_id),
             data={"params": params.validate_params()},
@@ -227,7 +227,7 @@ class SyncTransactions(Transactions):
         if memo is not None:
             data["memo"] = memo
 
-        response = self._client.request(
+        response = self._client._request(
             "POST",
             self._get_execute_url(transaction_id),
             data=data,
@@ -247,7 +247,7 @@ class SyncTransactions(Transactions):
         Raises:
             requests.exceptions.RequestException: If the request fails
         """
-        return self._client.request(
+        return self._client._request(
             "POST",
             self._get_read_url(transaction_id),
             data={"params": params.validate_params()},
@@ -265,7 +265,7 @@ class SyncTransactions(Transactions):
         Raises:
             requests.exceptions.RequestException: If the request fails
         """
-        response = self._client.request(
+        response = self._client._request(
             "GET",
             self._get_get_url(transaction_id),
         )
@@ -288,7 +288,7 @@ class SyncTransactions(Transactions):
         Raises:
             requests.exceptions.RequestException: If the request fails
         """
-        response = self._client.request(
+        response = self._client._request(
             "GET",
             self._get_list_url(business_id, params),
         )
@@ -311,7 +311,7 @@ class SyncTransactions(Transactions):
         Raises:
             requests.exceptions.RequestException: If the request fails
         """
-        response = self._client.request(
+        response = self._client._request(
             "POST",
             self._get_create_url(business_id),
             data=params,
@@ -335,7 +335,7 @@ class SyncTransactions(Transactions):
         Raises:
             requests.exceptions.RequestException: If the request fails
         """
-        response = self._client.request(
+        response = self._client._request(
             "POST",
             self._get_import_from_abi_url(business_id),
             data=params,
@@ -359,7 +359,7 @@ class SyncTransactions(Transactions):
         Raises:
             requests.exceptions.RequestException: If the request fails
         """
-        response = self._client.request(
+        response = self._client._request(
             "PUT",
             self._get_update_url(transaction_id),
             data=params,
@@ -375,7 +375,7 @@ class SyncTransactions(Transactions):
         Raises:
             requests.exceptions.RequestException: If the request fails
         """
-        self._client.request(
+        self._client._request(
             "DELETE",
             self._get_delete_url(transaction_id),
         )
@@ -392,7 +392,7 @@ class SyncTransactions(Transactions):
         Raises:
             requests.exceptions.RequestException: If the request fails
         """
-        response = self._client.request(
+        response = self._client._request(
             "PUT",
             self._get_restore_url(transaction_id),
             data={"rewardIds": [transaction_id]},
@@ -416,7 +416,7 @@ class AsyncTransactions(Transactions):
         Raises:
             httpx.HTTPError: If the request fails
         """
-        response = await self._client.request(
+        response = await self._client._request(
             "POST",
             self._get_test_url(transaction_id),
             data={"params": params.validate_params()},
@@ -436,7 +436,7 @@ class AsyncTransactions(Transactions):
         Raises:
             httpx.HTTPError: If the request fails
         """
-        response = await self._client.request(
+        response = await self._client._request(
             "POST",
             self._get_estimate_url(transaction_id),
             data={"params": params.validate_params()},
@@ -470,7 +470,7 @@ class AsyncTransactions(Transactions):
         if memo is not None:
             data["memo"] = memo
 
-        response = await self._client.request(
+        response = await self._client._request(
             "POST",
             self._get_execute_url(transaction_id),
             data=data,
@@ -490,7 +490,7 @@ class AsyncTransactions(Transactions):
         Raises:
             httpx.HTTPError: If the request fails
         """
-        return await self._client.request(
+        return await self._client._request(
             "POST",
             self._get_read_url(transaction_id),
             data={"params": params.validate_params()},
@@ -508,7 +508,7 @@ class AsyncTransactions(Transactions):
         Raises:
             httpx.HTTPError: If the request fails
         """
-        response = await self._client.request(
+        response = await self._client._request(
             "GET",
             self._get_get_url(transaction_id),
         )
@@ -531,7 +531,7 @@ class AsyncTransactions(Transactions):
         Raises:
             httpx.HTTPError: If the request fails
         """
-        response = await self._client.request(
+        response = await self._client._request(
             "GET",
             self._get_list_url(business_id, params),
         )
@@ -554,7 +554,7 @@ class AsyncTransactions(Transactions):
         Raises:
             httpx.HTTPError: If the request fails
         """
-        response = await self._client.request(
+        response = await self._client._request(
             "POST",
             self._get_create_url(business_id),
             data=params,
@@ -578,7 +578,7 @@ class AsyncTransactions(Transactions):
         Raises:
             httpx.HTTPError: If the request fails
         """
-        response = await self._client.request(
+        response = await self._client._request(
             "POST",
             self._get_import_from_abi_url(business_id),
             data=params,
@@ -602,7 +602,7 @@ class AsyncTransactions(Transactions):
         Raises:
             httpx.HTTPError: If the request fails
         """
-        response = await self._client.request(
+        response = await self._client._request(
             "PUT",
             self._get_update_url(transaction_id),
             data=params,
@@ -618,7 +618,7 @@ class AsyncTransactions(Transactions):
         Raises:
             httpx.HTTPError: If the request fails
         """
-        await self._client.request(
+        await self._client._request(
             "DELETE",
             self._get_delete_url(transaction_id),
         )
@@ -635,7 +635,7 @@ class AsyncTransactions(Transactions):
         Raises:
             httpx.HTTPError: If the request fails
         """
-        response = await self._client.request(
+        response = await self._client._request(
             "PUT",
             self._get_restore_url(transaction_id),
             data={"rewardIds": [transaction_id]},
