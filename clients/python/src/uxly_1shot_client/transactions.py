@@ -8,10 +8,10 @@ from uxly_1shot_client.models.common import PagedResponse
 from uxly_1shot_client.models.execution import TransactionExecution
 from uxly_1shot_client.models.transaction import (
     TransactionExecution,
-    TransactionParams,
     TransactionEstimate,
     TransactionTestResult,
     Transaction,
+    ListTransactionsParams,
 )
 from uxly_1shot_client.base import BaseClient
 
@@ -161,7 +161,7 @@ class Transactions:
 class SyncTransactions(Transactions):
     """Synchronous transactions module for the 1Shot API."""
 
-    def test(self, transaction_id: str, params: TransactionParams) -> TransactionTestResult:
+    def test(self, transaction_id: str, params: Dict[str, Any]) -> TransactionTestResult:
         """Test a transaction execution.
 
         Args:
@@ -177,11 +177,11 @@ class SyncTransactions(Transactions):
         response = self._client._request(
             "POST",
             self._get_test_url(transaction_id),
-            data={"params": params.validate_params()},
+            data={"params": params},
         )
         return TransactionTestResult.model_validate(response)
 
-    def estimate(self, transaction_id: str, params: TransactionParams) -> TransactionEstimate:
+    def estimate(self, transaction_id: str, params: Dict[str, Any]) -> TransactionEstimate:
         """Estimate the cost of executing a transaction.
 
         Args:
@@ -197,14 +197,14 @@ class SyncTransactions(Transactions):
         response = self._client._request(
             "POST",
             self._get_estimate_url(transaction_id),
-            data={"params": params.validate_params()},
+            data={"params": params},
         )
         return TransactionEstimate.model_validate(response)
 
     def execute(
         self,
         transaction_id: str,
-        params: TransactionParams,
+        params: Dict[str, Any],
         escrow_wallet_id: Optional[str] = None,
         memo: Optional[str] = None,
     ) -> TransactionExecution:
@@ -222,7 +222,7 @@ class SyncTransactions(Transactions):
         Raises:
             requests.exceptions.RequestException: If the request fails
         """
-        data = {"params": params.validate_params()}
+        data = {"params": params}
         if escrow_wallet_id is not None:
             data["escrow_wallet_id"] = escrow_wallet_id
         if memo is not None:
@@ -235,7 +235,7 @@ class SyncTransactions(Transactions):
         )
         return TransactionExecution.model_validate(response)
 
-    def read(self, transaction_id: str, params: TransactionParams) -> Dict[str, Any]:
+    def read(self, transaction_id: str, params: Dict[str, Any]) -> Dict[str, Any]:
         """Read the result of a view/pure function.
 
         Args:
@@ -248,11 +248,12 @@ class SyncTransactions(Transactions):
         Raises:
             requests.exceptions.RequestException: If the request fails
         """
-        return self._client._request(
+        response = self._client._request(
             "POST",
             self._get_read_url(transaction_id),
-            data={"params": params.validate_params()},
+            data={"params": params},
         )
+        return response
 
     def get(self, transaction_id: str) -> Transaction:
         """Get a transaction by ID.
@@ -275,7 +276,7 @@ class SyncTransactions(Transactions):
     def list(
         self,
         business_id: str,
-        params: Optional[Dict[str, Any]] = None,
+        params: Optional[ListTransactionsParams] = None,
     ) -> PagedResponse[Transaction]:
         """List transactions for a business.
 
@@ -291,7 +292,7 @@ class SyncTransactions(Transactions):
         """
         response = self._client._request(
             "GET",
-            self._get_list_url(business_id, params),
+            self._get_list_url(business_id, params.model_dump(by_alias=True) if params else None),
         )
         return PagedResponse[Transaction].model_validate(response)
 
@@ -404,7 +405,7 @@ class SyncTransactions(Transactions):
 class AsyncTransactions(Transactions):
     """Asynchronous transactions module for the 1Shot API."""
 
-    async def test(self, transaction_id: str, params: TransactionParams) -> TransactionTestResult:
+    async def test(self, transaction_id: str, params: Dict[str, Any]) -> TransactionTestResult:
         """Test a transaction execution.
 
         Args:
@@ -420,11 +421,11 @@ class AsyncTransactions(Transactions):
         response = await self._client._request(
             "POST",
             self._get_test_url(transaction_id),
-            data={"params": params.validate_params()},
+            data={"params": params},
         )
         return TransactionTestResult.model_validate(response)
 
-    async def estimate(self, transaction_id: str, params: TransactionParams) -> TransactionEstimate:
+    async def estimate(self, transaction_id: str, params: Dict[str, Any]) -> TransactionEstimate:
         """Estimate the cost of executing a transaction.
 
         Args:
@@ -440,14 +441,14 @@ class AsyncTransactions(Transactions):
         response = await self._client._request(
             "POST",
             self._get_estimate_url(transaction_id),
-            data={"params": params.validate_params()},
+            data={"params": params},
         )
         return TransactionEstimate.model_validate(response)
 
     async def execute(
         self,
         transaction_id: str,
-        params: TransactionParams,
+        params: Dict[str, Any],
         escrow_wallet_id: Optional[str] = None,
         memo: Optional[str] = None,
     ) -> TransactionExecution:
@@ -465,7 +466,7 @@ class AsyncTransactions(Transactions):
         Raises:
             httpx.HTTPError: If the request fails
         """
-        data = {"params": params.validate_params()}
+        data = {"params": params}
         if escrow_wallet_id is not None:
             data["escrow_wallet_id"] = escrow_wallet_id
         if memo is not None:
@@ -478,7 +479,7 @@ class AsyncTransactions(Transactions):
         )
         return TransactionExecution.model_validate(response)
 
-    async def read(self, transaction_id: str, params: TransactionParams) -> Dict[str, Any]:
+    async def read(self, transaction_id: str, params: Dict[str, Any]) -> Dict[str, Any]:
         """Read the result of a view/pure function.
 
         Args:
@@ -491,11 +492,12 @@ class AsyncTransactions(Transactions):
         Raises:
             httpx.HTTPError: If the request fails
         """
-        return await self._client._request(
+        response = await self._client._request(
             "POST",
             self._get_read_url(transaction_id),
-            data={"params": params.validate_params()},
+            data={"params": params},
         )
+        return response
 
     async def get(self, transaction_id: str) -> Transaction:
         """Get a transaction by ID.
@@ -518,7 +520,7 @@ class AsyncTransactions(Transactions):
     async def list(
         self,
         business_id: str,
-        params: Optional[Dict[str, Any]] = None,
+        params: Optional[ListTransactionsParams] = None,
     ) -> PagedResponse[Transaction]:
         """List transactions for a business.
 
@@ -534,7 +536,7 @@ class AsyncTransactions(Transactions):
         """
         response = await self._client._request(
             "GET",
-            self._get_list_url(business_id, params),
+            self._get_list_url(business_id, params.model_dump(by_alias=True) if params else None),
         )
         return PagedResponse[Transaction].model_validate(response)
 

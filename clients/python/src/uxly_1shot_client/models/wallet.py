@@ -8,30 +8,30 @@ from pydantic import BaseModel, Field
 class AccountBalanceDetails(BaseModel):
     """Account balance details model."""
 
-    type: str = Field(..., description="The balance type")
+    type: int = Field(..., description="The chain technology type")
     ticker: str = Field(..., description="The token ticker")
     chain_id: int = Field(..., alias="chainId", description="The chain ID")
     token_address: str = Field(..., alias="tokenAddress", description="The token address")
     account_address: str = Field(..., alias="accountAddress", description="The account address")
-    balance: str = Field(..., description="The balance as a Big Number String")
-    decimals: int = Field(..., description="The number of decimals")
-    usd_value: float = Field(..., alias="usdValue", description="The current USD value")
-    usd_value_timestamp: int = Field(..., alias="usdValueTimestamp", description="The USD value timestamp")
+    balance: str = Field(..., description="The balance of the token as a Big Number String")
+    decimals: int = Field(..., description="The number of decimals in the balance. Determined by the token type.")
 
 
 class EscrowWallet(BaseModel):
-    """Escrow wallet model."""
+    """Escrow wallet stored by chain service"""
 
-    id: str = Field(..., description="The wallet ID")
-    account_address: str = Field(..., alias="accountAddress", description="The account address")
-    business_id: Optional[str] = Field(None, alias="businessId", description="The business ID")
-    user_id: Optional[str] = Field(None, alias="userId", description="The user ID")
+    id: str = Field(..., description="internal ID of the escrowWallet object")
+    account_address: str = Field(..., alias="accountAddress", description="string address of a wallet insight platform holds keys for")
+    business_id: Optional[str] = Field(None, alias="businessId", description="The business ID that owns this wallet. Admin escrow wallets will not have this value. An escrow wallet will have either a user ID or a business ID.")
+    user_id: Optional[str] = Field(None, alias="userId", description="The User ID of the person that owns this wallet. Admin escrow wallets will not have this value. An escrow wallet will have either a user ID or a business ID.")
     chain_id: int = Field(..., alias="chainId", description="The chain ID")
-    name: str = Field(..., description="The wallet name")
-    description: Optional[str] = Field(None, description="The wallet description")
-    is_admin: bool = Field(..., alias="isAdmin", description="Whether the wallet is an admin wallet")
+    name: str = Field(..., description="The name of the escrow wallet.")
+    description: Optional[str] = Field(None, description="Optional description of the escrow wallet, can be used to describe it's purpose.")
+    is_admin: bool = Field(..., alias="isAdmin", description="Whether or not the escrow wallet is an admin escrow wallet, used for internal purposes.")
     account_balance_details: Optional[AccountBalanceDetails] = Field(
-        None, alias="accountBalanceDetails", description="The account balance details"
+        None, 
+        alias="accountBalanceDetails", 
+        description="The account balance details"
     )
     updated: int = Field(..., description="The last update timestamp")
     created: int = Field(..., description="The creation timestamp") 

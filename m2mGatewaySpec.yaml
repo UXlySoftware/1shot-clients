@@ -301,7 +301,8 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Transaction"   
+                $ref: "#/components/schemas/Transaction"
+                  
 
         500:
           $ref: "#/components/responses/DatabaseError"
@@ -654,28 +655,13 @@ paths:
       security:
         - OAuth2ClientCredentials:
           - read:api
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                rewardIds:
-                  type: array
-                  items:
-                    type: string
-                    format: uuid
-                    example: f4e3d951-85ad-42fa-8e21-75545145c7cb
       responses:
         200:
           description: Returns the transaction object.
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Transaction"
+                $ref: "#/components/schemas/Transaction"
 
         500:
           $ref: "#/components/responses/DatabaseError"
@@ -785,6 +771,15 @@ paths:
               properties:
                 chain:
                   $ref: "#/components/schemas/EChain"
+                name:
+                  type: string
+                  description: The name of the escrow wallet.
+                description:
+                  type: string
+                  description: A description of the escrow wallet, such as it's intended use. This is for reference only.
+              required:
+                - chain
+                - name
       security:
         - OAuth2ClientCredentials:
           - read:api
@@ -1149,6 +1144,7 @@ components:
     ETransactionExecutionStatus:
       type: string
       enum:
+        - Pending
         - Submitted
         - Completed
         - Retrying
@@ -1224,6 +1220,12 @@ components:
         - 480
         - 81457
 
+    EChainTechnology:
+      type: integer
+      description: The technology of the chain. 1Shot currently only supports EVM (0) chains
+      enum:
+        - 0
+
     ContractAddress:
       type: string
       description: string address of contract
@@ -1249,10 +1251,12 @@ components:
             businessId:
               type: string
               format: uuid
+              nullable: true
               description: The business ID that owns this wallet. Admin escrow wallets will not have this value. An escrow wallet will have either a user ID or a business ID.
             userId:
               type: string
               format: uuid
+              nullable: true
               description: The User ID of the person that owns this wallet. Admin escrow wallets will not have this value. An escrow wallet will have either a user ID or a business ID.
             chainId:
               $ref: "#/components/schemas/EChain"
@@ -1284,8 +1288,9 @@ components:
       type: object
       properties:
         type:
-          type: string
-          format: uuid
+          $ref: "#/components/schemas/EChainTechnology"
+          type: number
+          description: The chain technology type
         ticker:
           type: string
           example: ETH
@@ -1302,12 +1307,6 @@ components:
         decimals:
           type: integer
           description: The number of decimals in the balance. Determined by the token type.
-        usdValue:
-          type: number
-          description: The current value of the token in USD as determined by the latest oracle information
-        usdValueTimestamp:
-          type: number
-          format: unix-timestamp
       required:
         - type
         - ticker
@@ -1353,7 +1352,7 @@ components:
               type: string
               description: Name of the function on the contract to call for this transaction
               example: mint
-            params:
+            inputs:
               type: array
               items: 
                 $ref: "#/components/schemas/SolidityStructParam"
@@ -1382,7 +1381,7 @@ components:
             - name
             - description
             - functionName
-            - params
+            - inputs
             - outputs
             - stateMutability
             - callbackUrl
@@ -1422,7 +1421,7 @@ components:
           required:
             - id
             - businessId
-        - $ref: "#/components/schemas/EntityBookKeeping"
+        - $ref: "#/components/schemas/EntityBookKeepingWithoutDeleted"
         - allOf:
           - $ref: "#/components/schemas/NewSolidityStruct"
           - type: object
@@ -1533,6 +1532,10 @@ components:
               description: ID of the API Credential used to execute the transaction. Note, this is not the API Key itself. This will be null if a user initiated the execution and not an API Credential
               example: f4e3d951-85ad-42fa-8e21-75545145c7cb
               nullable: true
+            apiKey:
+              type: string
+              description: The actual API key used
+              nullable: true
             userId:
               type: string
               format: uuid
@@ -1547,11 +1550,23 @@ components:
               format: uuid
               description: The ID of the actual chain transaction in the internal chain service.
               example: f4e3d951-85ad-42fa-8e21-75545145c7cb
+            transactionHash:
+              type: string
+              nullable: true
+              description: The hash of the transaction. Only calculated once the status is Submitted.
+            name:
+              type: string
+              decription: the name of the associated Transaction. Included as a convienience.
+            functionName:
+              type: string
+              description: The functionName of the associated Transaction. Included as a convienience.
+            chain:
+              $ref: "#/components/schemas/EChain"
             memo:
               type: string
               nullable: true
               description: Optional text supplied when the transaction is executed. This can be a note to the user about why the execution was done, or formatted information such as JSON that can be used by the user's system.
-            completedTimestamp:
+            completed:
               type: number
               nullable: true
               format: unix-timestamp
@@ -1564,7 +1579,7 @@ components:
             - status
             - chainTransactionId
             - transactionHash
-            - completedTimestamp
+            - completed
         - $ref: "#/components/schemas/EntityBookKeeping"
         
     JSONValue:
