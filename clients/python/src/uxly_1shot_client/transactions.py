@@ -11,6 +11,7 @@ from uxly_1shot_client.models.transaction import (
     TransactionParams,
     TransactionEstimate,
     TransactionTestResult,
+    Transaction,
 )
 from uxly_1shot_client.base import BaseClient
 
@@ -253,7 +254,7 @@ class SyncTransactions(Transactions):
             data={"params": params.validate_params()},
         )
 
-    def get(self, transaction_id: str) -> TransactionExecution:
+    def get(self, transaction_id: str) -> Transaction:
         """Get a transaction by ID.
 
         Args:
@@ -269,13 +270,13 @@ class SyncTransactions(Transactions):
             "GET",
             self._get_get_url(transaction_id),
         )
-        return TransactionExecution.model_validate(response)
+        return Transaction.model_validate(response)
 
     def list(
         self,
         business_id: str,
         params: Optional[Dict[str, Any]] = None,
-    ) -> PagedResponse[TransactionExecution]:
+    ) -> PagedResponse[Transaction]:
         """List transactions for a business.
 
         Args:
@@ -292,13 +293,13 @@ class SyncTransactions(Transactions):
             "GET",
             self._get_list_url(business_id, params),
         )
-        return PagedResponse[TransactionExecution].model_validate(response)
+        return PagedResponse[Transaction].model_validate(response)
 
     def create(
         self,
         business_id: str,
         params: Dict[str, Any],
-    ) -> List[TransactionExecution]:
+    ) -> Transaction:
         """Create a new transaction.
 
         Args:
@@ -306,7 +307,7 @@ class SyncTransactions(Transactions):
             params: Transaction creation parameters
 
         Returns:
-            The created transactions
+            The created transaction
 
         Raises:
             requests.exceptions.RequestException: If the request fails
@@ -316,7 +317,7 @@ class SyncTransactions(Transactions):
             self._get_create_url(business_id),
             data=params,
         )
-        return [TransactionExecution.model_validate(tx) for tx in response]
+        return Transaction.model_validate(response)
 
     def import_from_abi(
         self,
@@ -346,7 +347,7 @@ class SyncTransactions(Transactions):
         self,
         transaction_id: str,
         params: Dict[str, Any],
-    ) -> TransactionExecution:
+    ) -> Transaction:
         """Update a transaction.
 
         Args:
@@ -364,7 +365,7 @@ class SyncTransactions(Transactions):
             self._get_update_url(transaction_id),
             data=params,
         )
-        return TransactionExecution.model_validate(response)
+        return Transaction.model_validate(response)
 
     def delete(self, transaction_id: str) -> None:
         """Delete a transaction.
@@ -380,7 +381,7 @@ class SyncTransactions(Transactions):
             self._get_delete_url(transaction_id),
         )
 
-    def restore(self, transaction_id: str) -> List[TransactionExecution]:
+    def restore(self, transaction_id: str) -> List[Transaction]:
         """Restore a deleted transaction.
 
         Args:
@@ -397,7 +398,7 @@ class SyncTransactions(Transactions):
             self._get_restore_url(transaction_id),
             data={"rewardIds": [transaction_id]},
         )
-        return [TransactionExecution.model_validate(tx) for tx in response]
+        return [Transaction.model_validate(tx) for tx in response]
 
 
 class AsyncTransactions(Transactions):
@@ -496,7 +497,7 @@ class AsyncTransactions(Transactions):
             data={"params": params.validate_params()},
         )
 
-    async def get(self, transaction_id: str) -> TransactionExecution:
+    async def get(self, transaction_id: str) -> Transaction:
         """Get a transaction by ID.
 
         Args:
@@ -512,13 +513,13 @@ class AsyncTransactions(Transactions):
             "GET",
             self._get_get_url(transaction_id),
         )
-        return TransactionExecution.model_validate(response)
+        return Transaction.model_validate(response)
 
     async def list(
         self,
         business_id: str,
         params: Optional[Dict[str, Any]] = None,
-    ) -> PagedResponse[TransactionExecution]:
+    ) -> PagedResponse[Transaction]:
         """List transactions for a business.
 
         Args:
@@ -535,13 +536,13 @@ class AsyncTransactions(Transactions):
             "GET",
             self._get_list_url(business_id, params),
         )
-        return PagedResponse[TransactionExecution].model_validate(response)
+        return PagedResponse[Transaction].model_validate(response)
 
     async def create(
         self,
         business_id: str,
         params: Dict[str, Any],
-    ) -> List[TransactionExecution]:
+    ) -> Transaction:
         """Create a new transaction.
 
         Args:
@@ -549,7 +550,7 @@ class AsyncTransactions(Transactions):
             params: Transaction creation parameters
 
         Returns:
-            The created transactions
+            The created transaction
 
         Raises:
             httpx.HTTPError: If the request fails
@@ -559,13 +560,13 @@ class AsyncTransactions(Transactions):
             self._get_create_url(business_id),
             data=params,
         )
-        return [TransactionExecution.model_validate(tx) for tx in response]
+        return Transaction.model_validate(response)
 
     async def import_from_abi(
         self,
         business_id: str,
         params: Dict[str, Any],
-    ) -> List[TransactionExecution]:
+    ) -> List[Transaction]:
         """Import transactions from an ABI.
 
         Args:
@@ -583,13 +584,13 @@ class AsyncTransactions(Transactions):
             self._get_import_from_abi_url(business_id),
             data=params,
         )
-        return [TransactionExecution.model_validate(tx) for tx in response]
+        return [Transaction.model_validate(tx) for tx in response]
 
     async def update(
         self,
         transaction_id: str,
         params: Dict[str, Any],
-    ) -> TransactionExecution:
+    ) -> Transaction:
         """Update a transaction.
 
         Args:
@@ -607,7 +608,7 @@ class AsyncTransactions(Transactions):
             self._get_update_url(transaction_id),
             data=params,
         )
-        return TransactionExecution.model_validate(response)
+        return Transaction.model_validate(response)
 
     async def delete(self, transaction_id: str) -> None:
         """Delete a transaction.
@@ -623,7 +624,7 @@ class AsyncTransactions(Transactions):
             self._get_delete_url(transaction_id),
         )
 
-    async def restore(self, transaction_id: str) -> List[TransactionExecution]:
+    async def restore(self, transaction_id: str) -> List[Transaction]:
         """Restore a deleted transaction.
 
         Args:
@@ -640,4 +641,4 @@ class AsyncTransactions(Transactions):
             self._get_restore_url(transaction_id),
             data={"rewardIds": [transaction_id]},
         )
-        return [TransactionExecution.model_validate(tx) for tx in response] 
+        return [Transaction.model_validate(tx) for tx in response] 

@@ -301,9 +301,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Transaction"
+                $ref: "#/components/schemas/Transaction"   
 
         500:
           $ref: "#/components/responses/DatabaseError"
