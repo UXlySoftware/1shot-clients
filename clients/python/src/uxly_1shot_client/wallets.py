@@ -121,7 +121,7 @@ class SyncWallets(Wallets):
         Raises:
             requests.exceptions.RequestException: If the request fails
         """
-        response = self._client.request(
+        response = self._client._request(
             "GET",
             self._get_list_url(business_id, params),
         )
@@ -140,7 +140,7 @@ class SyncWallets(Wallets):
         Raises:
             requests.exceptions.RequestException: If the request fails
         """
-        response = self._client.request(
+        response = self._client._request(
             "POST",
             self._get_create_url(business_id),
             data={"chain": chain},
@@ -162,7 +162,7 @@ class SyncWallets(Wallets):
         Raises:
             requests.exceptions.RequestException: If the request fails
         """
-        response = self._client.request(
+        response = self._client._request(
             "GET",
             self._get_get_url(escrow_wallet_id, include_balances),
         )
@@ -183,7 +183,7 @@ class SyncWallets(Wallets):
         Raises:
             requests.exceptions.RequestException: If the request fails
         """
-        response = self._client.request(
+        response = self._client._request(
             "PUT",
             self._get_update_url(escrow_wallet_id),
             data=params.model_dump(exclude_none=True),
@@ -202,7 +202,7 @@ class SyncWallets(Wallets):
         Raises:
             requests.exceptions.RequestException: If the request fails
         """
-        return self._client.request(
+        return self._client._request(
             "DELETE",
             self._get_delete_url(escrow_wallet_id),
         )
@@ -226,7 +226,7 @@ class AsyncWallets(Wallets):
         Raises:
             httpx.HTTPError: If the request fails
         """
-        response = await self._client.request(
+        response = await self._client._request(
             "GET",
             self._get_list_url(business_id, params),
         )
@@ -245,7 +245,7 @@ class AsyncWallets(Wallets):
         Raises:
             httpx.HTTPError: If the request fails
         """
-        response = await self._client.request(
+        response = await self._client._request(
             "POST",
             self._get_create_url(business_id),
             data={"chain": chain},
@@ -267,7 +267,7 @@ class AsyncWallets(Wallets):
         Raises:
             httpx.HTTPError: If the request fails
         """
-        response = await self._client.request(
+        response = await self._client._request(
             "GET",
             self._get_get_url(escrow_wallet_id, include_balances),
         )
@@ -288,7 +288,7 @@ class AsyncWallets(Wallets):
         Raises:
             httpx.HTTPError: If the request fails
         """
-        response = await self._client.request(
+        response = await self._client._request(
             "PUT",
             self._get_update_url(escrow_wallet_id),
             data=params.model_dump(exclude_none=True),
@@ -307,7 +307,7 @@ class AsyncWallets(Wallets):
         Raises:
             httpx.HTTPError: If the request fails
         """
-        return await self._client.request(
+        return await self._client._request(
             "DELETE",
             self._get_delete_url(escrow_wallet_id),
         ) 

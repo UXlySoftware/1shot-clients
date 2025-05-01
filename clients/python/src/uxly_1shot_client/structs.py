@@ -121,7 +121,7 @@ class SyncStructs(Structs):
         Raises:
             requests.exceptions.RequestException: If the request fails
         """
-        response = self._client.request(
+        response = self._client._request(
             "PUT",
             self._get_update_url(struct_id),
             data=params.model_dump(),
@@ -144,7 +144,7 @@ class SyncStructs(Structs):
         Raises:
             requests.exceptions.RequestException: If the request fails
         """
-        response = self._client.request(
+        response = self._client._request(
             "POST",
             self._get_add_param_url(business_id, struct_id),
             data=param.model_dump(exclude_none=True),
@@ -170,7 +170,7 @@ class SyncStructs(Structs):
         Raises:
             requests.exceptions.RequestException: If the request fails
         """
-        response = self._client.request(
+        response = self._client._request(
             "PUT",
             self._get_update_params_url(business_id, struct_id),
             data={"updates": [update.model_dump(exclude_none=True) for update in updates]},
@@ -190,7 +190,7 @@ class SyncStructs(Structs):
         Raises:
             requests.exceptions.RequestException: If the request fails
         """
-        response = self._client.request(
+        response = self._client._request(
             "DELETE",
             self._get_remove_param_url(struct_id, struct_param_id),
         )
@@ -213,7 +213,7 @@ class AsyncStructs(Structs):
         Raises:
             httpx.HTTPError: If the request fails
         """
-        response = await self._client.request(
+        response = await self._client._request(
             "PUT",
             self._get_update_url(struct_id),
             data=params.model_dump(),
@@ -236,7 +236,7 @@ class AsyncStructs(Structs):
         Raises:
             httpx.HTTPError: If the request fails
         """
-        response = await self._client.request(
+        response = await self._client._request(
             "POST",
             self._get_add_param_url(business_id, struct_id),
             data=param.model_dump(exclude_none=True),
@@ -262,7 +262,7 @@ class AsyncStructs(Structs):
         Raises:
             httpx.HTTPError: If the request fails
         """
-        response = await self._client.request(
+        response = await self._client._request(
             "PUT",
             self._get_update_params_url(business_id, struct_id),
             data={"updates": [update.model_dump(exclude_none=True) for update in updates]},
@@ -282,7 +282,7 @@ class AsyncStructs(Structs):
         Raises:
             httpx.HTTPError: If the request fails
         """
-        response = await self._client.request(
+        response = await self._client._request(
             "DELETE",
             self._get_remove_param_url(struct_id, struct_param_id),
         )

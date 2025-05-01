@@ -86,7 +86,7 @@ class SyncExecutions(Executions):
         Raises:
             requests.exceptions.RequestException: If the request fails
         """
-        response = self._client.request(
+        response = self._client._request(
             "GET",
             self._get_list_url(business_id, params),
         )
@@ -105,7 +105,7 @@ class SyncExecutions(Executions):
         Raises:
             requests.exceptions.RequestException: If the request fails
         """
-        response = self._client.request(
+        response = self._client._request(
             "GET",
             self._get_get_url(transaction_id, execution_id),
         )
@@ -130,7 +130,7 @@ class AsyncExecutions(Executions):
         Raises:
             httpx.HTTPError: If the request fails
         """
-        response = await self._client.request(
+        response = await self._client._request(
             "GET",
             self._get_list_url(business_id, params),
         )
@@ -149,7 +149,7 @@ class AsyncExecutions(Executions):
         Raises:
             httpx.HTTPError: If the request fails
         """
-        response = await self._client.request(
+        response = await self._client._request(
             "GET",
             self._get_get_url(transaction_id, execution_id),
         )
