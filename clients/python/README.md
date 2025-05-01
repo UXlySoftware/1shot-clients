@@ -13,18 +13,27 @@ pip install uxly-1shot-client
 ### Synchronous Client
 
 ```python
+import os
+
+# its handy to set your API key and secret with environment variables
+API_KEY = os.getenv("ONESHOT_API_KEY")
+API_SECRET = os.getenv("ONESHOT_API_SECRET")
+BUSINESS_ID = os.getenv("ONESHOT_BUSINESS_ID") 
+
 from uxly_1shot_client import Client
 
 # Initialize the client
 client = Client(
-    api_key="your_api_key",
-    api_secret="your_api_secret",
-    base_url="https://api.1shotapi.com/v1"  # Optional, defaults to this URL
+    api_key=API_KEY,
+    api_secret=API_SECRET,
+    base_url="https://api.1shotapi.com/v0"  # Optional, defaults to this URL
 )
+
+wallet = client.wallets.get(escrow_wallet_id="54ee551b-5586-48c9-a7ee-72d74ed889c0", include_balances=True)
 
 # List transactions for a business
 transactions = client.transactions.list(
-    business_id="your_business_id",
+    business_id=BUSINESS_ID,
     params={"page": 1, "page_size": 10}
 )
 
