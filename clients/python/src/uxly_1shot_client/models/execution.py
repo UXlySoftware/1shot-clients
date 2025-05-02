@@ -29,7 +29,7 @@ class TransactionExecution(BaseModel):
     status: str = Field(
         ...,
         description="Current status of the execution",
-        pattern="^(Submitted|Completed|Retrying|Failed)$",
+        pattern="^(Pending|Submitted|Completed|Retrying|Failed)$",
     )
     chain_transaction_id: Optional[str] = Field(
         None, 
