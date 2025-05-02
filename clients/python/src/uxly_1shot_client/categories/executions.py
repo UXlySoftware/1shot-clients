@@ -2,8 +2,6 @@
 
 from typing import Any, Dict, Optional, Union
 
-from pydantic import BaseModel, Field, validator
-
 from uxly_1shot_client.models.common import PagedResponse
 from uxly_1shot_client.models.execution import ExecutionListParams, TransactionExecution
 
@@ -28,7 +26,7 @@ class Executions:
         Returns:
             The URL for listing executions
         """
-        url = f"/business/{business_id}/executions"
+        url = f"/business/{business_id}/transactions/executions"
         if params:
             query_params = []
             for key, value in params.items():

@@ -7,7 +7,6 @@ from pydantic import BaseModel, Field
 from uxly_1shot_client.models.common import PagedResponse
 from uxly_1shot_client.models.execution import TransactionExecution
 from uxly_1shot_client.models.transaction import (
-    TransactionExecution,
     TransactionEstimate,
     TransactionTestResult,
     Transaction,

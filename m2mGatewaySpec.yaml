@@ -666,21 +666,12 @@ paths:
         500:
           $ref: "#/components/responses/DatabaseError"
 
-  /transactions/{transactionId}/executions/{transactionExecutionId}:
+  /executions/{transactionExecutionId}:
     get:
       tags:
-        - Transaction
         - Transaction Execution
-      description: Gets all the executions of the transaction
+      description: Gets a specific transaction execution
       parameters:
-        - name: transactionId
-          in: path
-          description: The transaction that you want
-          required: true
-          schema:
-            type: string
-            format: uuid
-            example: f4e3d951-85ad-42fa-8e21-75545145c7cb
         - name: transactionExecutionId
           in: path
           description: The transaction execution that you want
