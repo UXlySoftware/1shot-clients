@@ -35,6 +35,15 @@ The `hatch shell` command:
 - Activates the environment
 - Sets up the project in editable mode
 
+**Important Note**: The Hatch shell is for development work only. When you need to build the package, you should exit the Hatch shell first:
+```bash
+# Exit the Hatch shell
+exit
+
+# Build the package from outside the Hatch shell
+hatch build
+```
+
 #### Option 2: Using venv
 
 If you prefer using Python's built-in virtual environment:
@@ -63,8 +72,9 @@ pip install -e ".[dev]"
   - Manages the entire project lifecycle
   - Automatically handles dependency installation
   - Provides consistent environments across team members
-  - Includes build and publishing tools
   - Environment is project-specific and managed by Hatch
+  - Use for development, testing, and running code
+  - Exit the shell before running `hatch build`
 
 - **venv**:
   - Python's built-in virtual environment tool
@@ -72,6 +82,34 @@ pip install -e ".[dev]"
   - Requires explicit dependency installation
   - Environment is managed by you
   - More familiar to Python developers
+
+### Development Workflow
+
+1. Start development:
+```bash
+# Enter the Hatch shell for development
+python -m hatch shell
+```
+
+2. Make your changes and run tests:
+```bash
+# Run tests
+pytest
+
+# Run linters
+ruff check .
+```
+
+3. Build the package:
+```bash
+# First exit the Hatch shell
+exit
+
+# Then build the package
+hatch build
+```
+
+4. If you need to make more changes, repeat from step 1.
 
 ### IDE Configuration
 
@@ -347,9 +385,13 @@ The client includes comprehensive type hints for better IDE support and type che
 
 This package is published to PyPI using modern Python packaging tools. Here's how to publish a new version:
 
-1. Install the required tools:
+1. Install the required tools globally (outside of any virtual environment):
 ```bash
-pip install hatch hatchling twine
+# Install twine globally
+pip install twine
+
+# Install hatch and hatchling if you haven't already
+pip install hatch hatchling
 ```
 
 2. Update the version in `pyproject.toml`:
@@ -360,6 +402,7 @@ version = "0.1.0"  # Update this to your new version
 
 3. Build the package:
 ```bash
+# Make sure you're not in the Hatch shell
 hatch build
 ```
 
@@ -375,10 +418,10 @@ hatch run python -m pip install dist/uxly_1shot_client-1.0.20-py3-none-any.whl
 5. Upload to PyPI:
 ```bash
 # First, upload to TestPyPI to verify everything works
-twine upload --repository testpypi dist/uxly_1shot_client-1.0.20-py3-none-any.whl dist/uxly_1shot_client-1.0.20.tar.gz
+python -m twine upload --repository testpypi dist/uxly_1shot_client-1.0.20-py3-none-any.whl dist/uxly_1shot_client-1.0.20.tar.gz
 
 # If everything looks good, upload to the real PyPI
-twine upload dist/uxly_1shot_client-1.0.20-py3-none-any.whl dist/uxly_1shot_client-1.0.20.tar.gz
+python -m twine upload dist/uxly_1shot_client-1.0.20-py3-none-any.whl dist/uxly_1shot_client-1.0.20.tar.gz
 ```
 
 Note: You'll need to have a PyPI account and configure your credentials. You can do this by:
@@ -391,9 +434,20 @@ password = your_password
 
 Or by using environment variables:
 ```bash
+# On Windows PowerShell:
+$env:TWINE_USERNAME="your_username"
+$env:TWINE_PASSWORD="your_password"
+
+# On Windows Command Prompt:
+set TWINE_USERNAME=your_username
+set TWINE_PASSWORD=your_password
+
+# On Unix-like systems (Linux/macOS):
 export TWINE_USERNAME=your_username
 export TWINE_PASSWORD=your_password
 ```
+
+**Important**: Make sure you're not in the Hatch shell when running twine commands. The tools should be installed globally and run from your system's Python environment.
 
 ## Contributing
 

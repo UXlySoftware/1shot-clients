@@ -39,14 +39,38 @@ Issues = "https://github.com/uxly/1shot-clients/issues"
 type = "virtual"
 path = "./hatch/virtual/default"
 
+[tool.hatch.build]
+include = [
+    "src/uxly_1shot_client",
+    "README.md",
+    "LICENSE",
+]
+exclude = [
+    "**/__pycache__",
+    "**/*.pyc",
+    "**/*.pyo",
+    "**/*.pyd",
+    ".git",
+    ".gitignore",
+    ".pytest_cache",
+    ".ruff_cache",
+    ".coverage",
+    "htmlcov",
+    "dist",
+    "build",
+    "*.egg-info",
+]
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/uxly_1shot_client"]
+only-include = [
+    "src/uxly_1shot_client",
+    "README.md",
+    "LICENSE",
+]
 
 [tool.hatch.metadata]
 allow-direct-references = true
-
-[tool.hatch.build.hooks.custom]
-path = "build.py"
 
 [tool.ruff]
 line-length = 100
