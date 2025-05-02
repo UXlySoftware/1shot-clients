@@ -35,12 +35,12 @@ transactions = client.transactions.list(
     params={"page": 1, "page_size": 10}
 )
 
-# Get transaction details
-transaction = client.transactions.get(transactions.response[0].id)
+# Get transaction endpoint details
+transaction_endpoint = client.transactions.get(transactions.response[0].id)
 
 # Execute a transaction
 execution = client.transactions.execute(
-    transaction_id="your_transaction_id",
+    transaction_id=transaction_endpoint.id,
     params={
         "amount": "1000000000000000000",  # 1 ETH in wei
         "recipient": "0x123..."
@@ -97,57 +97,37 @@ new_transaction = client.transactions.create(
 ### Asynchronous Client
 
 ```python
+import os
+
+# its handy to set your API key and secret with environment variables
+API_KEY = os.getenv("ONESHOT_API_KEY")
+API_SECRET = os.getenv("ONESHOT_API_SECRET")
+BUSINESS_ID = os.getenv("ONESHOT_BUSINESS_ID") 
+
 import asyncio
 from uxly_1shot_client import AsyncClient
 
 async def main():
     # Initialize the client
     client = AsyncClient(
-        api_key="your_api_key",
-        api_secret="your_api_secret",
-        base_url="https://api.1shotapi.com/v1"  # Optional, defaults to this URL
+        api_key=API_KEY,
+        api_secret=API_SECRET,
+        base_url="https://api.1shotapi.com/v0"  # Optional, defaults to this URL
     )
-
     # List transactions for a business
     transactions = await client.transactions.list(
-        business_id="your_business_id",
+        business_id=BUSINESS_ID,
         params={"page": 1, "page_size": 10}
     )
-
     # Execute a transaction
     execution = await client.transactions.execute(
-        transaction_id="your_transaction_id",
+        transaction_id="424f56a9-cc15-4b5c-9bab-5fc5c9569869",
         params={
-            "amount": "1000000000000000000",  # 1 ETH in wei
-            "recipient": "0x123..."
+            "to": "0xE936e8FAf4A5655469182A49a505055B71C17604"
         }
     )
-
     # Get transaction details
-    transaction = await client.transactions.get("your_transaction_id")
-
-    # Create a new transaction
-    new_transaction = await client.transactions.create(
-        business_id="your_business_id",
-        params={
-            "name": "Transfer ETH",
-            "description": "Transfer ETH to a recipient",
-            "chain": 1,  # Ethereum mainnet
-            "contract_address": "0x...",
-            "function_name": "transfer",
-            "state_mutability": "nonpayable",
-            "inputs": [
-                {
-                    "name": "recipient",
-                    "type": "address"
-                },
-                {
-                    "name": "amount",
-                    "type": "uint256"
-                }
-            ]
-        }
-    )
+    transaction = await client.executions.get(execution.id)
 
 # Run the async code
 asyncio.run(main())
