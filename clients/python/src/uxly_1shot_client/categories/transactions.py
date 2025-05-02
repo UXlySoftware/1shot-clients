@@ -2,7 +2,6 @@
 
 from typing import Any, Dict, List, Optional, Union
 
-from pydantic import BaseModel, Field
 
 from uxly_1shot_client.models.common import PagedResponse
 from uxly_1shot_client.models.execution import TransactionExecution
@@ -93,8 +92,10 @@ class Transactions:
         """
         url = f"/business/{business_id}/transactions"
         if params:
+            print(f"Params in _get_list_url: {params}")  # Debug
             query_params = []
             for key, value in params.items():
+                print(f"Processing key: {key}, value: {value}")  # Debug
                 if value is not None:
                     query_params.append(f"{key}={value}")
             if query_params:
@@ -289,9 +290,14 @@ class SyncTransactions(Transactions):
         Raises:
             requests.exceptions.RequestException: If the request fails
         """
+        print(f"Original params: {params}")  # Debug
         if params is not None and not isinstance(params, ListTransactionsParams):
-            params = ListTransactionsParams.model_validate(params)
-        url = self._get_list_url(business_id, params.model_dump(by_alias=True) if params else None)
+            params = ListTransactionsParams.model_validate(params, by_alias=True, by_name=True)
+            print(f"After validation: {params}")  # Debug
+        dumped_params = params.model_dump(mode='json') if params else None
+        print(f"After model_dump: {dumped_params}")  # Debug
+        url = self._get_list_url(business_id, dumped_params)
+        print(f"Final URL: {url}")  # Debug
         response = self._client._request("GET", url)
         return PagedResponse[Transaction].model_validate(response)
 
@@ -537,9 +543,14 @@ class AsyncTransactions(Transactions):
         Raises:
             httpx.HTTPError: If the request fails
         """
+        print(f"Original params: {params}")  # Debug
         if params is not None and not isinstance(params, ListTransactionsParams):
-            params = ListTransactionsParams.model_validate(params)
-        url = self._get_list_url(business_id, params.model_dump(by_alias=True) if params else None)
+            params = ListTransactionsParams.model_validate(params, by_alias=True, by_name=True)
+            print(f"After validation: {params}")  # Debug
+        dumped_params = params.model_dump(mode='json') if params else None
+        print(f"After model_dump: {dumped_params}")  # Debug
+        url = self._get_list_url(business_id, dumped_params)
+        print(f"Final URL: {url}")  # Debug
         response = await self._client._request("GET", url)
         return PagedResponse[Transaction].model_validate(response)
 
