@@ -113,4 +113,51 @@ class TransactionTestResult(BaseModel):
     result: Optional[Dict[str, Any]] = Field(None, description="The test result")
     error: Optional[str] = Field(None, description="The error message if any")
     gas_used: Optional[int] = Field(None, alias="gasUsed", description="The gas used in the test")
-    logs: Optional[List[Dict[str, Any]]] = Field(None, description="The transaction logs") 
+    logs: Optional[List[Dict[str, Any]]] = Field(None, description="The transaction logs")
+
+
+class TransactionCreateParams(BaseModel):
+    """Parameters for creating a transaction.
+    
+    Args:
+        chain: The chain ID
+        contract_address: The contract address
+        name: Name of the transaction
+        description: Description of the transaction
+        function_name: Name of the function on the contract to call
+        state_mutability: The state mutability
+        inputs: The input parameters
+        outputs: The output parameters
+        callback_url: Optional URL for webhook callbacks
+    """
+    
+    chain: int = Field(..., description="The chain ID")
+    contract_address: str = Field(..., alias="contractAddress", description="The contract address")
+    name: str = Field(..., description="Name of the transaction")
+    description: str = Field(..., description="Description of the transaction")
+    function_name: str = Field(..., alias="functionName", description="Name of the function on the contract to call")
+    state_mutability: str = Field(..., alias="stateMutability", description="The state mutability")
+    inputs: List[Dict[str, Any]] = Field(..., description="The input parameters")
+    outputs: List[Dict[str, Any]] = Field(..., description="The output parameters")
+    callback_url: Optional[str] = Field(None, alias="callbackUrl", description="Optional URL for webhook callbacks")
+
+    @validator('state_mutability')
+    def validate_state_mutability(cls, v):
+        valid_mutabilities = ['pure', 'view', 'nonpayable', 'payable']
+        if v not in valid_mutabilities:
+            raise ValueError(f'State mutability must be one of {valid_mutabilities}')
+        return v
+
+
+class TransactionUpdateParams(BaseModel):
+    """Parameters for updating a transaction.
+    
+    Args:
+        name: Optional new name for the transaction
+        description: Optional new description for the transaction
+        callback_url: Optional new callback URL for webhooks
+    """
+    
+    name: Optional[str] = Field(None, description="New name for the transaction")
+    description: Optional[str] = Field(None, description="New description for the transaction")
+    callback_url: Optional[str] = Field(None, alias="callbackUrl", description="New callback URL for webhooks") 

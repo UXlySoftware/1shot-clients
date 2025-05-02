@@ -2,46 +2,8 @@
 
 from typing import Any, Dict, Optional, Union
 
-from pydantic import BaseModel, Field, validator
-
 from uxly_1shot_client.models.common import PagedResponse
-from uxly_1shot_client.models.struct import SolidityStruct
-
-
-class StructListParams(BaseModel):
-    """Parameters for listing structs."""
-
-    page_size: Optional[int] = Field(None, alias="pageSize", description="The size of the page to return. Defaults to 25")
-    page: Optional[int] = Field(None, description="Which page to return. This is 1 indexed, and default to the first page, 1")
-
-    @validator('page')
-    def validate_page(cls, v):
-        if v is not None and v < 1:
-            raise ValueError('Page number must be greater than or equal to 1')
-        return v
-
-    @validator('page_size')
-    def validate_page_size(cls, v):
-        if v is not None and v < 1:
-            raise ValueError('Page size must be greater than or equal to 1')
-        return v
-
-
-class StructCreateParams(BaseModel):
-    """Parameters for creating a struct."""
-
-    name: str = Field(..., description="The name of the struct")
-    description: Optional[str] = Field(None, description="A description of the struct")
-    params: list[Dict[str, Any]] = Field(..., description="The parameters of the struct")
-
-
-class StructUpdateParams(BaseModel):
-    """Parameters for updating a struct."""
-
-    name: Optional[str] = Field(None, description="The name of the struct")
-    description: Optional[str] = Field(None, description="A description of the struct")
-    params: Optional[list[Dict[str, Any]]] = Field(None, description="The parameters of the struct")
-
+from uxly_1shot_client.models.struct import SolidityStruct, StructCreateParams, StructListParams, StructUpdateParams
 
 class Structs:
     """Structs module for the 1Shot API."""
@@ -54,16 +16,25 @@ class Structs:
         """
         self._client = client
 
-    def _get_list_url(self, business_id: str) -> str:
+    def _get_list_url(self, business_id: str, params: Optional[Dict[str, Any]] = None) -> str:
         """Get the URL for listing structs.
 
         Args:
             business_id: The business ID
+            params: Optional filter parameters
 
         Returns:
             The URL for listing structs
         """
-        return f"/business/{business_id}/structs"
+        url = f"/business/{business_id}/structs"
+        if params:
+            query_params = []
+            for key, value in params.items():
+                if value is not None:
+                    query_params.append(f"{key}={value}")
+            if query_params:
+                url += "?" + "&".join(query_params)
+        return url
 
     def _get_create_url(self, business_id: str) -> str:
         """Get the URL for creating a struct.
@@ -114,37 +85,39 @@ class SyncStructs(Structs):
     """Synchronous structs module for the 1Shot API."""
 
     def list(
-        self, business_id: str, params: Optional[StructListParams] = None
+        self, business_id: str, params: Optional[Union[StructListParams, Dict[str, Any]]] = None
     ) -> PagedResponse[SolidityStruct]:
         """List structs for a business.
 
         Args:
             business_id: The business ID
-            params: Optional filter parameters
+            params: Optional filter parameters, either as a dict or StructListParams instance
 
         Returns:
             A paged response of structs
         """
-        url = self._get_list_url(business_id)
-        if params:
-            query_params = params.dict(by_alias=True, exclude_none=True)
-            response = self._client._request("GET", url, params=query_params)
-        else:
-            response = self._client._request("GET", url)
+        if params is not None and not isinstance(params, StructListParams):
+            params = StructListParams.model_validate(params)
+        url = self._get_list_url(business_id, params.model_dump(by_alias=True) if params else None)
+        response = self._client._request("GET", url)
         return PagedResponse[SolidityStruct].model_validate(response)
 
-    def create(self, business_id: str, params: StructCreateParams) -> SolidityStruct:
+    def create(
+        self, business_id: str, params: Union[StructCreateParams, Dict[str, Any]]
+    ) -> SolidityStruct:
         """Create a new struct for a business.
 
         Args:
             business_id: The business ID
-            params: Parameters for creating the struct
+            params: Parameters for creating the struct, either as a dict or StructCreateParams instance
 
         Returns:
             The created struct
         """
+        if not isinstance(params, StructCreateParams):
+            params = StructCreateParams.model_validate(params)
         url = self._get_create_url(business_id)
-        response = self._client._request("POST", url, json=params.dict(exclude_none=True))
+        response = self._client._request("POST", url, data=params.model_dump(exclude_none=True))
         return SolidityStruct.model_validate(response)
 
     def get(self, struct_id: str) -> SolidityStruct:
@@ -161,19 +134,21 @@ class SyncStructs(Structs):
         return SolidityStruct.model_validate(response)
 
     def update(
-        self, struct_id: str, params: StructUpdateParams
+        self, struct_id: str, params: Union[StructUpdateParams, Dict[str, Any]]
     ) -> SolidityStruct:
         """Update a struct.
 
         Args:
             struct_id: The struct ID
-            params: Update parameters
+            params: Update parameters, either as a dict or StructUpdateParams instance
 
         Returns:
             The updated struct
         """
+        if not isinstance(params, StructUpdateParams):
+            params = StructUpdateParams.model_validate(params)
         url = self._get_update_url(struct_id)
-        response = self._client._request("PUT", url, json=params.dict(exclude_none=True))
+        response = self._client._request("PUT", url, data=params.model_dump(exclude_none=True))
         return SolidityStruct.model_validate(response)
 
     def delete(self, struct_id: str) -> Dict[str, bool]:
@@ -193,37 +168,39 @@ class AsyncStructs(Structs):
     """Asynchronous structs module for the 1Shot API."""
 
     async def list(
-        self, business_id: str, params: Optional[StructListParams] = None
+        self, business_id: str, params: Optional[Union[StructListParams, Dict[str, Any]]] = None
     ) -> PagedResponse[SolidityStruct]:
         """List structs for a business.
 
         Args:
             business_id: The business ID
-            params: Optional filter parameters
+            params: Optional filter parameters, either as a dict or StructListParams instance
 
         Returns:
             A paged response of structs
         """
-        url = self._get_list_url(business_id)
-        if params:
-            query_params = params.dict(by_alias=True, exclude_none=True)
-            response = await self._client._request("GET", url, params=query_params)
-        else:
-            response = await self._client._request("GET", url)
+        if params is not None and not isinstance(params, StructListParams):
+            params = StructListParams.model_validate(params)
+        url = self._get_list_url(business_id, params.model_dump(by_alias=True) if params else None)
+        response = await self._client._request("GET", url)
         return PagedResponse[SolidityStruct].model_validate(response)
 
-    async def create(self, business_id: str, params: StructCreateParams) -> SolidityStruct:
+    async def create(
+        self, business_id: str, params: Union[StructCreateParams, Dict[str, Any]]
+    ) -> SolidityStruct:
         """Create a new struct for a business.
 
         Args:
             business_id: The business ID
-            params: Parameters for creating the struct
+            params: Parameters for creating the struct, either as a dict or StructCreateParams instance
 
         Returns:
             The created struct
         """
+        if not isinstance(params, StructCreateParams):
+            params = StructCreateParams.model_validate(params)
         url = self._get_create_url(business_id)
-        response = await self._client._request("POST", url, json=params.dict(exclude_none=True))
+        response = await self._client._request("POST", url, data=params.model_dump(exclude_none=True))
         return SolidityStruct.model_validate(response)
 
     async def get(self, struct_id: str) -> SolidityStruct:
@@ -240,19 +217,21 @@ class AsyncStructs(Structs):
         return SolidityStruct.model_validate(response)
 
     async def update(
-        self, struct_id: str, params: StructUpdateParams
+        self, struct_id: str, params: Union[StructUpdateParams, Dict[str, Any]]
     ) -> SolidityStruct:
         """Update a struct.
 
         Args:
             struct_id: The struct ID
-            params: Update parameters
+            params: Update parameters, either as a dict or StructUpdateParams instance
 
         Returns:
             The updated struct
         """
+        if not isinstance(params, StructUpdateParams):
+            params = StructUpdateParams.model_validate(params)
         url = self._get_update_url(struct_id)
-        response = await self._client._request("PUT", url, json=params.dict(exclude_none=True))
+        response = await self._client._request("PUT", url, data=params.model_dump(exclude_none=True))
         return SolidityStruct.model_validate(response)
 
     async def delete(self, struct_id: str) -> Dict[str, bool]:

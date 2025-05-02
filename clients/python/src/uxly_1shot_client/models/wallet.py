@@ -2,7 +2,7 @@
 
 from typing import Dict, List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 
 
 class AccountBalanceDetails(BaseModel):
@@ -34,4 +34,39 @@ class EscrowWallet(BaseModel):
         description="The account balance details"
     )
     updated: int = Field(..., description="The last update timestamp")
-    created: int = Field(..., description="The creation timestamp") 
+    created: int = Field(..., description="The creation timestamp")
+
+
+class WalletListParams(BaseModel):
+    """Parameters for listing wallets."""
+
+    chain_id: Optional[int] = Field(None, alias="chainId", description="The specific chain to get the wallets for")
+    page_size: Optional[int] = Field(None, alias="pageSize", description="The size of the page to return. Defaults to 25")
+    page: Optional[int] = Field(None, description="Which page to return. This is 1 indexed, and default to the first page, 1")
+
+    @validator('page')
+    def validate_page(cls, v):
+        if v is not None and v < 1:
+            raise ValueError('Page number must be greater than or equal to 1')
+        return v
+
+    @validator('page_size')
+    def validate_page_size(cls, v):
+        if v is not None and v < 1:
+            raise ValueError('Page size must be greater than or equal to 1')
+        return v
+
+
+class WalletCreateParams(BaseModel):
+    """Parameters for creating a wallet."""
+
+    chain: int = Field(..., description="The chain ID to create the wallet on")
+    name: str = Field(..., description="The name of the escrow wallet")
+    description: Optional[str] = Field(None, description="A description of the escrow wallet, such as it's intended use. This is for reference only.")
+
+
+class WalletUpdateParams(BaseModel):
+    """Parameters for updating a wallet."""
+
+    name: Optional[str] = Field(None, description="The name of the escrow wallet")
+    description: Optional[str] = Field(None, description="Optional description of the escrow wallet, can be used to describe it's purpose") 

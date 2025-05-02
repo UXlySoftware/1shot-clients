@@ -2,45 +2,13 @@
 
 from typing import Any, Dict, Optional, Union
 
-from pydantic import BaseModel, Field, validator
-
 from uxly_1shot_client.models.common import PagedResponse
-from uxly_1shot_client.models.wallet import EscrowWallet
-
-
-class WalletListParams(BaseModel):
-    """Parameters for listing wallets."""
-
-    chain_id: Optional[int] = Field(None, alias="chainId", description="The specific chain to get the wallets for")
-    page_size: Optional[int] = Field(None, alias="pageSize", description="The size of the page to return. Defaults to 25")
-    page: Optional[int] = Field(None, description="Which page to return. This is 1 indexed, and default to the first page, 1")
-
-    @validator('page')
-    def validate_page(cls, v):
-        if v is not None and v < 1:
-            raise ValueError('Page number must be greater than or equal to 1')
-        return v
-
-    @validator('page_size')
-    def validate_page_size(cls, v):
-        if v is not None and v < 1:
-            raise ValueError('Page size must be greater than or equal to 1')
-        return v
-
-
-class WalletCreateParams(BaseModel):
-    """Parameters for creating a wallet."""
-
-    chain: int = Field(..., description="The chain ID to create the wallet on")
-    name: str = Field(..., description="The name of the escrow wallet")
-    description: Optional[str] = Field(None, description="A description of the escrow wallet, such as it's intended use. This is for reference only.")
-
-
-class WalletUpdateParams(BaseModel):
-    """Parameters for updating a wallet."""
-
-    name: Optional[str] = Field(None, description="The name of the escrow wallet")
-    description: Optional[str] = Field(None, description="Optional description of the escrow wallet, can be used to describe it's purpose")
+from uxly_1shot_client.models.wallet import (
+    EscrowWallet,
+    WalletListParams,
+    WalletCreateParams,
+    WalletUpdateParams,
+)
 
 
 class Wallets:
@@ -54,16 +22,25 @@ class Wallets:
         """
         self._client = client
 
-    def _get_list_url(self, business_id: str) -> str:
+    def _get_list_url(self, business_id: str, params: Optional[Dict[str, Any]] = None) -> str:
         """Get the URL for listing wallets.
 
         Args:
             business_id: The business ID
+            params: Optional filter parameters
 
         Returns:
             The URL for listing wallets
         """
-        return f"/business/{business_id}/wallets"
+        url = f"/business/{business_id}/wallets"
+        if params:
+            query_params = []
+            for key, value in params.items():
+                if value is not None:
+                    query_params.append(f"{key}={value}")
+            if query_params:
+                url += "?" + "&".join(query_params)
+        return url
 
     def _get_create_url(self, business_id: str) -> str:
         """Get the URL for creating a wallet.
@@ -76,16 +53,25 @@ class Wallets:
         """
         return f"/business/{business_id}/wallets"
 
-    def _get_get_url(self, escrow_wallet_id: str) -> str:
+    def _get_get_url(self, escrow_wallet_id: str, params: Optional[Dict[str, Any]] = None) -> str:
         """Get the URL for getting a wallet.
 
         Args:
             escrow_wallet_id: The wallet ID
+            params: Optional query parameters
 
         Returns:
             The URL for getting a wallet
         """
-        return f"/wallets/{escrow_wallet_id}"
+        url = f"/wallets/{escrow_wallet_id}"
+        if params:
+            query_params = []
+            for key, value in params.items():
+                if value is not None:
+                    query_params.append(f"{key}={value}")
+            if query_params:
+                url += "?" + "&".join(query_params)
+        return url
 
     def _get_update_url(self, escrow_wallet_id: str) -> str:
         """Get the URL for updating a wallet.
@@ -114,37 +100,39 @@ class SyncWallets(Wallets):
     """Synchronous wallets module for the 1Shot API."""
 
     def list(
-        self, business_id: str, params: Optional[WalletListParams] = None
+        self, business_id: str, params: Optional[Union[WalletListParams, Dict[str, Any]]] = None
     ) -> PagedResponse[EscrowWallet]:
         """List escrow wallets for a business.
 
         Args:
             business_id: The business ID
-            params: Optional filter parameters
+            params: Optional filter parameters, either as a dict or WalletListParams instance
 
         Returns:
             A paged response of wallets
         """
-        url = self._get_list_url(business_id)
-        if params:
-            query_params = params.dict(by_alias=True, exclude_none=True)
-            response = self._client._request("GET", url, params=query_params)
-        else:
-            response = self._client._request("GET", url)
+        if params is not None and not isinstance(params, WalletListParams):
+            params = WalletListParams.model_validate(params)
+        url = self._get_list_url(business_id, params.model_dump(by_alias=True) if params else None)
+        response = self._client._request("GET", url)
         return PagedResponse[EscrowWallet].model_validate(response)
 
-    def create(self, business_id: str, params: WalletCreateParams) -> EscrowWallet:
+    def create(
+        self, business_id: str, params: Union[WalletCreateParams, Dict[str, Any]]
+    ) -> EscrowWallet:
         """Create a new escrow wallet for a business.
 
         Args:
             business_id: The business ID
-            params: Parameters for creating the wallet
+            params: Parameters for creating the wallet, either as a dict or WalletCreateParams instance
 
         Returns:
             The created wallet
         """
+        if not isinstance(params, WalletCreateParams):
+            params = WalletCreateParams.model_validate(params)
         url = self._get_create_url(business_id)
-        response = self._client._request("POST", url, json=params.dict(exclude_none=True))
+        response = self._client._request("POST", url, data=params.model_dump(exclude_none=True))
         return EscrowWallet.model_validate(response)
 
     def get(
@@ -159,25 +147,27 @@ class SyncWallets(Wallets):
         Returns:
             The wallet
         """
-        url = self._get_get_url(escrow_wallet_id)
         params = {"includeBalances": str(include_balances).lower()} if include_balances is not None else None
-        response = self._client._request("GET", url, params=params)
+        url = self._get_get_url(escrow_wallet_id, params)
+        response = self._client._request("GET", url)
         return EscrowWallet.model_validate(response)
 
     def update(
-        self, escrow_wallet_id: str, params: WalletUpdateParams
+        self, escrow_wallet_id: str, params: Union[WalletUpdateParams, Dict[str, Any]]
     ) -> EscrowWallet:
         """Update an escrow wallet.
 
         Args:
             escrow_wallet_id: The wallet ID
-            params: Update parameters
+            params: Update parameters, either as a dict or WalletUpdateParams instance
 
         Returns:
             The updated wallet
         """
+        if not isinstance(params, WalletUpdateParams):
+            params = WalletUpdateParams.model_validate(params)
         url = self._get_update_url(escrow_wallet_id)
-        response = self._client._request("PUT", url, json=params.dict(exclude_none=True))
+        response = self._client._request("PUT", url, data=params.model_dump(exclude_none=True))
         return EscrowWallet.model_validate(response)
 
     def delete(self, escrow_wallet_id: str) -> Dict[str, bool]:
@@ -197,37 +187,39 @@ class AsyncWallets(Wallets):
     """Asynchronous wallets module for the 1Shot API."""
 
     async def list(
-        self, business_id: str, params: Optional[WalletListParams] = None
+        self, business_id: str, params: Optional[Union[WalletListParams, Dict[str, Any]]] = None
     ) -> PagedResponse[EscrowWallet]:
         """List escrow wallets for a business.
 
         Args:
             business_id: The business ID
-            params: Optional filter parameters
+            params: Optional filter parameters, either as a dict or WalletListParams instance
 
         Returns:
             A paged response of wallets
         """
-        url = self._get_list_url(business_id)
-        if params:
-            query_params = params.dict(by_alias=True, exclude_none=True)
-            response = await self._client._request("GET", url, params=query_params)
-        else:
-            response = await self._client._request("GET", url)
+        if params is not None and not isinstance(params, WalletListParams):
+            params = WalletListParams.model_validate(params)
+        url = self._get_list_url(business_id, params.model_dump(by_alias=True) if params else None)
+        response = await self._client._request("GET", url)
         return PagedResponse[EscrowWallet].model_validate(response)
 
-    async def create(self, business_id: str, params: WalletCreateParams) -> EscrowWallet:
+    async def create(
+        self, business_id: str, params: Union[WalletCreateParams, Dict[str, Any]]
+    ) -> EscrowWallet:
         """Create a new escrow wallet for a business.
 
         Args:
             business_id: The business ID
-            params: Parameters for creating the wallet
+            params: Parameters for creating the wallet, either as a dict or WalletCreateParams instance
 
         Returns:
             The created wallet
         """
+        if not isinstance(params, WalletCreateParams):
+            params = WalletCreateParams.model_validate(params)
         url = self._get_create_url(business_id)
-        response = await self._client._request("POST", url, json=params.dict(exclude_none=True))
+        response = await self._client._request("POST", url, data=params.model_dump(exclude_none=True))
         return EscrowWallet.model_validate(response)
 
     async def get(
@@ -242,25 +234,27 @@ class AsyncWallets(Wallets):
         Returns:
             The wallet
         """
-        url = self._get_get_url(escrow_wallet_id)
         params = {"includeBalances": str(include_balances).lower()} if include_balances is not None else None
-        response = await self._client._request("GET", url, params=params)
+        url = self._get_get_url(escrow_wallet_id, params)
+        response = await self._client._request("GET", url)
         return EscrowWallet.model_validate(response)
 
     async def update(
-        self, escrow_wallet_id: str, params: WalletUpdateParams
+        self, escrow_wallet_id: str, params: Union[WalletUpdateParams, Dict[str, Any]]
     ) -> EscrowWallet:
         """Update an escrow wallet.
 
         Args:
             escrow_wallet_id: The wallet ID
-            params: Update parameters
+            params: Update parameters, either as a dict or WalletUpdateParams instance
 
         Returns:
             The updated wallet
         """
+        if not isinstance(params, WalletUpdateParams):
+            params = WalletUpdateParams.model_validate(params)
         url = self._get_update_url(escrow_wallet_id)
-        response = await self._client._request("PUT", url, json=params.dict(exclude_none=True))
+        response = await self._client._request("PUT", url, data=params.model_dump(exclude_none=True))
         return EscrowWallet.model_validate(response)
 
     async def delete(self, escrow_wallet_id: str) -> Dict[str, bool]:

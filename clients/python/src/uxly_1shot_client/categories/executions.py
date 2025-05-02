@@ -5,33 +5,7 @@ from typing import Any, Dict, Optional, Union
 from pydantic import BaseModel, Field, validator
 
 from uxly_1shot_client.models.common import PagedResponse
-from uxly_1shot_client.models.execution import TransactionExecution
-
-
-class ExecutionListParams(BaseModel):
-    """Parameters for listing executions."""
-
-    page_size: Optional[int] = Field(None, alias="pageSize", description="The size of the page to return. Defaults to 25")
-    page: Optional[int] = Field(None, description="Which page to return. This is 1 indexed, and default to the first page, 1")
-    chain_id: Optional[int] = Field(None, alias="chainId", description="The specific chain to get the executions for")
-    status: Optional[str] = Field(None, description="The status of the executions to return")
-    escrow_wallet_id: Optional[str] = Field(None, alias="escrowWalletId", description="The escrow wallet ID to get the executions for")
-    transaction_id: Optional[str] = Field(None, alias="transactionId", description="The transaction ID to get the executions for")
-    api_credential_id: Optional[str] = Field(None, alias="apiCredentialId", description="The API credential ID to get the executions for")
-    user_id: Optional[str] = Field(None, alias="userId", description="The user ID to get the executions for")
-
-    @validator('page')
-    def validate_page(cls, v):
-        if v is not None and v < 1:
-            raise ValueError('Page number must be greater than or equal to 1')
-        return v
-
-    @validator('page_size')
-    def validate_page_size(cls, v):
-        if v is not None and v < 1:
-            raise ValueError('Page size must be greater than or equal to 1')
-        return v
-
+from uxly_1shot_client.models.execution import ExecutionListParams, TransactionExecution
 
 class Executions:
     """Executions module for the 1Shot API."""
@@ -44,16 +18,25 @@ class Executions:
         """
         self._client = client
 
-    def _get_list_url(self, business_id: str) -> str:
+    def _get_list_url(self, business_id: str, params: Optional[Dict[str, Any]] = None) -> str:
         """Get the URL for listing executions.
 
         Args:
             business_id: The business ID
+            params: Optional filter parameters
 
         Returns:
             The URL for listing executions
         """
-        return f"/business/{business_id}/executions"
+        url = f"/business/{business_id}/executions"
+        if params:
+            query_params = []
+            for key, value in params.items():
+                if value is not None:
+                    query_params.append(f"{key}={value}")
+            if query_params:
+                url += "?" + "&".join(query_params)
+        return url
 
     def _get_get_url(self, execution_id: str) -> str:
         """Get the URL for getting an execution.
@@ -71,23 +54,21 @@ class SyncExecutions(Executions):
     """Synchronous executions module for the 1Shot API."""
 
     def list(
-        self, business_id: str, params: Optional[ExecutionListParams] = None
+        self, business_id: str, params: Optional[Union[ExecutionListParams, Dict[str, Any]]] = None
     ) -> PagedResponse[TransactionExecution]:
         """List executions for a business.
 
         Args:
             business_id: The business ID
-            params: Optional filter parameters
+            params: Optional filter parameters, either as a dict or ExecutionListParams instance
 
         Returns:
             A paged response of executions
         """
-        url = self._get_list_url(business_id)
-        if params:
-            query_params = params.dict(by_alias=True, exclude_none=True)
-            response = self._client._request("GET", url, params=query_params)
-        else:
-            response = self._client._request("GET", url)
+        if params is not None and not isinstance(params, ExecutionListParams):
+            params = ExecutionListParams.model_validate(params)
+        url = self._get_list_url(business_id, params.model_dump(by_alias=True) if params else None)
+        response = self._client._request("GET", url)
         return PagedResponse[TransactionExecution].model_validate(response)
 
     def get(self, execution_id: str) -> TransactionExecution:
@@ -108,23 +89,21 @@ class AsyncExecutions(Executions):
     """Asynchronous executions module for the 1Shot API."""
 
     async def list(
-        self, business_id: str, params: Optional[ExecutionListParams] = None
+        self, business_id: str, params: Optional[Union[ExecutionListParams, Dict[str, Any]]] = None
     ) -> PagedResponse[TransactionExecution]:
         """List executions for a business.
 
         Args:
             business_id: The business ID
-            params: Optional filter parameters
+            params: Optional filter parameters, either as a dict or ExecutionListParams instance
 
         Returns:
             A paged response of executions
         """
-        url = self._get_list_url(business_id)
-        if params:
-            query_params = params.dict(by_alias=True, exclude_none=True)
-            response = await self._client._request("GET", url, params=query_params)
-        else:
-            response = await self._client._request("GET", url)
+        if params is not None and not isinstance(params, ExecutionListParams):
+            params = ExecutionListParams.model_validate(params)
+        url = self._get_list_url(business_id, params.model_dump(by_alias=True) if params else None)
+        response = await self._client._request("GET", url)
         return PagedResponse[TransactionExecution].model_validate(response)
 
     async def get(self, execution_id: str) -> TransactionExecution:

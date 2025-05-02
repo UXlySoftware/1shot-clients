@@ -11,10 +11,14 @@ class ESolidityAbiParameterType(str, Enum):
     ADDRESS = "address"
     BOOL = "bool"
     BYTES = "bytes"
+    BYTES_FIXED = "bytes<M>"
     INT = "int"
-    STRING = "string"
+    INT_FIXED = "int<M>"
     UINT = "uint"
+    UINT_FIXED = "uint<M>"
+    STRING = "string"
     STRUCT = "struct"
+    TUPLE = "tuple"
 
 
 class SolidityStructParam(BaseModel):
@@ -33,6 +37,8 @@ class SolidityStructParam(BaseModel):
     array_size: Optional[int] = Field(None, alias="arraySize", description="If the parameter is a fixed size array, set this value.")
     type_struct_id: Optional[str] = Field(None, alias="typeStructId", description="The ID of the sub-struct if the type is 'struct'. When creating a param, you must set only one of either typeStructId (to re-use an existing Solidity Struct) or typeStruct (creates a new struct for the param)")
     type_struct: Optional["SolidityStruct"] = Field(None, alias="typeStruct", description="The sub-struct if the type is 'struct', which will be created for use by this parameter. When creating a param, you must set only one of either typeStructId (to re-use an existing Solidity Struct) or typeStruct (creates a new struct for the param)")
+    is_optional: bool = Field(False, alias="isOptional", description="Whether the parameter is optional")
+    default_value: Optional[str] = Field(None, alias="defaultValue", description="The default value if optional")
 
     @validator('type_size')
     def validate_type_size(cls, v, values):
@@ -144,6 +150,33 @@ class StructParamUpdateRequest(BaseModel):
             if values.get('type_struct_id') and values.get('type_struct'):
                 raise ValueError('For struct type, only one of typeStructId or typeStruct can be provided')
         return v
+
+
+class StructListParams(BaseModel):
+    """Parameters for listing structs."""
+
+    page_size: Optional[int] = Field(None, alias="pageSize", description="The size of the page to return. Defaults to 25")
+    page: Optional[int] = Field(None, description="Which page to return. This is 1 indexed, and default to the first page, 1")
+
+    @validator('page')
+    def validate_page(cls, v):
+        if v is not None and v < 1:
+            raise ValueError('Page number must be greater than or equal to 1')
+        return v
+
+    @validator('page_size')
+    def validate_page_size(cls, v):
+        if v is not None and v < 1:
+            raise ValueError('Page size must be greater than or equal to 1')
+        return v
+
+
+class StructCreateParams(BaseModel):
+    """Parameters for creating a struct."""
+
+    name: str = Field(..., description="The name of the struct")
+    description: Optional[str] = Field(None, description="A description of the struct")
+    params: List[SolidityStructParam] = Field(..., description="The parameters of the struct")
 
 
 # Update the forward reference

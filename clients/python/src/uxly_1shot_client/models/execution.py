@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 
 
 class TransactionExecution(BaseModel):
@@ -65,3 +65,28 @@ class TransactionExecution(BaseModel):
     updated: int = Field(..., description="The last update timestamp")
     created: int = Field(..., description="The creation timestamp")
     deleted: bool = Field(..., description="Whether the execution is deleted")
+
+
+class ExecutionListParams(BaseModel):
+    """Parameters for listing executions."""
+
+    page_size: Optional[int] = Field(None, alias="pageSize", description="The size of the page to return. Defaults to 25")
+    page: Optional[int] = Field(None, description="Which page to return. This is 1 indexed, and default to the first page, 1")
+    chain_id: Optional[int] = Field(None, alias="chainId", description="The specific chain to get the executions for")
+    status: Optional[str] = Field(None, description="The status of the executions to return")
+    escrow_wallet_id: Optional[str] = Field(None, alias="escrowWalletId", description="The escrow wallet ID to get the executions for")
+    transaction_id: Optional[str] = Field(None, alias="transactionId", description="The transaction ID to get the executions for")
+    api_credential_id: Optional[str] = Field(None, alias="apiCredentialId", description="The API credential ID to get the executions for")
+    user_id: Optional[str] = Field(None, alias="userId", description="The user ID to get the executions for")
+
+    @validator('page')
+    def validate_page(cls, v):
+        if v is not None and v < 1:
+            raise ValueError('Page number must be greater than or equal to 1')
+        return v
+
+    @validator('page_size')
+    def validate_page_size(cls, v):
+        if v is not None and v < 1:
+            raise ValueError('Page size must be greater than or equal to 1')
+        return v

@@ -12,6 +12,8 @@ from uxly_1shot_client.models.transaction import (
     TransactionTestResult,
     Transaction,
     ListTransactionsParams,
+    TransactionCreateParams,
+    TransactionUpdateParams,
 )
 
 class Transactions:
@@ -274,13 +276,13 @@ class SyncTransactions(Transactions):
     def list(
         self,
         business_id: str,
-        params: Optional[ListTransactionsParams] = None,
+        params: Optional[Union[ListTransactionsParams, Dict[str, Any]]] = None,
     ) -> PagedResponse[Transaction]:
         """List transactions for a business.
 
         Args:
             business_id: The business ID
-            params: Optional filter parameters
+            params: Optional filter parameters, either as a dict or ListTransactionsParams instance
 
         Returns:
             A paged response of transactions
@@ -288,22 +290,22 @@ class SyncTransactions(Transactions):
         Raises:
             requests.exceptions.RequestException: If the request fails
         """
-        response = self._client._request(
-            "GET",
-            self._get_list_url(business_id, params.model_dump(by_alias=True) if params else None),
-        )
+        if params is not None and not isinstance(params, ListTransactionsParams):
+            params = ListTransactionsParams.model_validate(params)
+        url = self._get_list_url(business_id, params.model_dump(by_alias=True) if params else None)
+        response = self._client._request("GET", url)
         return PagedResponse[Transaction].model_validate(response)
 
     def create(
         self,
         business_id: str,
-        params: Dict[str, Any],
+        params: Union[TransactionCreateParams, Dict[str, Any]],
     ) -> Transaction:
         """Create a new transaction.
 
         Args:
             business_id: The business ID
-            params: Transaction creation parameters
+            params: Transaction creation parameters, either as a dict or TransactionCreateParams instance
 
         Returns:
             The created transaction
@@ -311,10 +313,12 @@ class SyncTransactions(Transactions):
         Raises:
             requests.exceptions.RequestException: If the request fails
         """
+        if not isinstance(params, TransactionCreateParams):
+            params = TransactionCreateParams.model_validate(params)
         response = self._client._request(
             "POST",
             self._get_create_url(business_id),
-            data=params,
+            data=params.model_dump(exclude_none=True, by_alias=True),
         )
         return Transaction.model_validate(response)
 
@@ -345,13 +349,13 @@ class SyncTransactions(Transactions):
     def update(
         self,
         transaction_id: str,
-        params: Dict[str, Any],
+        params: Union[TransactionUpdateParams, Dict[str, Any]],
     ) -> Transaction:
         """Update a transaction.
 
         Args:
             transaction_id: The transaction ID
-            params: Update parameters
+            params: Update parameters, either as a dict or TransactionUpdateParams instance
 
         Returns:
             The updated transaction
@@ -359,10 +363,12 @@ class SyncTransactions(Transactions):
         Raises:
             requests.exceptions.RequestException: If the request fails
         """
+        if not isinstance(params, TransactionUpdateParams):
+            params = TransactionUpdateParams.model_validate(params)
         response = self._client._request(
             "PUT",
             self._get_update_url(transaction_id),
-            data=params,
+            data=params.model_dump(exclude_none=True, by_alias=True),
         )
         return Transaction.model_validate(response)
 
@@ -518,13 +524,13 @@ class AsyncTransactions(Transactions):
     async def list(
         self,
         business_id: str,
-        params: Optional[ListTransactionsParams] = None,
+        params: Optional[Union[ListTransactionsParams, Dict[str, Any]]] = None,
     ) -> PagedResponse[Transaction]:
         """List transactions for a business.
 
         Args:
             business_id: The business ID
-            params: Optional filter parameters
+            params: Optional filter parameters, either as a dict or ListTransactionsParams instance
 
         Returns:
             A paged response of transactions
@@ -532,22 +538,22 @@ class AsyncTransactions(Transactions):
         Raises:
             httpx.HTTPError: If the request fails
         """
-        response = await self._client._request(
-            "GET",
-            self._get_list_url(business_id, params.model_dump(by_alias=True) if params else None),
-        )
+        if params is not None and not isinstance(params, ListTransactionsParams):
+            params = ListTransactionsParams.model_validate(params)
+        url = self._get_list_url(business_id, params.model_dump(by_alias=True) if params else None)
+        response = await self._client._request("GET", url)
         return PagedResponse[Transaction].model_validate(response)
 
     async def create(
         self,
         business_id: str,
-        params: Dict[str, Any],
+        params: Union[TransactionCreateParams, Dict[str, Any]],
     ) -> Transaction:
         """Create a new transaction.
 
         Args:
             business_id: The business ID
-            params: Transaction creation parameters
+            params: Transaction creation parameters, either as a dict or TransactionCreateParams instance
 
         Returns:
             The created transaction
@@ -555,10 +561,12 @@ class AsyncTransactions(Transactions):
         Raises:
             httpx.HTTPError: If the request fails
         """
+        if not isinstance(params, TransactionCreateParams):
+            params = TransactionCreateParams.model_validate(params)
         response = await self._client._request(
             "POST",
             self._get_create_url(business_id),
-            data=params,
+            data=params.model_dump(exclude_none=True, by_alias=True),
         )
         return Transaction.model_validate(response)
 
@@ -589,13 +597,13 @@ class AsyncTransactions(Transactions):
     async def update(
         self,
         transaction_id: str,
-        params: Dict[str, Any],
+        params: Union[TransactionUpdateParams, Dict[str, Any]],
     ) -> Transaction:
         """Update a transaction.
 
         Args:
             transaction_id: The transaction ID
-            params: Update parameters
+            params: Update parameters, either as a dict or TransactionUpdateParams instance
 
         Returns:
             The updated transaction
@@ -603,10 +611,12 @@ class AsyncTransactions(Transactions):
         Raises:
             httpx.HTTPError: If the request fails
         """
+        if not isinstance(params, TransactionUpdateParams):
+            params = TransactionUpdateParams.model_validate(params)
         response = await self._client._request(
             "PUT",
             self._get_update_url(transaction_id),
-            data=params,
+            data=params.model_dump(exclude_none=True, by_alias=True),
         )
         return Transaction.model_validate(response)
 
