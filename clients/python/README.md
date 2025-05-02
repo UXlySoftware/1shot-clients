@@ -123,7 +123,7 @@ async def main():
     execution = await client.transactions.execute(
         transaction_id="424f56a9-cc15-4b5c-9bab-5fc5c9569869",
         params={
-            "to": "0xE936e8FAf4A5655469182A49a505055B71C17604"
+            "account": "0xE936e8FAf4A5655469182A49a505055B71C17604"
         }
     )
     # Get transaction details
@@ -244,19 +244,19 @@ hatch build
 4. Test the build:
 ```bash
 # On Windows:
-hatch run python -m pip install dist\uxly_1shot_client-1.0.17-py3-none-any.whl
+hatch run python -m pip install dist\uxly_1shot_client-1.0.11-py3-none-any.whl
 
 # On Unix-like systems (Linux/macOS):
-hatch run python -m pip install dist/uxly_1shot_client-1.0.17-py3-none-any.whl
+hatch run python -m pip install dist/uxly_1shot_client-1.0.11-py3-none-any.whl
 ```
 
 5. Upload to PyPI:
 ```bash
 # First, upload to TestPyPI to verify everything works
-twine upload --repository testpypi dist/uxly_1shot_client-1.0.17-py3-none-any.whl dist/uxly_1shot_client-1.0.17.tar.gz
+twine upload --repository testpypi dist/uxly_1shot_client-1.0.11-py3-none-any.whl dist/uxly_1shot_client-1.0.11.tar.gz
 
 # If everything looks good, upload to the real PyPI
-twine upload dist/uxly_1shot_client-1.0.17-py3-none-any.whl dist/uxly_1shot_client-1.0.17.tar.gz
+twine upload dist/uxly_1shot_client-1.0.11-py3-none-any.whl dist/uxly_1shot_client-1.0.11.tar.gz
 ```
 
 Note: You'll need to have a PyPI account and configure your credentials. You can do this by:
