@@ -29,13 +29,14 @@ client = Client(
     base_url="https://api.1shotapi.com/v0"  # Optional, defaults to this URL
 )
 
-wallet = client.wallets.get(escrow_wallet_id="54ee551b-5586-48c9-a7ee-72d74ed889c0", include_balances=True)
-
 # List transactions for a business
 transactions = client.transactions.list(
     business_id=BUSINESS_ID,
     params={"page": 1, "page_size": 10}
 )
+
+# Get transaction details
+transaction = client.transactions.get(transactions.response[0].id)
 
 # Execute a transaction
 execution = client.transactions.execute(
@@ -46,31 +47,50 @@ execution = client.transactions.execute(
     }
 )
 
-# Get transaction details
-transaction = client.transactions.get("your_transaction_id")
+executions_list = client.executions.list(business_id=BUSINESS_ID)
+
+execution_status = client.executions.get(execution.id)
+
+wallet = client.wallets.get(escrow_wallet_id="54ee551b-5586-48c9-a7ee-72d74ed889c0", include_balances=True)
+
+mint_endpoint_payload = {
+        "chain": 11155111,
+        "contractAddress": "0xA1BfEd6c6F1C3A516590edDAc7A8e359C2189A61",
+        "escrowWalletId": f"{wallet.id}",
+        "name": "Sepolia Token Deployer",
+        "description": "This deploys ERC20 tokens on Sepolia",
+        "functionName": "deployToken",
+        "callbackUrl": "https://rapid-clam-infinitely.ngrok-free.app/1shot",
+        "stateMutability": "nonpayable",
+        "inputs": [
+            {
+                "name": "admin",
+                "type": "address",
+                "index": 0,
+            },
+            {
+                "name": "name",
+                "type": "string",
+                "index": 1
+            },
+            {
+                "name": "ticker",
+                "type": "string",
+                "index": 2
+            },
+            {
+                "name": "premint",
+                "type": "uint",
+                "index": 3
+            }
+        ],
+        "outputs": []
+    }
 
 # Create a new transaction
 new_transaction = client.transactions.create(
-    business_id="your_business_id",
-    params={
-        "name": "Transfer ETH",
-        "description": "Transfer ETH to a recipient",
-        "chain": 1,  # Ethereum mainnet
-        "contract_address": "0x...",
-        "function_name": "transfer",
-        "state_mutability": "nonpayable",
-        "inputs": [
-            {
-                "name": "recipient",
-                "type": "address"
-            },
-            {
-                "name": "amount",
-                "type": "uint"
-                "type_size": 256
-            }
-        ]
-    }
+    business_id=BUSINESS_ID,
+    params=mint_endpoint_payload
 )
 ```
 
