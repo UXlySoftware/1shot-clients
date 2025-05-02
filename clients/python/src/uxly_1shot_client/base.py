@@ -1,10 +1,9 @@
 """Base client for the 1Shot API."""
 
-from datetime import datetime, timedelta
-from typing import Any, Dict, Optional
+from datetime import datetime
+from typing import Dict, Optional
 
-from pydantic import BaseModel, Field
-
+from pydantic import BaseModel
 
 class TokenResponse(BaseModel):
     """Response from the token endpoint."""

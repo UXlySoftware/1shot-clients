@@ -1,0 +1,8 @@
+{
+    "python.defaultInterpreterPath": "${workspaceFolder}/clients/python/hatch/virtual/default/Scripts/python.exe",
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}/clients/python/src"
+    ],
+    "python.analysis.autoImportCompletions": true,
+    "python.analysis.typeCheckingMode": "basic"
+} 

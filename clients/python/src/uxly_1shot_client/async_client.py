@@ -1,7 +1,7 @@
 """Asynchronous client for the 1Shot API."""
 
 from datetime import datetime, timedelta
-from typing import Any, Dict, Optional, TypeVar, Generic
+from typing import Any, Dict, Optional, TypeVar
 
 import httpx
 
@@ -35,6 +35,7 @@ class AsyncClient(BaseClient):
         self.transactions = AsyncTransactions(self)
         self.wallets = AsyncWallets(self)
         self.structs = AsyncStructs(self)
+        self._client: Optional[httpx.AsyncClient] = None
 
     async def __aenter__(self) -> "AsyncClient":
         """Enter the async context.
@@ -42,11 +43,14 @@ class AsyncClient(BaseClient):
         Returns:
             The client instance
         """
+        self._client = httpx.AsyncClient()
         return self
 
     async def __aexit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         """Exit the async context."""
-        await self._client.aclose()
+        if self._client is not None:
+            await self._client.aclose()
+            self._client = None
 
     async def _get_access_token(self) -> str:
         """Get an access token.
@@ -64,18 +68,20 @@ class AsyncClient(BaseClient):
         ):
             return self._access_token
 
-        async with httpx.AsyncClient() as client:
-            response = await client.post(
-                self._get_token_url(),
-                data=self._get_token_data(),
-                headers={"Content-Type": "application/x-www-form-urlencoded"},
-            )
-            response.raise_for_status()
+        if self._client is None:
+            self._client = httpx.AsyncClient()
 
-            token_data = TokenResponse.model_validate(response.json())
-            self._access_token = token_data.access_token
-            self._token_expiry = datetime.now() + timedelta(seconds=token_data.expires_in)
-            return self._access_token
+        response = await self._client.post(
+            self._get_token_url(),
+            data=self._get_token_data(),
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+        )
+        response.raise_for_status()
+
+        token_data = TokenResponse.model_validate(response.json())
+        self._access_token = token_data.access_token
+        self._token_expiry = datetime.now() + timedelta(seconds=token_data.expires_in)
+        return self._access_token
 
     async def _request(
         self, method: str, path: str, data: Optional[Dict[str, Any]] = None
@@ -93,13 +99,15 @@ class AsyncClient(BaseClient):
         Raises:
             httpx.HTTPError: If the request fails
         """
+        if self._client is None:
+            self._client = httpx.AsyncClient()
+
         token = await self._get_access_token()
-        async with httpx.AsyncClient() as client:
-            response = await client.request(
-                method,
-                self._get_url(path),
-                headers=self._get_headers(),
-                json=data,
-            )
-            response.raise_for_status()
-            return response.json() 
+        response = await self._client.request(
+            method,
+            self._get_url(path),
+            headers=self._get_headers(),
+            json=data,
+        )
+        response.raise_for_status()
+        return response.json() 

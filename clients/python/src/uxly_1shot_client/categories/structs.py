@@ -4,17 +4,11 @@ from typing import Any, Dict, Optional, Union
 
 from uxly_1shot_client.models.common import PagedResponse
 from uxly_1shot_client.models.struct import SolidityStruct, StructCreateParams, StructListParams, StructUpdateParams
+from uxly_1shot_client.async_client import AsyncClient
+from uxly_1shot_client.sync_client import Client
 
-class Structs:
-    """Structs module for the 1Shot API."""
-
-    def __init__(self, client: Union["SyncClient", "AsyncClient"]) -> None:
-        """Initialize the structs module.
-
-        Args:
-            client: The client instance
-        """
-        self._client = client
+class BaseStructs:
+    """Base class for structs module."""
 
     def _get_list_url(self, business_id: str, params: Optional[Dict[str, Any]] = None) -> str:
         """Get the URL for listing structs.
@@ -81,8 +75,16 @@ class Structs:
         return f"/structs/{struct_id}"
 
 
-class SyncStructs(Structs):
+class SyncStructs(BaseStructs):
     """Synchronous structs module for the 1Shot API."""
+
+    def __init__(self, client: Client) -> None:
+        """Initialize the structs module.
+
+        Args:
+            client: The synchronous client instance
+        """
+        self._client = client
 
     def list(
         self, business_id: str, params: Optional[Union[StructListParams, Dict[str, Any]]] = None
@@ -151,7 +153,7 @@ class SyncStructs(Structs):
         response = self._client._request("PUT", url, data=params.model_dump(exclude_none=True, by_alias=True))
         return SolidityStruct.model_validate(response)
 
-    def delete(self, struct_id: str) -> Dict[str, bool]:
+    def delete(self, struct_id: str) -> None:
         """Delete a struct.
 
         Args:
@@ -161,11 +163,19 @@ class SyncStructs(Structs):
             A dictionary with a success flag
         """
         url = self._get_delete_url(struct_id)
-        return self._client._request("DELETE", url)
+        self._client._request("DELETE", url)
 
 
-class AsyncStructs(Structs):
+class AsyncStructs(BaseStructs):
     """Asynchronous structs module for the 1Shot API."""
+
+    def __init__(self, client: AsyncClient) -> None:
+        """Initialize the structs module.
+
+        Args:
+            client: The asynchronous client instance
+        """
+        self._client = client
 
     async def list(
         self, business_id: str, params: Optional[Union[StructListParams, Dict[str, Any]]] = None
@@ -234,7 +244,7 @@ class AsyncStructs(Structs):
         response = await self._client._request("PUT", url, data=params.model_dump(exclude_none=True, by_alias=True))
         return SolidityStruct.model_validate(response)
 
-    async def delete(self, struct_id: str) -> Dict[str, bool]:
+    async def delete(self, struct_id: str) -> None:
         """Delete a struct.
 
         Args:
@@ -244,4 +254,4 @@ class AsyncStructs(Structs):
             A dictionary with a success flag
         """
         url = self._get_delete_url(struct_id)
-        return await self._client._request("DELETE", url) 
+        await self._client._request("DELETE", url) 

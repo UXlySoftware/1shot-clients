@@ -80,12 +80,12 @@ If your IDE shows import errors (like "Import could not be resolved") even after
 #### VS Code
 1. Press `Ctrl+Shift+P` (Windows/Linux) or `Cmd+Shift+P` (macOS)
 2. Type "Python: Select Interpreter"
-3. Choose the interpreter from your virtual environment (it should be something like `.venv/Scripts/python.exe` on Windows or `.venv/bin/python` on Unix-like systems)
+3. Choose the interpreter from your Hatch environment (it should be something like `hatch/virtual/default/Scripts/python.exe` on Windows or `hatch/virtual/default/bin/python` on Unix-like systems)
 
 #### PyCharm
 1. Go to `File > Settings > Project > Python Interpreter` (Windows/Linux) or `PyCharm > Preferences > Project > Python Interpreter` (macOS)
 2. Click the gear icon and select "Add"
-3. Choose "Existing Environment" and select the Python interpreter from your virtual environment
+3. Choose "Existing Environment" and select the Python interpreter from your Hatch environment at `hatch/virtual/default/Scripts/python.exe` (Windows) or `hatch/virtual/default/bin/python` (Unix-like systems)
 
 #### General Tips
 - Make sure your IDE's Python extension is installed and up to date
@@ -366,19 +366,19 @@ hatch build
 4. Test the build:
 ```bash
 # On Windows:
-hatch run python -m pip install dist\uxly_1shot_client-1.0.11-py3-none-any.whl
+hatch run python -m pip install dist\uxly_1shot_client-1.0.20-py3-none-any.whl
 
 # On Unix-like systems (Linux/macOS):
-hatch run python -m pip install dist/uxly_1shot_client-1.0.11-py3-none-any.whl
+hatch run python -m pip install dist/uxly_1shot_client-1.0.20-py3-none-any.whl
 ```
 
 5. Upload to PyPI:
 ```bash
 # First, upload to TestPyPI to verify everything works
-twine upload --repository testpypi dist/uxly_1shot_client-1.0.11-py3-none-any.whl dist/uxly_1shot_client-1.0.11.tar.gz
+twine upload --repository testpypi dist/uxly_1shot_client-1.0.20-py3-none-any.whl dist/uxly_1shot_client-1.0.20.tar.gz
 
 # If everything looks good, upload to the real PyPI
-twine upload dist/uxly_1shot_client-1.0.11-py3-none-any.whl dist/uxly_1shot_client-1.0.11.tar.gz
+twine upload dist/uxly_1shot_client-1.0.20-py3-none-any.whl dist/uxly_1shot_client-1.0.20.tar.gz
 ```
 
 Note: You'll need to have a PyPI account and configure your credentials. You can do this by:

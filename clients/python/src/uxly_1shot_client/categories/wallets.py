@@ -9,18 +9,11 @@ from uxly_1shot_client.models.wallet import (
     WalletCreateParams,
     WalletUpdateParams,
 )
+from uxly_1shot_client.async_client import AsyncClient
+from uxly_1shot_client.sync_client import Client
 
-
-class Wallets:
-    """Wallets module for the 1Shot API."""
-
-    def __init__(self, client: Union["SyncClient", "AsyncClient"]) -> None:
-        """Initialize the wallets module.
-
-        Args:
-            client: The client instance
-        """
-        self._client = client
+class BaseWallets:
+    """Base class for wallets module."""
 
     def _get_list_url(self, business_id: str, params: Optional[Dict[str, Any]] = None) -> str:
         """Get the URL for listing wallets.
@@ -96,8 +89,16 @@ class Wallets:
         return f"/wallets/{escrow_wallet_id}"
 
 
-class SyncWallets(Wallets):
+class SyncWallets(BaseWallets):
     """Synchronous wallets module for the 1Shot API."""
+
+    def __init__(self, client: Client) -> None:
+        """Initialize the wallets module.
+
+        Args:
+            client: The synchronous client instance
+        """
+        self._client = client
 
     def list(
         self, business_id: str, params: Optional[Union[WalletListParams, Dict[str, Any]]] = None
@@ -170,7 +171,7 @@ class SyncWallets(Wallets):
         response = self._client._request("PUT", url, data=params.model_dump(exclude_none=True, by_alias=True))
         return EscrowWallet.model_validate(response)
 
-    def delete(self, escrow_wallet_id: str) -> Dict[str, bool]:
+    def delete(self, escrow_wallet_id: str) -> None:
         """Delete an escrow wallet.
 
         Args:
@@ -180,11 +181,19 @@ class SyncWallets(Wallets):
             A dictionary with a success flag
         """
         url = self._get_delete_url(escrow_wallet_id)
-        return self._client._request("DELETE", url)
+        self._client._request("DELETE", url)
 
 
-class AsyncWallets(Wallets):
+class AsyncWallets(BaseWallets):
     """Asynchronous wallets module for the 1Shot API."""
+
+    def __init__(self, client: AsyncClient) -> None:
+        """Initialize the wallets module.
+
+        Args:
+            client: The asynchronous client instance
+        """
+        self._client = client
 
     async def list(
         self, business_id: str, params: Optional[Union[WalletListParams, Dict[str, Any]]] = None

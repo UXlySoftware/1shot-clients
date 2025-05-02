@@ -4,17 +4,12 @@ from typing import Any, Dict, Optional, Union
 
 from uxly_1shot_client.models.common import PagedResponse
 from uxly_1shot_client.models.execution import ExecutionListParams, TransactionExecution
+from uxly_1shot_client.async_client import AsyncClient
+from uxly_1shot_client.sync_client import Client
 
-class Executions:
-    """Executions module for the 1Shot API."""
 
-    def __init__(self, client: Union["SyncClient", "AsyncClient"]) -> None:
-        """Initialize the executions module.
-
-        Args:
-            client: The client instance
-        """
-        self._client = client
+class BaseExecutions:
+    """Base class for executions module."""
 
     def _get_list_url(self, business_id: str, params: Optional[Dict[str, Any]] = None) -> str:
         """Get the URL for listing executions.
@@ -48,8 +43,16 @@ class Executions:
         return f"/executions/{execution_id}"
 
 
-class SyncExecutions(Executions):
+class SyncExecutions(BaseExecutions):
     """Synchronous executions module for the 1Shot API."""
+
+    def __init__(self, client: Client) -> None:
+        """Initialize the executions module.
+
+        Args:
+            client: The synchronous client instance
+        """
+        self._client = client
 
     def list(
         self, business_id: str, params: Optional[Union[ExecutionListParams, Dict[str, Any]]] = None
@@ -83,8 +86,16 @@ class SyncExecutions(Executions):
         return TransactionExecution.model_validate(response)
 
 
-class AsyncExecutions(Executions):
+class AsyncExecutions(BaseExecutions):
     """Asynchronous executions module for the 1Shot API."""
+
+    def __init__(self, client: AsyncClient) -> None:
+        """Initialize the executions module.
+
+        Args:
+            client: The asynchronous client instance
+        """
+        self._client = client
 
     async def list(
         self, business_id: str, params: Optional[Union[ExecutionListParams, Dict[str, Any]]] = None

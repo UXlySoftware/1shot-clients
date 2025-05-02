@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "uxly-1shot-client"
-version = "1.0.19"
+version = "1.0.20"
 description = "Python client for the 1Shot API"
 readme = "README.md"
 requires-python = ">=3.8"
@@ -34,6 +34,10 @@ Homepage = "https://github.com/uxly/1shot-clients"
 Documentation = "https://github.com/uxly/1shot-clients/tree/main/clients/python"
 Repository = "https://github.com/uxly/1shot-clients.git"
 Issues = "https://github.com/uxly/1shot-clients/issues"
+
+[tool.hatch.envs.default]
+type = "virtual"
+path = "./hatch/virtual/default"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/uxly_1shot_client"]

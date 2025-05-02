@@ -5,6 +5,8 @@ from typing import Any, Dict, List, Optional, Union
 
 from uxly_1shot_client.models.common import PagedResponse
 from uxly_1shot_client.models.execution import TransactionExecution
+from uxly_1shot_client.async_client import AsyncClient
+from uxly_1shot_client.sync_client import Client
 from uxly_1shot_client.models.transaction import (
     TransactionEstimate,
     TransactionTestResult,
@@ -14,16 +16,8 @@ from uxly_1shot_client.models.transaction import (
     TransactionUpdateParams,
 )
 
-class Transactions:
-    """Transactions module for the 1Shot API."""
-
-    def __init__(self, client: Union["SyncClient", "AsyncClient"]) -> None:
-        """Initialize the transactions module.
-
-        Args:
-            client: The client instance
-        """
-        self._client = client
+class BaseTransactions:
+    """Base class for transactions module."""
 
     def _get_test_url(self, transaction_id: str) -> str:
         """Get the URL for testing a transaction.
@@ -156,8 +150,16 @@ class Transactions:
         return f"/transactions/{transaction_id}/restore"
 
 
-class SyncTransactions(Transactions):
+class SyncTransactions(BaseTransactions):
     """Synchronous transactions module for the 1Shot API."""
+
+    def __init__(self, client: Client) -> None:
+        """Initialize the transactions module.
+
+        Args:
+            client: The synchronous client instance
+        """
+        self._client = client
 
     def test(self, transaction_id: str, params: Dict[str, Any]) -> TransactionTestResult:
         """Test a transaction execution.
@@ -220,7 +222,7 @@ class SyncTransactions(Transactions):
         Raises:
             requests.exceptions.RequestException: If the request fails
         """
-        data = {"params": params}
+        data: Dict[str, Any] = {"params": params}
         if escrow_wallet_id is not None:
             data["escrow_wallet_id"] = escrow_wallet_id
         if memo is not None:
@@ -405,8 +407,16 @@ class SyncTransactions(Transactions):
         return [Transaction.model_validate(tx) for tx in response]
 
 
-class AsyncTransactions(Transactions):
+class AsyncTransactions(BaseTransactions):
     """Asynchronous transactions module for the 1Shot API."""
+
+    def __init__(self, client: AsyncClient) -> None:
+        """Initialize the transactions module.
+
+        Args:
+            client: The asynchronous client instance
+        """
+        self._client = client
 
     async def test(self, transaction_id: str, params: Dict[str, Any]) -> TransactionTestResult:
         """Test a transaction execution.
@@ -469,7 +479,7 @@ class AsyncTransactions(Transactions):
         Raises:
             httpx.HTTPError: If the request fails
         """
-        data = {"params": params}
+        data: Dict[str, Any] = {"params": params}
         if escrow_wallet_id is not None:
             data["escrow_wallet_id"] = escrow_wallet_id
         if memo is not None:
