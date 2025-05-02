@@ -64,7 +64,7 @@ class SyncExecutions(Executions):
             A paged response of executions
         """
         if params is not None and not isinstance(params, ExecutionListParams):
-            params = ExecutionListParams.model_validate(params)
+            params = ExecutionListParams.model_validate(params, by_alias=True, by_name=True)
         url = self._get_list_url(business_id, params.model_dump(by_alias=True) if params else None)
         response = self._client._request("GET", url)
         return PagedResponse[TransactionExecution].model_validate(response)
@@ -99,7 +99,7 @@ class AsyncExecutions(Executions):
             A paged response of executions
         """
         if params is not None and not isinstance(params, ExecutionListParams):
-            params = ExecutionListParams.model_validate(params)
+            params = ExecutionListParams.model_validate(params, by_alias=True, by_name=True)
         url = self._get_list_url(business_id, params.model_dump(by_alias=True) if params else None)
         response = await self._client._request("GET", url)
         return PagedResponse[TransactionExecution].model_validate(response)

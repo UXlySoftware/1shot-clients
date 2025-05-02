@@ -97,7 +97,7 @@ class SyncStructs(Structs):
             A paged response of structs
         """
         if params is not None and not isinstance(params, StructListParams):
-            params = StructListParams.model_validate(params)
+            params = StructListParams.model_validate(params, by_alias=True, by_name=True)
         url = self._get_list_url(business_id, params.model_dump(by_alias=True) if params else None)
         response = self._client._request("GET", url)
         return PagedResponse[SolidityStruct].model_validate(response)
@@ -115,9 +115,9 @@ class SyncStructs(Structs):
             The created struct
         """
         if not isinstance(params, StructCreateParams):
-            params = StructCreateParams.model_validate(params)
+            params = StructCreateParams.model_validate(params, by_alias=True, by_name=True)
         url = self._get_create_url(business_id)
-        response = self._client._request("POST", url, data=params.model_dump(exclude_none=True))
+        response = self._client._request("POST", url, data=params.model_dump(exclude_none=True, by_alias=True))
         return SolidityStruct.model_validate(response)
 
     def get(self, struct_id: str) -> SolidityStruct:
@@ -146,9 +146,9 @@ class SyncStructs(Structs):
             The updated struct
         """
         if not isinstance(params, StructUpdateParams):
-            params = StructUpdateParams.model_validate(params)
+            params = StructUpdateParams.model_validate(params, by_alias=True, by_name=True)
         url = self._get_update_url(struct_id)
-        response = self._client._request("PUT", url, data=params.model_dump(exclude_none=True))
+        response = self._client._request("PUT", url, data=params.model_dump(exclude_none=True, by_alias=True))
         return SolidityStruct.model_validate(response)
 
     def delete(self, struct_id: str) -> Dict[str, bool]:
@@ -180,7 +180,7 @@ class AsyncStructs(Structs):
             A paged response of structs
         """
         if params is not None and not isinstance(params, StructListParams):
-            params = StructListParams.model_validate(params)
+            params = StructListParams.model_validate(params, by_alias=True, by_name=True)
         url = self._get_list_url(business_id, params.model_dump(by_alias=True) if params else None)
         response = await self._client._request("GET", url)
         return PagedResponse[SolidityStruct].model_validate(response)
@@ -198,9 +198,9 @@ class AsyncStructs(Structs):
             The created struct
         """
         if not isinstance(params, StructCreateParams):
-            params = StructCreateParams.model_validate(params)
+            params = StructCreateParams.model_validate(params, by_alias=True, by_name=True)
         url = self._get_create_url(business_id)
-        response = await self._client._request("POST", url, data=params.model_dump(exclude_none=True))
+        response = await self._client._request("POST", url, data=params.model_dump(exclude_none=True, by_alias=True))
         return SolidityStruct.model_validate(response)
 
     async def get(self, struct_id: str) -> SolidityStruct:
@@ -229,9 +229,9 @@ class AsyncStructs(Structs):
             The updated struct
         """
         if not isinstance(params, StructUpdateParams):
-            params = StructUpdateParams.model_validate(params)
+            params = StructUpdateParams.model_validate(params, by_alias=True, by_name=True)
         url = self._get_update_url(struct_id)
-        response = await self._client._request("PUT", url, data=params.model_dump(exclude_none=True))
+        response = await self._client._request("PUT", url, data=params.model_dump(exclude_none=True, by_alias=True))
         return SolidityStruct.model_validate(response)
 
     async def delete(self, struct_id: str) -> Dict[str, bool]:

@@ -92,10 +92,8 @@ class Transactions:
         """
         url = f"/business/{business_id}/transactions"
         if params:
-            print(f"Params in _get_list_url: {params}")  # Debug
             query_params = []
             for key, value in params.items():
-                print(f"Processing key: {key}, value: {value}")  # Debug
                 if value is not None:
                     query_params.append(f"{key}={value}")
             if query_params:
@@ -290,14 +288,10 @@ class SyncTransactions(Transactions):
         Raises:
             requests.exceptions.RequestException: If the request fails
         """
-        print(f"Original params: {params}")  # Debug
         if params is not None and not isinstance(params, ListTransactionsParams):
             params = ListTransactionsParams.model_validate(params, by_alias=True, by_name=True)
-            print(f"After validation: {params}")  # Debug
-        dumped_params = params.model_dump(mode='json') if params else None
-        print(f"After model_dump: {dumped_params}")  # Debug
+        dumped_params = params.model_dump(mode='json', by_alias=True) if params else None
         url = self._get_list_url(business_id, dumped_params)
-        print(f"Final URL: {url}")  # Debug
         response = self._client._request("GET", url)
         return PagedResponse[Transaction].model_validate(response)
 
@@ -319,7 +313,7 @@ class SyncTransactions(Transactions):
             requests.exceptions.RequestException: If the request fails
         """
         if not isinstance(params, TransactionCreateParams):
-            params = TransactionCreateParams.model_validate(params)
+            params = TransactionCreateParams.model_validate(params, by_alias=True, by_name=True)
         response = self._client._request(
             "POST",
             self._get_create_url(business_id),
@@ -369,7 +363,7 @@ class SyncTransactions(Transactions):
             requests.exceptions.RequestException: If the request fails
         """
         if not isinstance(params, TransactionUpdateParams):
-            params = TransactionUpdateParams.model_validate(params)
+            params = TransactionUpdateParams.model_validate(params, by_alias=True, by_name=True)
         response = self._client._request(
             "PUT",
             self._get_update_url(transaction_id),
@@ -543,14 +537,10 @@ class AsyncTransactions(Transactions):
         Raises:
             httpx.HTTPError: If the request fails
         """
-        print(f"Original params: {params}")  # Debug
         if params is not None and not isinstance(params, ListTransactionsParams):
             params = ListTransactionsParams.model_validate(params, by_alias=True, by_name=True)
-            print(f"After validation: {params}")  # Debug
-        dumped_params = params.model_dump(mode='json') if params else None
-        print(f"After model_dump: {dumped_params}")  # Debug
+        dumped_params = params.model_dump(mode='json', by_alias=True) if params else None
         url = self._get_list_url(business_id, dumped_params)
-        print(f"Final URL: {url}")  # Debug
         response = await self._client._request("GET", url)
         return PagedResponse[Transaction].model_validate(response)
 
@@ -572,7 +562,7 @@ class AsyncTransactions(Transactions):
             httpx.HTTPError: If the request fails
         """
         if not isinstance(params, TransactionCreateParams):
-            params = TransactionCreateParams.model_validate(params)
+            params = TransactionCreateParams.model_validate(params, by_alias=True, by_name=True)
         response = await self._client._request(
             "POST",
             self._get_create_url(business_id),
@@ -622,7 +612,7 @@ class AsyncTransactions(Transactions):
             httpx.HTTPError: If the request fails
         """
         if not isinstance(params, TransactionUpdateParams):
-            params = TransactionUpdateParams.model_validate(params)
+            params = TransactionUpdateParams.model_validate(params, by_alias=True, by_name=True)
         response = await self._client._request(
             "PUT",
             self._get_update_url(transaction_id),

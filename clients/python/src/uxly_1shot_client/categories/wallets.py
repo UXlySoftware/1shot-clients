@@ -112,7 +112,7 @@ class SyncWallets(Wallets):
             A paged response of wallets
         """
         if params is not None and not isinstance(params, WalletListParams):
-            params = WalletListParams.model_validate(params)
+            params = WalletListParams.model_validate(params, by_alias=True, by_name=True)
         url = self._get_list_url(business_id, params.model_dump(by_alias=True) if params else None)
         response = self._client._request("GET", url)
         return PagedResponse[EscrowWallet].model_validate(response)
@@ -130,9 +130,9 @@ class SyncWallets(Wallets):
             The created wallet
         """
         if not isinstance(params, WalletCreateParams):
-            params = WalletCreateParams.model_validate(params)
+            params = WalletCreateParams.model_validate(params, by_alias=True, by_name=True)
         url = self._get_create_url(business_id)
-        response = self._client._request("POST", url, data=params.model_dump(exclude_none=True))
+        response = self._client._request("POST", url, data=params.model_dump(exclude_none=True, by_alias=True))
         return EscrowWallet.model_validate(response)
 
     def get(
@@ -165,9 +165,9 @@ class SyncWallets(Wallets):
             The updated wallet
         """
         if not isinstance(params, WalletUpdateParams):
-            params = WalletUpdateParams.model_validate(params)
+            params = WalletUpdateParams.model_validate(params, by_alias=True, by_name=True)
         url = self._get_update_url(escrow_wallet_id)
-        response = self._client._request("PUT", url, data=params.model_dump(exclude_none=True))
+        response = self._client._request("PUT", url, data=params.model_dump(exclude_none=True, by_alias=True))
         return EscrowWallet.model_validate(response)
 
     def delete(self, escrow_wallet_id: str) -> Dict[str, bool]:
@@ -199,7 +199,7 @@ class AsyncWallets(Wallets):
             A paged response of wallets
         """
         if params is not None and not isinstance(params, WalletListParams):
-            params = WalletListParams.model_validate(params)
+            params = WalletListParams.model_validate(params, by_alias=True, by_name=True)
         url = self._get_list_url(business_id, params.model_dump(by_alias=True) if params else None)
         response = await self._client._request("GET", url)
         return PagedResponse[EscrowWallet].model_validate(response)
@@ -217,9 +217,9 @@ class AsyncWallets(Wallets):
             The created wallet
         """
         if not isinstance(params, WalletCreateParams):
-            params = WalletCreateParams.model_validate(params)
+            params = WalletCreateParams.model_validate(params, by_alias=True, by_name=True)
         url = self._get_create_url(business_id)
-        response = await self._client._request("POST", url, data=params.model_dump(exclude_none=True))
+        response = await self._client._request("POST", url, data=params.model_dump(exclude_none=True, by_alias=True))
         return EscrowWallet.model_validate(response)
 
     async def get(
@@ -252,9 +252,9 @@ class AsyncWallets(Wallets):
             The updated wallet
         """
         if not isinstance(params, WalletUpdateParams):
-            params = WalletUpdateParams.model_validate(params)
+            params = WalletUpdateParams.model_validate(params, by_alias=True, by_name=True)
         url = self._get_update_url(escrow_wallet_id)
-        response = await self._client._request("PUT", url, data=params.model_dump(exclude_none=True))
+        response = await self._client._request("PUT", url, data=params.model_dump(exclude_none=True, by_alias=True))
         return EscrowWallet.model_validate(response)
 
     async def delete(self, escrow_wallet_id: str) -> Dict[str, bool]:
