@@ -3,7 +3,7 @@ from typing import Dict, List, Optional, Union
 from pydantic import BaseModel, Field
 
 class Log(BaseModel):
-    _type: str = Field(..., alias="type")
+    type: str = Field(..., alias="type")
     address: str
     block_hash: str = Field(..., alias="blockHash")
     block_number: int = Field(..., alias="blockNumber")
@@ -14,7 +14,7 @@ class Log(BaseModel):
     transaction_index: int = Field(..., alias="transactionIndex")
 
 class TransactionReceipt(BaseModel):
-    _type: str = Field(..., alias="type")
+    type: str = Field(..., alias="type")
     blob_gas_price: Optional[str] = Field(None, alias="blobGasPrice")
     blob_gas_used: Optional[str] = Field(None, alias="blobGasUsed")
     block_hash: str = Field(..., alias="blockHash")

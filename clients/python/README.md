@@ -8,6 +8,128 @@ A Python client for the 1Shot API that provides both synchronous and asynchronou
 pip install uxly-1shot-client
 ```
 
+## Development
+
+### Setting Up the Development Environment
+
+There are two ways to set up your development environment:
+
+#### Option 1: Using Hatch (Recommended)
+
+[Hatch](https://hatch.pypa.io/) is a modern Python project manager that handles environments, dependencies, and builds.
+
+1. Install Hatch:
+```bash
+pip install hatch
+```
+
+2. Create and enter the development environment:
+```bash
+# This creates a virtual environment and installs all dependencies
+python -m hatch shell
+```
+
+The `hatch shell` command:
+- Creates an isolated environment
+- Installs all development dependencies
+- Activates the environment
+- Sets up the project in editable mode
+
+#### Option 2: Using venv
+
+If you prefer using Python's built-in virtual environment:
+
+1. Create and activate a virtual environment:
+```bash
+# Create a virtual environment
+python -m venv .venv
+
+# Activate the virtual environment
+# On Windows:
+.venv\Scripts\activate
+# On Unix-like systems (Linux/macOS):
+source .venv/bin/activate
+```
+
+2. Install development dependencies:
+```bash
+# Install the package in editable mode with development dependencies
+pip install -e ".[dev]"
+```
+
+### Key Differences
+
+- **Hatch Shell**:
+  - Manages the entire project lifecycle
+  - Automatically handles dependency installation
+  - Provides consistent environments across team members
+  - Includes build and publishing tools
+  - Environment is project-specific and managed by Hatch
+
+- **venv**:
+  - Python's built-in virtual environment tool
+  - More manual control over the environment
+  - Requires explicit dependency installation
+  - Environment is managed by you
+  - More familiar to Python developers
+
+### IDE Configuration
+
+If your IDE shows import errors (like "Import could not be resolved") even after installing dependencies, you may need to configure your IDE to use the correct Python interpreter:
+
+#### VS Code
+1. Press `Ctrl+Shift+P` (Windows/Linux) or `Cmd+Shift+P` (macOS)
+2. Type "Python: Select Interpreter"
+3. Choose the interpreter from your virtual environment (it should be something like `.venv/Scripts/python.exe` on Windows or `.venv/bin/python` on Unix-like systems)
+
+#### PyCharm
+1. Go to `File > Settings > Project > Python Interpreter` (Windows/Linux) or `PyCharm > Preferences > Project > Python Interpreter` (macOS)
+2. Click the gear icon and select "Add"
+3. Choose "Existing Environment" and select the Python interpreter from your virtual environment
+
+#### General Tips
+- Make sure your IDE's Python extension is installed and up to date
+- Try reloading your IDE window after selecting the correct interpreter
+- If using VS Code, you might need to install the Pylance extension for better Python support
+
+### Running Tests
+
+```bash
+# Run all tests
+pytest
+
+# Run tests with coverage
+pytest --cov=uxly_1shot_client
+```
+
+### Code Style
+
+The project uses:
+- Black for code formatting
+- isort for import sorting
+- flake8 for linting
+- mypy for type checking
+
+You can run these tools manually:
+```bash
+# Format code
+black src tests
+
+# Sort imports
+isort src tests
+
+# Run linter
+flake8 src tests
+
+# Check types
+mypy src tests
+```
+
+Or use pre-commit to run them automatically on commit:
+```bash
+pre-commit run --all-files
+```
+
 ## Usage
 
 ### Synchronous Client
