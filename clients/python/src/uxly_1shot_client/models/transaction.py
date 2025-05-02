@@ -58,7 +58,7 @@ class Transaction(BaseModel):
     function_name: str = Field(..., alias="functionName", description="Name of the function on the contract to call for this transaction")
     state_mutability: str = Field(..., alias="stateMutability", description="The state mutability")
     inputs: List[Dict[str, Any]] = Field(..., description="The input parameters")
-    outputs: List[Dict[str, Any]] = Field(..., description="The output parameters")
+    outputs: Optional[List[Dict[str, Any]]] = Field(None, description="The output parameters")
     callback_url: Optional[str] = Field(None, alias="callbackUrl", description="The current destination for webhooks to be sent when this transaction is executed. Will be null if no webhook is assigned.")
     public_key: Optional[str] = Field(None, alias="publicKey", description="The current public key for verifying the integrity of the webhook when this transaction is executed. 1Shot will sign its webhooks with a private key and provide a signature for the webhook that can be validated with this key. It will be null if there is no webhook destination specified.")
     updated: int = Field(..., description="The last update timestamp")
