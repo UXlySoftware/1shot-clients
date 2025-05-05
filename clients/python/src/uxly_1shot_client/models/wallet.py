@@ -43,6 +43,7 @@ class WalletListParams(BaseModel):
     chain_id: Optional[int] = Field(None, alias="chainId", description="The specific chain to get the wallets for")
     page_size: Optional[int] = Field(None, alias="pageSize", description="The size of the page to return. Defaults to 25")
     page: Optional[int] = Field(None, description="Which page to return. This is 1 indexed, and default to the first page, 1")
+    name: Optional[str] = Field(None, description="Filters on the name of the escrow wallet.")
 
     @validator('page')
     def validate_page(cls, v):

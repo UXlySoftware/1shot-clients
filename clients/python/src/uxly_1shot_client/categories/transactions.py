@@ -328,12 +328,19 @@ class SyncTransactions(BaseTransactions):
         self,
         business_id: str,
         params: Dict[str, Any],
-    ) -> List[TransactionExecution]:
+    ) -> List[Transaction]:
         """Import transactions from an ABI.
 
         Args:
             business_id: The business ID
-            params: ABI import parameters
+            params: ABI import parameters including:
+                - chain: The chain ID
+                - contractAddress: The contract address
+                - escrowWalletId: The escrow wallet ID
+                - abi: The Ethereum ABI
+                - name: Optional name of the smart contract
+                - description: Optional description of the smart contract
+                - tags: Optional array of tags for the smart contract
 
         Returns:
             The imported transactions
@@ -346,7 +353,7 @@ class SyncTransactions(BaseTransactions):
             self._get_import_from_abi_url(business_id),
             data=params,
         )
-        return [TransactionExecution.model_validate(tx) for tx in response]
+        return [Transaction.model_validate(tx) for tx in response]
 
     def update(
         self,
@@ -590,7 +597,14 @@ class AsyncTransactions(BaseTransactions):
 
         Args:
             business_id: The business ID
-            params: ABI import parameters
+            params: ABI import parameters including:
+                - chain: The chain ID
+                - contractAddress: The contract address
+                - escrowWalletId: The escrow wallet ID
+                - abi: The Ethereum ABI
+                - name: Optional name of the smart contract
+                - description: Optional description of the smart contract
+                - tags: Optional array of tags for the smart contract
 
         Returns:
             The imported transactions

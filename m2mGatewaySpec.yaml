@@ -310,6 +310,7 @@ paths:
     get:
       tags:
         - Transaction
+        - List
       description: Lists transactions for a business
       parameters:
         - name: businessId
@@ -404,25 +405,26 @@ paths:
                   type: string
                   format: uuid
                   example: 8a6e0804-2bd0-4672-b79d-d97027f90720
-                name:
-                  type: string
-                  example: Mint Token
-                description:
-                  type: string
-                  example: This calls the mint() method on our ERC20 contract
-                functionName:
-                  type: string
-                  example: mint
                 abi:
                   $ref: "#/components/schemas/EthereumAbi"
+                name:
+                  type: string
+                  description: The name of the smart contract, if it doesn't already exist.
+                  example: Uniswap V3
+                description:
+                  type: string
+                  description: A description of the smart contract, if it doesn't already exist.
+                  example: The Uniswap V3 smart contract
+                tags:
+                  type: array
+                  items:
+                    type: string
+                  description: Tags to add to the smart contract
               required:
                 - chain
                 - contractAddress
                 - escrowWalletId
-                - name
-                - description
-                - functionName
-                - params
+                - abi
       responses:
         200:
           description: Returns the transaction object.
@@ -553,6 +555,7 @@ paths:
       tags:
         - Transaction
         - Transaction Execution
+        - List
       description: Gets a paged list of transaction executions.
       parameters:
         - name: businessId
@@ -697,6 +700,7 @@ paths:
     get:
       tags:
         - Escrow Wallets
+        - List
       description: Lists escrow wallets for the business- NOT BusinessEscrowWallets. These are almost identical but EscrowWallet has more stuff.
       parameters:
         - name: businessId
@@ -722,6 +726,12 @@ paths:
           required: false
           schema:
             $ref: "#/components/schemas/Page"
+        - name: name
+          in: query
+          required: false
+          description: Filters on the name of the escrow wallet.
+          schema:
+            type: string
       security:
         - OAuth2ClientCredentials:
           - read:api
@@ -848,6 +858,7 @@ paths:
     put:
       tags:
         - Escrow Wallets
+        - Update
       description: Updates an escrow wallet. Will only update properties that are not null
       parameters:
         - name: escrowWalletId
@@ -885,6 +896,7 @@ paths:
     put:
       tags:
         - Solidity Structs
+        - Update
       description: Updates an existing solidity struct. You can get the structId from the SolidityStructParam.typeStructId, which are either input or output params of a Transaction.
       parameters:
         - name: structId
@@ -1547,7 +1559,7 @@ components:
               description: The hash of the transaction. Only calculated once the status is Submitted.
             name:
               type: string
-              decription: the name of the associated Transaction. Included as a convienience.
+              description: the name of the associated Transaction. Included as a convienience.
             functionName:
               type: string
               description: The functionName of the associated Transaction. Included as a convienience.
