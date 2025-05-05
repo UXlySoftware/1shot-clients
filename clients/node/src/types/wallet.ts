@@ -31,11 +31,10 @@ export interface EscrowWallet {
 
 /**
  * Represents the balance details of a token in a wallet.
- * This includes both the token balance and its USD value.
  */
 export interface AccountBalanceDetails {
-  /** Type identifier for the token */
-  type: string;
+  /** Chain technology type (0 for EVM) */
+  type: number;
   /** Ticker symbol of the token (e.g., ETH, USDC) */
   ticker: string;
   /** Chain ID where the token exists */
@@ -48,8 +47,4 @@ export interface AccountBalanceDetails {
   balance: string;
   /** Number of decimals for the token */
   decimals: number;
-  /** Current USD value of the token balance */
-  usdValue: number;
-  /** Timestamp when the USD value was last updated */
-  usdValueTimestamp: number;
 }
