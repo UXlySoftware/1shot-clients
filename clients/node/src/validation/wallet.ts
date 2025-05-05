@@ -2,23 +2,21 @@ import { z } from 'zod';
 
 // Validation for account balance details
 export const accountBalanceDetailsSchema = z.object({
-  type: z.string().uuid(),
+  type: z.number().int(),
   ticker: z.string(),
   chainId: z.number().int().positive(),
   tokenAddress: z.string(),
   accountAddress: z.string(),
   balance: z.string(),
   decimals: z.number().int().nonnegative(),
-  usdValue: z.number(),
-  usdValueTimestamp: z.number(),
 });
 
 // Validation for escrow wallet
 export const escrowWalletSchema = z.object({
   id: z.string().uuid(),
   accountAddress: z.string(),
-  businessId: z.string().uuid(),
-  userId: z.string().uuid(),
+  businessId: z.string().uuid().nullable(),
+  userId: z.string().uuid().nullable(),
   chainId: z.number().int().positive(),
   name: z.string(),
   description: z.string(),
@@ -46,4 +44,6 @@ export const walletUpdateSchema = z.object({
 // Validation for wallet creation parameters
 export const walletCreateSchema = z.object({
   chain: z.number().int().positive(),
+  name: z.string(),
+  description: z.string().optional(),
 });

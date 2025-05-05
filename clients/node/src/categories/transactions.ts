@@ -248,7 +248,7 @@ export class Transactions {
    * @returns Promise<Transaction[]>
    * @throws {ZodError} If the parameters are invalid
    */
-  async importFromAbi(
+  async importFromABI(
     businessId: string,
     params: {
       chain: number;
@@ -256,7 +256,6 @@ export class Transactions {
       escrowWalletId: string;
       name: string;
       description: string;
-      functionName: string;
       abi: EthereumAbi;
     }
   ): Promise<Transaction[]> {
@@ -264,11 +263,20 @@ export class Transactions {
     const validatedBusinessId = z.string().uuid().parse(businessId);
 
     // Validate the import parameters
-    const validatedParams = transactionCreateSchema.parse(params);
+    const importParamsSchema = z.object({
+      chain: z.number().int().positive(),
+      contractAddress: z.string(),
+      escrowWalletId: z.string().uuid(),
+      name: z.string(),
+      description: z.string(),
+      abi: z.array(z.any()), // We'll validate this with the ABI validation
+    });
+
+    const validatedParams = importParamsSchema.parse(params);
 
     const response = await this.client.request<Transaction[]>(
       'POST',
-      `/business/${validatedBusinessId}/transactions/abi`,
+      `/business/${validatedBusinessId}/transactions/import`,
       validatedParams
     );
 

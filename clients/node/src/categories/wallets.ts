@@ -25,6 +25,7 @@ export class Wallets {
       chainId?: number;
       pageSize?: number;
       page?: number;
+      name?: string;
     }
   ): Promise<PagedResponse<EscrowWallet>> {
     // Validate the business ID
@@ -36,6 +37,7 @@ export class Wallets {
         chainId: z.number().int().positive().optional(),
         pageSize: z.number().int().positive().optional(),
         page: z.number().int().positive().optional(),
+        name: z.string().optional(),
       });
 
       paramsSchema.parse(params);
@@ -63,16 +65,23 @@ export class Wallets {
   /**
    * Create a new escrow wallet for a business
    * @param businessId The business ID to create the wallet for
-   * @param chain The chain ID to create the wallet on
+   * @param params Creation parameters including chain, name, and optional description
    * @returns Promise<EscrowWallet>
    * @throws {ZodError} If the parameters are invalid
    */
-  async create(businessId: string, chain: number): Promise<EscrowWallet> {
+  async create(
+    businessId: string,
+    params: {
+      chain: number;
+      name: string;
+      description?: string;
+    }
+  ): Promise<EscrowWallet> {
     // Validate the business ID
     const validatedBusinessId = z.string().uuid().parse(businessId);
 
     // Validate the creation parameters
-    const validatedParams = walletCreateSchema.parse({ chain });
+    const validatedParams = walletCreateSchema.parse(params);
 
     const response = await this.client.request<EscrowWallet>(
       'POST',

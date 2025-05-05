@@ -7,10 +7,10 @@ export interface EscrowWallet {
   id: string;
   /** Ethereum address of the wallet */
   accountAddress: string;
-  /** ID of the business that owns this wallet */
-  businessId: string;
-  /** ID of the user that owns this wallet */
-  userId: string;
+  /** ID of the business that owns this wallet (null if owned by a user) */
+  businessId: string | null;
+  /** ID of the user that owns this wallet (null if owned by a business) */
+  userId: string | null;
   /** Chain ID where the wallet exists */
   chainId: number;
   /** Name of the wallet for organization purposes */
