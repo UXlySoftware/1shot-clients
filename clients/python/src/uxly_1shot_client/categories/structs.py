@@ -1,11 +1,12 @@
 """Structs module for the 1Shot API."""
 
-from typing import Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 from uxly_1shot_client.models.common import PagedResponse
 from uxly_1shot_client.models.struct import SolidityStruct, StructCreateParams, StructListParams, StructUpdateParams
-from uxly_1shot_client.async_client import AsyncClient
-from uxly_1shot_client.sync_client import Client
+if TYPE_CHECKING:
+    from uxly_1shot_client.async_client import AsyncClient
+    from uxly_1shot_client.sync_client import Client
 
 class BaseStructs:
     """Base class for structs module."""
@@ -78,7 +79,7 @@ class BaseStructs:
 class SyncStructs(BaseStructs):
     """Synchronous structs module for the 1Shot API."""
 
-    def __init__(self, client: Client) -> None:
+    def __init__(self, client: "Client") -> None:
         """Initialize the structs module.
 
         Args:
@@ -169,7 +170,7 @@ class SyncStructs(BaseStructs):
 class AsyncStructs(BaseStructs):
     """Asynchronous structs module for the 1Shot API."""
 
-    def __init__(self, client: AsyncClient) -> None:
+    def __init__(self, client: "AsyncClient") -> None:
         """Initialize the structs module.
 
         Args:

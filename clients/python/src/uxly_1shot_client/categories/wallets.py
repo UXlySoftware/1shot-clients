@@ -1,6 +1,6 @@
 """Wallets module for the 1Shot API."""
 
-from typing import Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 from uxly_1shot_client.models.common import PagedResponse
 from uxly_1shot_client.models.wallet import (
@@ -9,8 +9,9 @@ from uxly_1shot_client.models.wallet import (
     WalletCreateParams,
     WalletUpdateParams,
 )
-from uxly_1shot_client.async_client import AsyncClient
-from uxly_1shot_client.sync_client import Client
+if TYPE_CHECKING:
+    from uxly_1shot_client.async_client import AsyncClient
+    from uxly_1shot_client.sync_client import Client
 
 class BaseWallets:
     """Base class for wallets module."""
@@ -92,7 +93,7 @@ class BaseWallets:
 class SyncWallets(BaseWallets):
     """Synchronous wallets module for the 1Shot API."""
 
-    def __init__(self, client: Client) -> None:
+    def __init__(self, client: "Client") -> None:
         """Initialize the wallets module.
 
         Args:
@@ -187,7 +188,7 @@ class SyncWallets(BaseWallets):
 class AsyncWallets(BaseWallets):
     """Asynchronous wallets module for the 1Shot API."""
 
-    def __init__(self, client: AsyncClient) -> None:
+    def __init__(self, client: "AsyncClient") -> None:
         """Initialize the wallets module.
 
         Args:

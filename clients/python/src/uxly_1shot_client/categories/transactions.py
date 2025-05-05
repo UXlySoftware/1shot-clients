@@ -1,12 +1,13 @@
 """Transactions module for the 1Shot API."""
 
-from typing import Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 
 from uxly_1shot_client.models.common import PagedResponse
 from uxly_1shot_client.models.execution import TransactionExecution
-from uxly_1shot_client.async_client import AsyncClient
-from uxly_1shot_client.sync_client import Client
+if TYPE_CHECKING:
+    from uxly_1shot_client.async_client import AsyncClient
+    from uxly_1shot_client.sync_client import Client
 from uxly_1shot_client.models.transaction import (
     TransactionEstimate,
     TransactionTestResult,
@@ -153,7 +154,7 @@ class BaseTransactions:
 class SyncTransactions(BaseTransactions):
     """Synchronous transactions module for the 1Shot API."""
 
-    def __init__(self, client: Client) -> None:
+    def __init__(self, client: "Client") -> None:
         """Initialize the transactions module.
 
         Args:
@@ -410,7 +411,7 @@ class SyncTransactions(BaseTransactions):
 class AsyncTransactions(BaseTransactions):
     """Asynchronous transactions module for the 1Shot API."""
 
-    def __init__(self, client: AsyncClient) -> None:
+    def __init__(self, client: "AsyncClient") -> None:
         """Initialize the transactions module.
 
         Args:
