@@ -213,6 +213,8 @@ execution_status = client.executions.get(execution.id)
 
 wallet = client.wallets.get(escrow_wallet_id="54ee551b-5586-48c9-a7ee-72d74ed889c0", include_balances=True)
 
+wallets = client.wallets.list(BUSINESS_ID)
+
 mint_endpoint_payload = {
         "chain": 11155111,
         "contractAddress": "0xA1BfEd6c6F1C3A516590edDAc7A8e359C2189A61",
@@ -286,8 +288,16 @@ async def main():
             "account": "0xE936e8FAf4A5655469182A49a505055B71C17604"
         }
     )
-    # Get transaction details
-    transaction = await client.executions.get(execution.id)
+    
+    # Get available transaction endpoints attached to your organization
+    transaction = await client.executions.list(BUSINESS_ID)
+    for transaction in transactions.response:
+        print(f"Transaction ID: {transaction.id}, Status: {transaction.name}")
+
+    # Get available wallets attached to your organization
+    wallets = await client.wallets.list(BUSINESS_ID)
+    for wallet in wallets.response:
+        print(f"Wallet ID: {wallet.id}, Address: {wallet.account_address}")
 
 # Run the async code
 asyncio.run(main())
