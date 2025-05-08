@@ -1,16 +1,16 @@
-import { OneShotClient } from '../client';
-import { EscrowWallet } from '../types/wallet';
-import { PagedResponse } from '../types/common';
+import { IOneShotClient } from '../types/client.js';
+import { EscrowWallet } from '../types/wallet.js';
+import { PagedResponse } from '../types/common.js';
 import {
   escrowWalletSchema,
   escrowWalletListSchema,
   walletUpdateSchema,
   walletCreateSchema,
-} from '../validation/wallet';
+} from '../validation/wallet.js';
 import { z } from 'zod';
 
 export class Wallets {
-  constructor(private client: OneShotClient) {}
+  constructor(private client: IOneShotClient) {}
 
   /**
    * List escrow wallets for a business

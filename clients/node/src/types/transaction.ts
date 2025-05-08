@@ -22,7 +22,7 @@ export interface Transaction {
   /** Name of the function to call on the contract */
   functionName: string;
   /** Array of parameters required for the transaction */
-  params: SolidityStructParam[];
+  inputs: SolidityStructParam[];
   /** Array of expected output parameters */
   outputs: SolidityStructParam[];
   /** State mutability of the function (nonpayable, payable, view, or pure) */

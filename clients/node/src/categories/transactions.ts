@@ -1,4 +1,4 @@
-import { OneShotClient } from '../client.js';
+import { IOneShotClient } from '../types/client.js';
 import { Transaction, TransactionParams, TransactionEstimate } from '../types/transaction.js';
 import { SolidityStructParam } from '../types/solidity.js';
 import { PagedResponse } from '../types/common.js';
@@ -15,7 +15,7 @@ import {
 import { z } from 'zod';
 
 export class Transactions {
-  constructor(private client: OneShotClient) {}
+  constructor(private client: IOneShotClient) {}
 
   /**
    * Execute a transaction

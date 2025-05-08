@@ -1,14 +1,14 @@
-import { OneShotClient } from '../client';
-import { TransactionExecution } from '../types/execution';
-import { PagedResponse } from '../types/common';
+import { IOneShotClient } from '../types/client.js';
+import { TransactionExecution } from '../types/execution.js';
+import { PagedResponse } from '../types/common.js';
 import {
   transactionExecutionSchema,
   transactionExecutionListSchema,
-} from '../validation/execution';
+} from '../validation/execution.js';
 import { z } from 'zod';
 
 export class Executions {
-  constructor(private client: OneShotClient) {}
+  constructor(private client: IOneShotClient) {}
 
   /**
    * Get a specific transaction execution

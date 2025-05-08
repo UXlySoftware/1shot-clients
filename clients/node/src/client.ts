@@ -3,8 +3,9 @@ import { Transactions } from './categories/transactions.js';
 import { Executions } from './categories/executions.js';
 import { Wallets } from './categories/wallets.js';
 import { Structs } from './categories/structs.js';
+import { IOneShotClient } from './types/client.js';
 
-export class OneShotClient {
+export class OneShotClient implements IOneShotClient {
   private config: ClientConfig;
   private accessToken: string | null = null;
   private tokenExpiry: Date | null = null;
@@ -17,7 +18,7 @@ export class OneShotClient {
   constructor(config: ClientConfig) {
     this.config = {
       ...config,
-      baseUrl: config.baseUrl || 'https://api.1shotapi.com/v1',
+      baseUrl: config.baseUrl || 'https://api.1shotapi.com/v0',
     };
     this.transactions = new Transactions(this);
     this.executions = new Executions(this);

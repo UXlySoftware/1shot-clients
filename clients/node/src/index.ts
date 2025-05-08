@@ -11,8 +11,10 @@ export * from './types/abi.js';
 export * from './types/struct.js';
 
 // Validation exports
-export * from './validation/transaction.js';
+export * from './validation/execution.js';
 export * from './validation/struct.js';
+export * from './validation/transaction.js';
+export * from './validation/wallet.js';
 
 // Utility exports
 export * from './utils/webhook.js';

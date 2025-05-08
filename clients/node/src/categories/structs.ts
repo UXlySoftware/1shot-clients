@@ -1,22 +1,18 @@
-import { OneShotClient } from '../client';
+import { IOneShotClient } from '../types/client.js';
 import {
   SolidityStruct,
   SolidityStructParamUpdateRequest,
   NewSolidityStructParam,
-} from '../types/struct';
+} from '../types/struct.js';
 import {
   structUpdateSchema,
   structParamUpdateRequestSchema,
   structParamUpdateSchema,
-} from '../validation/struct';
+} from '../validation/struct.js';
 import { z } from 'zod';
 
 export class Structs {
-  private client: OneShotClient;
-
-  constructor(client: OneShotClient) {
-    this.client = client;
-  }
+  constructor(private client: IOneShotClient) {}
 
   /**
    * Update an existing solidity struct
