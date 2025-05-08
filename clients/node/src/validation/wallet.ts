@@ -3,30 +3,13 @@ import { z } from 'zod';
 // Validation for account balance details
 export const accountBalanceDetailsSchema = z
   .object({
-    type: z
-      .number()
-      .int()
-      .describe('Type of the token (0 for native currency, 1 for ERC20)'),
+    type: z.number().int().describe('Type of the token (0 for native currency, 1 for ERC20)'),
     ticker: z.string().describe('Symbol of the token'),
-    chainId: z
-      .number()
-      .int()
-      .positive()
-      .describe('ID of the blockchain network'),
-    tokenAddress: z
-      .string()
-      .describe('Address of the token contract (empty for native currency)'),
-    accountAddress: z
-      .string()
-      .describe('Address of the wallet account'),
-    balance: z
-      .string()
-      .describe('Current balance of the token in the wallet'),
-    decimals: z
-      .number()
-      .int()
-      .nonnegative()
-      .describe('Number of decimal places for the token'),
+    chainId: z.number().int().positive().describe('ID of the blockchain network'),
+    tokenAddress: z.string().describe('Address of the token contract (empty for native currency)'),
+    accountAddress: z.string().describe('Address of the wallet account'),
+    balance: z.string().describe('Current balance of the token in the wallet'),
+    decimals: z.number().int().nonnegative().describe('Number of decimal places for the token'),
   })
   .describe('Details about a token balance in a wallet');
 
@@ -34,19 +17,13 @@ export const accountBalanceDetailsSchema = z
 export const escrowWalletSchema = z
   .object({
     id: z.string().uuid().describe('Internal ID of the escrow wallet'),
-    accountAddress: z
-      .string()
-      .describe('Blockchain address of the escrow wallet'),
+    accountAddress: z.string().describe('Blockchain address of the escrow wallet'),
     businessId: z
       .string()
       .uuid()
       .nullable()
       .describe('ID of the business that owns this wallet, if any'),
-    userId: z
-      .string()
-      .uuid()
-      .nullable()
-      .describe('ID of the user who owns this wallet, if any'),
+    userId: z.string().uuid().nullable().describe('ID of the user who owns this wallet, if any'),
     chainId: z
       .number()
       .int()
@@ -54,35 +31,18 @@ export const escrowWalletSchema = z
       .describe('ID of the blockchain network where this wallet exists'),
     name: z.string().describe('Name of the escrow wallet'),
     description: z.string().describe('Description of the escrow wallet'),
-    isAdmin: z
-      .boolean()
-      .describe('Whether this is an admin wallet with special privileges'),
+    isAdmin: z.boolean().describe('Whether this is an admin wallet with special privileges'),
     accountBalanceDetails: z
       .object({
-        type: z
-          .number()
-          .int()
-          .describe('Type of the token (0 for native currency, 1 for ERC20)'),
+        type: z.number().int().describe('Type of the token (0 for native currency, 1 for ERC20)'),
         ticker: z.string().describe('Symbol of the token'),
-        chainId: z
-          .number()
-          .int()
-          .positive()
-          .describe('ID of the blockchain network'),
+        chainId: z.number().int().positive().describe('ID of the blockchain network'),
         tokenAddress: z
           .string()
           .describe('Address of the token contract (empty for native currency)'),
-        accountAddress: z
-          .string()
-          .describe('Address of the wallet account'),
-        balance: z
-          .string()
-          .describe('Current balance of the token in the wallet'),
-        decimals: z
-          .number()
-          .int()
-          .nonnegative()
-          .describe('Number of decimal places for the token'),
+        accountAddress: z.string().describe('Address of the wallet account'),
+        balance: z.string().describe('Current balance of the token in the wallet'),
+        decimals: z.number().int().nonnegative().describe('Number of decimal places for the token'),
       })
       .nullable()
       .describe('Current balance details of the wallet'),
@@ -95,19 +55,9 @@ export const escrowWalletSchema = z
 // Validation for escrow wallet list response
 export const escrowWalletListSchema = z
   .object({
-    response: z
-      .array(escrowWalletSchema)
-      .describe('List of escrow wallets'),
-    page: z
-      .number()
-      .int()
-      .positive()
-      .describe('Current page number in the paginated results'),
-    pageSize: z
-      .number()
-      .int()
-      .positive()
-      .describe('Number of items per page'),
+    response: z.array(escrowWalletSchema).describe('List of escrow wallets'),
+    page: z.number().int().positive().describe('Current page number in the paginated results'),
+    pageSize: z.number().int().positive().describe('Number of items per page'),
     totalResults: z
       .number()
       .int()
@@ -119,14 +69,8 @@ export const escrowWalletListSchema = z
 // Validation for wallet update parameters
 export const walletUpdateSchema = z
   .object({
-    name: z
-      .string()
-      .optional()
-      .describe('New name for the escrow wallet'),
-    description: z
-      .string()
-      .optional()
-      .describe('New description for the escrow wallet'),
+    name: z.string().optional().describe('New name for the escrow wallet'),
+    description: z.string().optional().describe('New description for the escrow wallet'),
   })
   .describe('Parameters for updating an escrow wallet');
 
@@ -139,9 +83,63 @@ export const walletCreateSchema = z
       .positive()
       .describe('ID of the blockchain network where the wallet will be created'),
     name: z.string().describe('Name for the new escrow wallet'),
-    description: z
-      .string()
-      .optional()
-      .describe('Description for the new escrow wallet'),
+    description: z.string().optional().describe('Description for the new escrow wallet'),
   })
   .describe('Parameters for creating a new escrow wallet');
+
+// Validation for list escrow wallets parameters
+export const listEscrowWalletsSchema = z
+  .object({
+    businessId: z.string().uuid().describe('ID of the business to list wallets for'),
+    chainId: z
+      .number()
+      .int()
+      .positive()
+      .optional()
+      .describe('Filter wallets by blockchain network ID'),
+    pageSize: z.number().int().positive().optional().describe('Number of items per page'),
+    page: z.number().int().positive().optional().describe('Page number to retrieve'),
+    name: z.string().optional().describe('Filter wallets by name'),
+  })
+  .describe('Parameters for listing escrow wallets');
+
+// Validation for create escrow wallet parameters
+export const createEscrowWalletSchema = z
+  .object({
+    businessId: z.string().uuid().describe('ID of the business to create the wallet for'),
+    chain: z
+      .number()
+      .int()
+      .positive()
+      .describe('ID of the blockchain network where the wallet will be created'),
+    name: z.string().describe('Name for the new escrow wallet'),
+    description: z.string().optional().describe('Description for the new escrow wallet'),
+  })
+  .describe('Parameters for creating a new escrow wallet');
+
+// Validation for get escrow wallet parameters
+export const getEscrowWalletSchema = z
+  .object({
+    escrowWalletId: z.string().uuid().describe('ID of the escrow wallet to retrieve'),
+    includeBalances: z
+      .boolean()
+      .optional()
+      .describe('Whether to include balance information in the response'),
+  })
+  .describe('Parameters for retrieving an escrow wallet');
+
+// Validation for update escrow wallet parameters
+export const updateEscrowWalletSchema = z
+  .object({
+    escrowWalletId: z.string().uuid().describe('ID of the escrow wallet to update'),
+    name: z.string().optional().describe('New name for the escrow wallet'),
+    description: z.string().optional().describe('New description for the escrow wallet'),
+  })
+  .describe('Parameters for updating an escrow wallet');
+
+// Validation for delete escrow wallet parameters
+export const deleteEscrowWalletSchema = z
+  .object({
+    escrowWalletId: z.string().uuid().describe('ID of the escrow wallet to delete'),
+  })
+  .describe('Parameters for deleting an escrow wallet');

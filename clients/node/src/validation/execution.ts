@@ -15,10 +15,7 @@ export const transactionExecutionSchema = z
       .uuid()
       .nullable()
       .describe('ID of the API credential used for execution, if any'),
-    apiKey: z
-      .string()
-      .nullable()
-      .describe('API key used for execution, if any'),
+    apiKey: z.string().nullable().describe('API key used for execution, if any'),
     userId: z
       .string()
       .uuid()
@@ -41,10 +38,7 @@ export const transactionExecutionSchema = z
       .int()
       .positive()
       .describe('ID of the blockchain network where the transaction is executed'),
-    memo: z
-      .string()
-      .nullable()
-      .describe('Optional memo or note about the transaction execution'),
+    memo: z.string().nullable().describe('Optional memo or note about the transaction execution'),
     completed: z
       .number()
       .nullable()
@@ -58,19 +52,9 @@ export const transactionExecutionSchema = z
 // Validation for transaction execution list response
 export const transactionExecutionListSchema = z
   .object({
-    response: z
-      .array(transactionExecutionSchema)
-      .describe('List of transaction executions'),
-    page: z
-      .number()
-      .int()
-      .positive()
-      .describe('Current page number in the paginated results'),
-    pageSize: z
-      .number()
-      .int()
-      .positive()
-      .describe('Number of items per page'),
+    response: z.array(transactionExecutionSchema).describe('List of transaction executions'),
+    page: z.number().int().positive().describe('Current page number in the paginated results'),
+    pageSize: z.number().int().positive().describe('Number of items per page'),
     totalResults: z
       .number()
       .int()
