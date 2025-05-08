@@ -270,12 +270,22 @@ export const arraySizeSchema = z
   .optional()
   .describe('The fixed size of an array parameter');
 
-// Validation for struct parameter updates
-export const structParamUpdateSchema = z
+// Validation for updating a struct
+export const structUpdateSchema = z
   .object({
-    name: z.string().min(1).optional().describe('The name of the parameter'),
-    description: z.string().optional().describe('Description of the parameter'),
-    type: solidityTypeSchema.optional(),
+    name: z.string().describe('The new name for the struct'),
+  })
+  .describe('Parameters for updating a struct');
+
+// Validation for updating a struct parameter
+export const structParamUpdateSchema: z.ZodType = z
+  .object({
+    name: z.string().optional().describe('The name of the parameter'),
+    description: z.string().optional().describe('Optional description of the parameter'),
+    type: z
+      .enum(['address', 'bool', 'bytes', 'int', 'string', 'uint', 'struct'])
+      .optional()
+      .describe('The Solidity type of the parameter'),
     index: z
       .number()
       .int()
@@ -290,26 +300,38 @@ export const structParamUpdateSchema = z
       .describe(
         'This is an optional, static value for the parameter. If you set this, you will never be required or able to pass a value for this parameter when you execute the transaction, it will use the set value.'
       ),
-    typeSize: typeSizeSchema,
-    typeSize2: typeSize2Schema,
-    isArray: z
-      .boolean()
+    typeSize: z
+      .number()
+      .int()
+      .positive()
       .optional()
       .describe(
-        "If this parameter is an array type set this to true. By default, arrays can be of any size so you don't need to set arraySize."
+        'Optional size for the Solidity type (e.g., uint8, bytes32). Valid values: 1-32 for bytes, 8-256 for others'
       ),
-    arraySize: arraySizeSchema,
+    typeSize2: z
+      .number()
+      .int()
+      .positive()
+      .optional()
+      .describe('Optional second size for fixed/ufixed types (e.g., fixed8x18)'),
+    isArray: z.boolean().optional().describe('Whether this parameter is an array type'),
+    arraySize: z
+      .number()
+      .int()
+      .positive()
+      .optional()
+      .describe('Fixed size of the array, if applicable'),
     typeStructId: z
       .string()
       .uuid()
       .optional()
-      .describe(
-        'The ID of the sub-struct if the type is "struct". When creating a param, you must set only one of either typeStructId (to re-use an existing Solidity Struct) or typeStruct (creates a new struct for the param)'
-      ),
+      .describe('ID of an existing struct to use as the type, if type is "struct"'),
     typeStruct: z
       .object({
-        name: z.string().min(1).describe('The name of the struct'),
-        params: z.array(z.any()).describe('The parameters that make up the struct'),
+        name: z.string().describe('Name of the new struct to create'),
+        params: z
+          .array(z.lazy(() => structParamUpdateSchema))
+          .describe('Parameters for the new struct'),
       })
       .optional()
       .describe(
@@ -366,17 +388,28 @@ export const structParamUpdateSchema = z
   )
   .describe('Properties that may be updated on a Solidity Struct Param');
 
-// Validation for struct parameter update requests
-export const structParamUpdateRequestSchema = z
+// Validation for adding a parameter to a struct
+export const addStructParamSchema = z
   .object({
-    id: z.string().uuid().describe('ID of the parameter to update'),
-    updates: structParamUpdateSchema,
+    businessId: z.string().uuid().describe('ID of the business that owns the struct'),
+    structId: z.string().uuid().describe('ID of the struct to add the parameter to'),
+    param: newSolidityStructParamSchema,
   })
-  .describe('Request to update a struct parameter');
+  .describe('Parameters for adding a parameter to a struct');
 
-// Validation for struct updates
-export const structUpdateSchema = z
+// Validation for updating multiple struct parameters
+export const updateStructParamsSchema = z
   .object({
-    name: z.string().min(1).describe('The name of the struct'),
+    businessId: z.string().uuid().describe('ID of the business that owns the struct'),
+    structId: z.string().uuid().describe('ID of the struct to update'),
+    updates: z.array(structParamUpdateSchema).describe('Array of parameter updates'),
   })
-  .describe('Properties that may be updated on a Solidity Struct');
+  .describe('Parameters for updating multiple struct parameters');
+
+// Validation for removing a struct parameter
+export const removeStructParamSchema = z
+  .object({
+    structId: z.string().uuid().describe('ID of the struct'),
+    structParamId: z.string().uuid().describe('ID of the parameter to remove'),
+  })
+  .describe('Parameters for removing a parameter from a struct');
