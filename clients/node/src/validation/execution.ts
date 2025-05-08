@@ -62,3 +62,38 @@ export const transactionExecutionListSchema = z
       .describe('Total number of results across all pages'),
   })
   .describe('Paginated list of transaction executions');
+
+// Validation for get transaction execution parameters
+export const getTransactionExecutionSchema = z
+  .object({
+    transactionId: z.string().uuid().describe('ID of the transaction that was executed'),
+    executionId: z.string().uuid().describe('ID of the specific execution to retrieve'),
+  })
+  .describe('Parameters for retrieving a specific transaction execution');
+
+// Validation for list transaction executions parameters
+export const listTransactionExecutionsSchema = z
+  .object({
+    businessId: z.string().uuid().describe('ID of the business to list executions for'),
+    pageSize: z.number().int().positive().optional().describe('Number of items per page'),
+    page: z.number().int().positive().optional().describe('Page number to retrieve'),
+    chainId: z
+      .number()
+      .int()
+      .positive()
+      .optional()
+      .describe('Filter executions by blockchain network ID'),
+    status: z
+      .enum(['0', '1', '2', '3'])
+      .optional()
+      .describe('Filter executions by status (0=Submitted, 1=Completed, 2=Retrying, 3=Failed)'),
+    escrowWalletId: z.string().uuid().optional().describe('Filter executions by escrow wallet ID'),
+    transactionId: z.string().uuid().optional().describe('Filter executions by transaction ID'),
+    apiCredentialId: z
+      .string()
+      .uuid()
+      .optional()
+      .describe('Filter executions by API credential ID'),
+    userId: z.string().uuid().optional().describe('Filter executions by user ID'),
+  })
+  .describe('Parameters for listing transaction executions');
