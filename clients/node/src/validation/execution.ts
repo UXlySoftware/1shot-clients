@@ -66,8 +66,14 @@ export const transactionExecutionListSchema = z
 // Validation for get transaction execution parameters
 export const getTransactionExecutionSchema = z
   .object({
-    transactionId: z.string().uuid().describe('ID of the transaction that was executed'),
-    executionId: z.string().uuid().describe('ID of the specific execution to retrieve'),
+    transactionId: z
+      .string()
+      .uuid()
+      .describe('Transaction ID of the transaction that was executed'),
+    executionId: z
+      .string()
+      .uuid()
+      .describe('Execution ID of the specific transaction execution to retrieve.'),
   })
   .describe('Parameters for retrieving a specific transaction execution');
 

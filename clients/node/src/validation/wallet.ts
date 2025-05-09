@@ -48,7 +48,7 @@ export const escrowWalletSchema = z
       .describe('Current balance details of the wallet'),
     updated: z.number().describe('Unix timestamp of the last update to this wallet'),
     created: z.number().describe('Unix timestamp when this wallet was created'),
-    deleted: z.boolean().describe('Whether this wallet has been deleted'),
+    // deleted: z.boolean().describe('Whether this wallet has been deleted'),
   })
   .describe('An escrow wallet that can hold and manage funds');
 

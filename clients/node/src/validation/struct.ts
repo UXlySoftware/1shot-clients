@@ -1,6 +1,5 @@
 import { z } from 'zod';
-import { SolidityStructParam } from '../types/solidity.js';
-import { NewSolidityStructParam } from '../types/struct.js';
+import { NewSolidityStructParam, SolidityStructParam } from '../types/struct.js';
 
 // Validation for Solidity types
 export const solidityTypeSchema = z
@@ -88,7 +87,7 @@ export const newSolidityStructParamSchema: z.ZodType<NewSolidityStructParam> = z
   .refine(
     (data): boolean => {
       // Validate that typeSize2 is only set for fixed types
-      if (data.typeSize2 !== undefined) {
+      if (data.typeSize2 != undefined) {
         return ['fixed', 'ufixed'].includes(data.type);
       }
       return true;
@@ -100,7 +99,7 @@ export const newSolidityStructParamSchema: z.ZodType<NewSolidityStructParam> = z
   .refine(
     (data): boolean => {
       // Validate that arraySize is only set when isArray is true
-      if (data.arraySize !== undefined) {
+      if (data.arraySize != undefined) {
         return data.isArray === true;
       }
       return true;
@@ -141,6 +140,7 @@ export const solidityStructParamSchema: z.ZodType<SolidityStructParam> = z
     value: z
       .string()
       .optional()
+      .nullable()
       .describe(
         'This is an optional, static value for the parameter. If you set this, you will never be required or able to pass a value for this parameter when you execute the transaction, it will use the set value.'
       ),
@@ -149,6 +149,7 @@ export const solidityStructParamSchema: z.ZodType<SolidityStructParam> = z
       .int()
       .positive()
       .optional()
+      .nullable()
       .describe(
         'This is an optional field that specifies the main size of the Solidity type. For example, if your type is uint, by default it is a uint256. If you want a uint8 instead, set this value to 8. It works for int, uint, fixed, ufixed, and bytes types. Valid values for bytes are 1 to 32, for others it is 256 % 8'
       ),
@@ -157,6 +158,7 @@ export const solidityStructParamSchema: z.ZodType<SolidityStructParam> = z
       .int()
       .positive()
       .optional()
+      .nullable()
       .describe(
         'This is identical to typeSize but only used for fixed and ufixed sizes. This is the second size of the fixed field, for example, fixed(typeSize)x(typeSize2).'
       ),
@@ -170,11 +172,13 @@ export const solidityStructParamSchema: z.ZodType<SolidityStructParam> = z
       .int()
       .positive()
       .optional()
+      .nullable()
       .describe('If the parameter is a fixed size array, set this value.'),
     typeStructId: z
       .string()
       .uuid()
       .optional()
+      .nullable()
       .describe(
         'The ID of the sub-struct if the type is "struct". When creating a param, you must set only one of either typeStructId (to re-use an existing Solidity Struct) or typeStruct (creates a new struct for the param)'
       ),
@@ -191,6 +195,7 @@ export const solidityStructParamSchema: z.ZodType<SolidityStructParam> = z
         deleted: z.boolean().describe('Whether the struct has been deleted'),
       })
       .optional()
+      .nullable()
       .describe(
         'The sub-struct if the type is "struct", which will be created for use by this parameter. When creating a param, you must set only one of either typeStructId (to re-use an existing Solidity Struct) or typeStruct (creates a new struct for the param)'
       ),
@@ -198,7 +203,7 @@ export const solidityStructParamSchema: z.ZodType<SolidityStructParam> = z
   .refine(
     (data): boolean => {
       // Validate that typeSize is only set for numeric types
-      if (data.typeSize !== undefined) {
+      if (data.typeSize != undefined) {
         return ['int', 'uint', 'bytes'].includes(data.type);
       }
       return true;
@@ -210,7 +215,7 @@ export const solidityStructParamSchema: z.ZodType<SolidityStructParam> = z
   .refine(
     (data): boolean => {
       // Validate that typeSize2 is only set for fixed types
-      if (data.typeSize2 !== undefined) {
+      if (data.typeSize2 != undefined) {
         return ['fixed', 'ufixed'].includes(data.type);
       }
       return true;
@@ -222,7 +227,7 @@ export const solidityStructParamSchema: z.ZodType<SolidityStructParam> = z
   .refine(
     (data): boolean => {
       // Validate that arraySize is only set when isArray is true
-      if (data.arraySize !== undefined) {
+      if (data.arraySize != undefined) {
         return data.isArray === true;
       }
       return true;
@@ -245,31 +250,6 @@ export const solidityStructParamSchema: z.ZodType<SolidityStructParam> = z
   )
   .describe('A single defined parameter for a transaction after it has been created');
 
-// Validation for type sizes
-export const typeSizeSchema = z
-  .number()
-  .int()
-  .min(1)
-  .max(256)
-  .optional()
-  .describe('The size of a Solidity type (1-256)');
-
-export const typeSize2Schema = z
-  .number()
-  .int()
-  .min(1)
-  .max(256)
-  .optional()
-  .describe('The second size of a fixed Solidity type (1-256)');
-
-// Validation for array sizes
-export const arraySizeSchema = z
-  .number()
-  .int()
-  .positive()
-  .optional()
-  .describe('The fixed size of an array parameter');
-
 // Validation for updating a struct
 export const structUpdateSchema = z
   .object({
@@ -278,7 +258,7 @@ export const structUpdateSchema = z
   .describe('Parameters for updating a struct');
 
 // Validation for updating a struct parameter
-export const structParamUpdateSchema: z.ZodType = z
+export const solidityStructParamUpdateSchema: z.ZodType = z
   .object({
     name: z.string().optional().describe('The name of the parameter'),
     description: z.string().optional().describe('Optional description of the parameter'),
@@ -330,7 +310,7 @@ export const structParamUpdateSchema: z.ZodType = z
       .object({
         name: z.string().describe('Name of the new struct to create'),
         params: z
-          .array(z.lazy(() => structParamUpdateSchema))
+          .array(z.lazy(() => solidityStructParamUpdateSchema))
           .describe('Parameters for the new struct'),
       })
       .optional()
@@ -341,7 +321,7 @@ export const structParamUpdateSchema: z.ZodType = z
   .refine(
     (data) => {
       // Validate that typeSize is only set for numeric types
-      if (data.typeSize !== undefined) {
+      if (data.typeSize != undefined) {
         return ['int', 'uint', 'bytes'].includes(data.type || '');
       }
       return true;
@@ -353,7 +333,7 @@ export const structParamUpdateSchema: z.ZodType = z
   .refine(
     (data) => {
       // Validate that typeSize2 is only set for fixed types
-      if (data.typeSize2 !== undefined) {
+      if (data.typeSize2 != undefined) {
         return ['fixed', 'ufixed'].includes(data.type || '');
       }
       return true;
@@ -365,7 +345,7 @@ export const structParamUpdateSchema: z.ZodType = z
   .refine(
     (data) => {
       // Validate that arraySize is only set when isArray is true
-      if (data.arraySize !== undefined) {
+      if (data.arraySize != undefined) {
         return data.isArray === true;
       }
       return true;
@@ -402,7 +382,7 @@ export const updateStructParamsSchema = z
   .object({
     businessId: z.string().uuid().describe('ID of the business that owns the struct'),
     structId: z.string().uuid().describe('ID of the struct to update'),
-    updates: z.array(structParamUpdateSchema).describe('Array of parameter updates'),
+    updates: z.array(solidityStructParamUpdateSchema).describe('Array of parameter updates'),
   })
   .describe('Parameters for updating multiple struct parameters');
 

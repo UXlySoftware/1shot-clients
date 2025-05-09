@@ -42,35 +42,6 @@ export const transactionEstimateSchema = z
   })
   .describe('A summary of values required to estimate the cost of executing a transaction');
 
-// Validation for transaction creation parameters
-export const transactionCreateSchema = z
-  .object({
-    chain: z.number().int().positive().describe('The ChainId of a supported chain on 1Shot API'),
-    contractAddress: z.string().describe('string address of contract'),
-    escrowWalletId: z
-      .string()
-      .uuid()
-      .describe('The ID of the escrow wallet that will execute the transaction'),
-    name: z.string().describe('Name of transaction'),
-    description: z.string().describe('Description of transaction'),
-    functionName: z
-      .string()
-      .describe('Name of the function on the contract to call for this transaction'),
-    stateMutability: transactionStateMutabilitySchema,
-    inputs: z
-      .array(newSolidityStructParamSchema)
-      .describe('The input parameters for the transaction function'),
-    outputs: z
-      .array(newSolidityStructParamSchema)
-      .describe('The output parameters for the transaction function'),
-    callbackUrl: z
-      .string()
-      .url()
-      .optional()
-      .describe('The URL to send webhooks to when this transaction is executed'),
-  })
-  .describe('Parameters required to create a new transaction');
-
 // Validation for transaction update parameters
 export const transactionUpdateSchema = z
   .object({
@@ -156,3 +127,142 @@ export const transactionListSchema = z
     totalResults: z.number().int().nonnegative().describe('The total number of results available'),
   })
   .describe('A paginated list of transactions');
+
+// Validation for listing transactions
+export const listTransactionsSchema = z
+  .object({
+    businessId: z.string().uuid().describe('The business ID to list transactions for'),
+    pageSize: z.number().int().positive().optional().describe('Number of items per page'),
+    page: z.number().int().positive().optional().describe('Page number (1-indexed)'),
+    chainId: z.number().int().positive().optional().describe('Filter by chain ID'),
+    name: z.string().optional().describe('Filter by transaction name'),
+    status: z
+      .enum(['live', 'archived', 'both'])
+      .optional()
+      .describe('Filter by transaction status'),
+    contractAddress: z.string().optional().describe('Filter by contract address'),
+  })
+  .describe('Parameters for listing transactions');
+
+// Validation for executing a transaction
+export const executeTransactionSchema = z
+  .object({
+    transactionId: z.string().uuid().describe('The ID of the transaction to execute'),
+    params: transactionParamsSchema,
+    escrowWalletId: z
+      .string()
+      .uuid()
+      .optional()
+      .describe('Optional ID of the escrow wallet to use'),
+    memo: z.string().optional().describe('Optional memo for the transaction'),
+  })
+  .describe('Parameters for executing a transaction');
+
+// Validation for testing a transaction
+export const testTransactionSchema = z
+  .object({
+    transactionId: z.string().uuid().describe('The ID of the transaction to test'),
+    params: transactionParamsSchema,
+  })
+  .describe('Parameters for testing a transaction');
+
+// Validation for getting a transaction
+export const getTransactionSchema = z
+  .object({
+    id: z.string().uuid().describe('The ID of the transaction to get'),
+  })
+  .describe('Parameters for getting a transaction');
+
+// Validation for estimating a transaction
+export const estimateTransactionSchema = z
+  .object({
+    transactionId: z.string().uuid().describe('The ID of the transaction to estimate'),
+    params: transactionParamsSchema,
+    escrowWalletId: z
+      .string()
+      .uuid()
+      .optional()
+      .describe('Optional ID of the escrow wallet to use'),
+  })
+  .describe('Parameters for estimating a transaction');
+
+// Validation for reading a transaction
+export const readTransactionSchema = z
+  .object({
+    transactionId: z.string().uuid().describe('The ID of the transaction to read'),
+    params: transactionParamsSchema,
+  })
+  .describe('Parameters for reading a transaction');
+
+// Validation for creating a transaction
+export const createTransactionSchema = z
+  .object({
+    businessId: z.string().uuid().describe('The business ID to create the transaction for'),
+    chain: z.number().int().positive().describe('The ChainId of a supported chain on 1Shot API'),
+    contractAddress: z.string().describe('string address of contract'),
+    escrowWalletId: z
+      .string()
+      .uuid()
+      .describe(
+        'The ID of the escrow wallet that will execute the transaction. This escrow wallet must be for the same chain as the transaction you are creation.'
+      ),
+    name: z.string().describe('Name of transaction'),
+    description: z.string().describe('Description of transaction'),
+    functionName: z
+      .string()
+      .describe('Name of the function on the contract to call for this transaction'),
+    stateMutability: transactionStateMutabilitySchema,
+    inputs: z
+      .array(newSolidityStructParamSchema)
+      .describe('The input parameters for the transaction function'),
+    outputs: z
+      .array(newSolidityStructParamSchema)
+      .describe('The output parameters for the transaction function'),
+    callbackUrl: z
+      .string()
+      .url()
+      .optional()
+      .nullable()
+      .describe('The URL to send webhooks to when this transaction is executed'),
+  })
+  .describe('Parameters for creating a transaction');
+
+// Validation for importing transactions from ABI
+export const importFromABISchema = z
+  .object({
+    businessId: z.string().uuid().describe('The business ID to create the transactions for'),
+    params: z.object({
+      chain: z.number().int().positive().describe('The ChainId of a supported chain on 1Shot API'),
+      contractAddress: z.string().describe('string address of contract'),
+      escrowWalletId: z
+        .string()
+        .uuid()
+        .describe('The ID of the escrow wallet that will execute the transaction'),
+      name: z.string().describe('Name of the contract'),
+      description: z.string().describe('Description of the contract'),
+      abi: z.array(z.any()).describe('The Ethereum ABI to import'),
+    }),
+  })
+  .describe('Parameters for importing transactions from ABI');
+
+// Validation for updating a transaction
+export const updateTransactionSchema = z
+  .object({
+    transactionId: z.string().uuid().describe('The ID of the transaction to update'),
+    params: transactionUpdateSchema,
+  })
+  .describe('Parameters for updating a transaction');
+
+// Validation for deleting a transaction
+export const deleteTransactionSchema = z
+  .object({
+    transactionId: z.string().uuid().describe('The ID of the transaction to delete'),
+  })
+  .describe('Parameters for deleting a transaction');
+
+// Validation for restoring a transaction
+export const restoreTransactionSchema = z
+  .object({
+    transactionId: z.string().uuid().describe('The ID of the transaction to restore'),
+  })
+  .describe('Parameters for restoring a transaction');

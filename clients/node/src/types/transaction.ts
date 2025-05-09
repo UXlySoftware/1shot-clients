@@ -1,4 +1,4 @@
-import { SolidityStructParam } from './solidity';
+import { SolidityStructParam } from './struct.js';
 
 /**
  * Represents a transaction in the 1Shot API.

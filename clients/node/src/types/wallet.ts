@@ -26,7 +26,7 @@ export interface EscrowWallet {
   /** Timestamp of creation */
   created: number;
   /** Whether the wallet has been deleted */
-  deleted: boolean;
+  // deleted: boolean;
 }
 
 /**
