@@ -206,7 +206,7 @@ export class Transactions {
       stateMutability: 'nonpayable' | 'payable' | 'view' | 'pure';
       inputs: NewSolidityStructParam[];
       outputs: NewSolidityStructParam[];
-      callbackUrl?: string;
+      callbackUrl?: string | null;
     }
   ): Promise<Transaction> {
     const validatedParams = createTransactionSchema.parse({

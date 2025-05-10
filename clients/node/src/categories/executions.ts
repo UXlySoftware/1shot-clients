@@ -13,21 +13,19 @@ export class Executions {
 
   /**
    * Get a specific transaction execution
-   * @param transactionId The ID of the transaction
    * @param executionId The ID of the execution
    * @returns Promise<TransactionExecution>
    * @throws {ZodError} If the IDs are invalid
    */
-  async get(transactionId: string, executionId: string): Promise<TransactionExecution> {
+  async get(executionId: string): Promise<TransactionExecution> {
     // Validate all parameters using the schema
     const validatedParams = getTransactionExecutionSchema.parse({
-      transactionId,
       executionId,
     });
 
     const response = await this.client.request<TransactionExecution>(
       'GET',
-      `/transactions/${validatedParams.transactionId}/executions/${validatedParams.executionId}`
+      `/executions/${validatedParams.executionId}`
     );
 
     // Validate the response
@@ -47,7 +45,7 @@ export class Executions {
       pageSize?: number;
       page?: number;
       chainId?: number;
-      status?: 0 | 1 | 2 | 3; // 0=Submitted, 1=Completed, 2=Retrying, 3=Failed
+      status?: '0' | '1' | '2' | '3' | '4'; // Pending = 0, Submitted = 1, Completed = 2,	Retrying = 3,	Failed = 4,
       escrowWalletId?: string;
       transactionId?: string;
       apiCredentialId?: string;
