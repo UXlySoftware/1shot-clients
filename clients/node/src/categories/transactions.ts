@@ -3,6 +3,7 @@ import { Transaction, TransactionParams, TransactionEstimate } from '../types/tr
 import { PagedResponse } from '../types/common.js';
 import { TransactionExecution } from '../types/execution.js';
 import { EthereumAbi } from '../types/abi.js';
+import { FullContractDescription } from '../types/contract.js';
 import {
   transactionSchema,
   transactionListSchema,
@@ -18,6 +19,9 @@ import {
   updateTransactionSchema,
   deleteTransactionSchema,
   restoreTransactionSchema,
+  contractSearchSchema,
+  fullContractDescriptionSchema,
+  contractTransactionsSchema,
 } from '../validation/transaction.js';
 import { z } from 'zod';
 import { NewSolidityStructParam } from 'struct.js';
@@ -315,6 +319,61 @@ export class Transactions {
       'PUT',
       `/transactions/${validatedParams.transactionId}/restore`,
       { rewardIds: [validatedParams.transactionId] }
+    );
+
+    return z.array(transactionSchema).parse(response);
+  }
+
+  /**
+   * Search for contract descriptions using semantic search
+   * @param query The search query to find relevant contracts
+   * @param params Optional parameters including chain
+   * @returns Promise<FullContractDescription[]>
+   * @throws {ZodError} If the parameters are invalid
+   */
+  async search(query: string, params?: { chain?: number }): Promise<FullContractDescription[]> {
+    const validatedParams = contractSearchSchema.parse({
+      query,
+      ...params,
+    });
+
+    const response = await this.client.request<FullContractDescription[]>(
+      'POST',
+      '/contracts/descriptions/search',
+      validatedParams
+    );
+
+    return z.array(fullContractDescriptionSchema).parse(response);
+  }
+
+  /**
+   * Create transactions from a contract description
+   * @param businessId The business ID to create the transactions for
+   * @param params Contract transaction parameters
+   * @returns Promise<Transaction[]>
+   * @throws {ZodError} If the parameters are invalid
+   */
+  async contractTransactions(
+    businessId: string,
+    params: {
+      chain: number;
+      contractAddress: string;
+      escrowWalletId: string;
+    }
+  ): Promise<Transaction[]> {
+    const validatedParams = contractTransactionsSchema.parse({
+      businessId,
+      ...params,
+    });
+
+    const response = await this.client.request<Transaction[]>(
+      'POST',
+      `/business/${validatedParams.businessId}/transactions/contract`,
+      {
+        chain: validatedParams.chain,
+        contractAddress: validatedParams.contractAddress,
+        escrowWalletId: validatedParams.escrowWalletId,
+      }
     );
 
     return z.array(transactionSchema).parse(response);

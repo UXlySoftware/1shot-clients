@@ -523,3 +523,132 @@ export const restoreTransactionSchema = z
   .describe(
     'Parameters for restoring a transaction - undeletes transaction objects. Used to recover previously deleted transactions'
   );
+
+// Validation for contract function input description
+export const contractFunctionInputDescriptionSchema = z
+  .object({
+    index: z
+      .number()
+      .int()
+      .nonnegative()
+      .describe('The index of the input parameter. Starts at 0.'),
+    name: z
+      .string()
+      .describe('The name of the input parameter, as defined in the Solidity contract.'),
+    type: z
+      .string()
+      .describe('The Solidity type of the function parameter (e.g., uint256, address).'),
+    description: z
+      .string()
+      .describe('A human-provided description of the parameter and its purpose.'),
+    tags: z
+      .array(z.string())
+      .describe('An array of tag names associated with the function parameter.'),
+  })
+  .describe('A description of a function input parameter');
+
+// Validation for contract function description
+export const contractFunctionDescriptionSchema = z
+  .object({
+    name: z
+      .string()
+      .describe(
+        'The name of the function. This has to exactly match the name of the function in the Solidity contract, including the case and whitespace'
+      ),
+    description: z
+      .string()
+      .describe(
+        'A human provided description of the function, what it does, and a basic overview of its parameters.'
+      ),
+    tags: z.array(z.string()).describe('An array of tag names provided to the contract function'),
+    inputs: z.array(contractFunctionInputDescriptionSchema),
+    outputDescription: z
+      .string()
+      .describe(
+        'Only meaningful for view functions, this is a description of the output of the function.'
+      ),
+  })
+  .describe('The description of a single function on a contract');
+
+// Validation for contract description
+export const contractDescriptionSchema = z
+  .object({
+    id: z.string().uuid().describe('internal ID of the contract description'),
+    userId: z.string().uuid().describe('ID of the user that created'),
+    chain: z.number().int().positive().describe('The ChainId of a supported chain on 1Shot API'),
+    contractAddress: z.string().describe('The address of the contract'),
+    name: z
+      .string()
+      .describe(
+        'The name of the contract. This is human provided and has no technical significance'
+      ),
+    description: z
+      .string()
+      .describe(
+        'The human provided description of what the contract is and does, and the top level'
+      ),
+    tags: z.array(z.string()).describe('An array of tag names provided to the contract'),
+    updated: z
+      .number()
+      .describe('Unix timestamp of when the contract description was last updated'),
+    created: z.number().describe('Unix timestamp of when the contract description was created'),
+  })
+  .describe('A description of a contract, designed to be used for contract discovery by AI agents');
+
+// Validation for full contract description
+export const fullContractDescriptionSchema = contractDescriptionSchema
+  .extend({
+    functions: z
+      .array(contractFunctionDescriptionSchema)
+      .describe(
+        'An array of Contract Function Descriptions, describing each function on the contract.'
+      ),
+  })
+  .describe('A description of a contract with its functions');
+
+// Validation for contract search request
+export const contractSearchSchema = z
+  .object({
+    query: z
+      .string()
+      .describe(
+        'A free-form query to search for contracts. This uses semantic search to find the most relevant contracts.'
+      ),
+    chain: z
+      .number()
+      .int()
+      .positive()
+      .optional()
+      .describe('The ChainId of a supported chain on 1Shot API'),
+  })
+  .describe('Parameters for searching contract descriptions');
+
+// Validation for contract transactions request
+export const contractTransactionsSchema = z
+  .object({
+    businessId: z
+      .string()
+      .uuid()
+      .describe(
+        'The business ID to create the transactions for. Used for access control and organization'
+      ),
+    chain: z
+      .number()
+      .int()
+      .positive()
+      .describe(
+        'The ChainId of a supported chain on 1Shot API. Determines which blockchain network the transactions will operate on'
+      ),
+    contractAddress: z
+      .string()
+      .describe('The address of the smart contract that contains the functions to be imported'),
+    escrowWalletId: z
+      .string()
+      .uuid()
+      .describe(
+        'The ID of the escrow wallet that will execute the transactions. Must be for the same chain as the transactions'
+      ),
+  })
+  .describe(
+    'Parameters for creating transactions from a contract description. This is based on the verified contract ABI and the highest-ranked Contract Description.'
+  );
