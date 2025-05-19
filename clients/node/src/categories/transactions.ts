@@ -1,9 +1,5 @@
 import { IOneShotClient } from '../types/client.js';
-import { Transaction, TransactionParams, TransactionEstimate } from '../types/transaction.js';
-import { PagedResponse } from '../types/common.js';
-import { TransactionExecution } from '../types/execution.js';
 import { EthereumAbi } from '../types/abi.js';
-import { FullContractDescription } from '../types/contract.js';
 import {
   transactionSchema,
   transactionListSchema,
@@ -22,6 +18,8 @@ import {
   contractSearchSchema,
   fullContractDescriptionSchema,
   contractTransactionsSchema,
+  transactionTestResultSchema,
+  transactionParamsSchema,
 } from '../validation/transaction.js';
 import { z } from 'zod';
 import { NewSolidityStructParam } from 'struct.js';
@@ -35,15 +33,15 @@ export class Transactions {
    * @param params Configuration parameters for the transaction
    * @param escrowWalletId Optional ID of the escrow wallet to use
    * @param memo Optional memo for the transaction
-   * @returns Promise<TransactionExecution>
+   * @returns Promise<z.infer<typeof transactionSchema>>
    * @throws {ZodError} If the parameters are invalid
    */
   async execute(
     transactionId: string,
-    params: TransactionParams,
+    params: z.infer<typeof transactionParamsSchema>,
     escrowWalletId?: string,
     memo?: string
-  ): Promise<TransactionExecution> {
+  ): Promise<z.infer<typeof transactionSchema>> {
     const validatedParams = executeTransactionSchema.parse({
       transactionId,
       params,
@@ -51,7 +49,7 @@ export class Transactions {
       memo,
     });
 
-    return this.client.request<TransactionExecution>(
+    const response = await this.client.request<z.infer<typeof transactionSchema>>(
       'POST',
       `/transactions/${validatedParams.transactionId}/execute`,
       {
@@ -60,38 +58,45 @@ export class Transactions {
         memo: validatedParams.memo,
       }
     );
+
+    return transactionSchema.parse(response);
   }
 
   /**
    * Test a transaction without actually executing it
    * @param transactionId The ID of the transaction to test
    * @param params Configuration parameters for the transaction
-   * @returns Promise<TransactionParams> - Returns the result of the test execution
+   * @returns Promise<z.infer<typeof transactionTestResultSchema>>
    * @throws {ZodError} If the parameters are invalid
    */
-  async test(transactionId: string, params: TransactionParams): Promise<TransactionParams> {
+  async test(
+    transactionId: string,
+    params: z.infer<typeof transactionParamsSchema>
+  ): Promise<z.infer<typeof transactionTestResultSchema>> {
     const validatedParams = testTransactionSchema.parse({
       transactionId,
       params,
     });
 
-    return this.client.request<TransactionParams>(
+    const response = await this.client.request<z.infer<typeof transactionTestResultSchema>>(
       'POST',
       `/transactions/${validatedParams.transactionId}/test`,
       { params: validatedParams.params }
     );
+
+    return transactionTestResultSchema.parse(response);
   }
 
   /**
    * Get a transaction by ID
    * @param id Transaction ID
-   * @returns Promise<Transaction>
+   * @returns Promise<z.infer<typeof transactionSchema>>
    * @throws {ZodError} If the ID is invalid
    */
-  async get(id: string): Promise<Transaction> {
+  async get(id: string): Promise<z.infer<typeof transactionSchema>> {
     const validatedParams = getTransactionSchema.parse({ id });
 
-    const response = await this.client.request<Transaction>(
+    const response = await this.client.request<z.infer<typeof transactionSchema>>(
       'GET',
       `/transactions/${validatedParams.id}`
     );
@@ -103,7 +108,7 @@ export class Transactions {
    * List transactions for a business
    * @param businessId The business ID to list transactions for
    * @param params Optional filter parameters
-   * @returns Promise<PagedResponse<Transaction>>
+   * @returns Promise<z.infer<typeof transactionListSchema>>
    * @throws {ZodError} If the parameters are invalid
    */
   async list(
@@ -116,7 +121,7 @@ export class Transactions {
       status?: 'live' | 'archived' | 'both';
       contractAddress?: string;
     }
-  ): Promise<PagedResponse<Transaction>> {
+  ): Promise<z.infer<typeof transactionListSchema>> {
     // Validate all parameters using the schema
     const validatedParams = listTransactionsSchema.parse({
       businessId,
@@ -134,7 +139,7 @@ export class Transactions {
       ? `/business/${validatedParams.businessId}/transactions?${queryString}`
       : `/business/${validatedParams.businessId}/transactions`;
 
-    const response = await this.client.request<PagedResponse<Transaction>>('GET', path);
+    const response = await this.client.request<z.infer<typeof transactionListSchema>>('GET', path);
 
     // Validate the response
     return transactionListSchema.parse(response);
@@ -145,21 +150,21 @@ export class Transactions {
    * @param transactionId The ID of the transaction to estimate
    * @param params Configuration parameters for the transaction
    * @param escrowWalletId Optional ID of the escrow wallet to use
-   * @returns Promise<TransactionEstimate>
+   * @returns Promise<z.infer<typeof transactionEstimateSchema>>
    * @throws {ZodError} If the parameters are invalid
    */
   async estimate(
     transactionId: string,
-    params: TransactionParams,
+    params: z.infer<typeof transactionParamsSchema>,
     escrowWalletId?: string
-  ): Promise<TransactionEstimate> {
+  ): Promise<z.infer<typeof transactionEstimateSchema>> {
     const validatedParams = estimateTransactionSchema.parse({
       transactionId,
       params,
       escrowWalletId,
     });
 
-    const response = await this.client.request<TransactionEstimate>(
+    const response = await this.client.request<z.infer<typeof transactionEstimateSchema>>(
       'POST',
       `/transactions/${validatedParams.transactionId}/estimate`,
       {
@@ -175,27 +180,32 @@ export class Transactions {
    * Read the result of a view or pure function
    * @param transactionId The ID of the transaction to read
    * @param params Configuration parameters for the transaction
-   * @returns Promise<TransactionParams> - Returns the result of the read operation
+   * @returns Promise<z.infer<typeof transactionParamsSchema>>
    * @throws {ZodError} If the parameters are invalid
    */
-  async read(transactionId: string, params: TransactionParams): Promise<TransactionParams> {
+  async read(
+    transactionId: string,
+    params: z.infer<typeof transactionParamsSchema>
+  ): Promise<z.infer<typeof transactionParamsSchema>> {
     const validatedParams = readTransactionSchema.parse({
       transactionId,
       params,
     });
 
-    return this.client.request<TransactionParams>(
+    const response = await this.client.request<z.infer<typeof transactionParamsSchema>>(
       'POST',
       `/transactions/${validatedParams.transactionId}/read`,
       { params: validatedParams.params }
     );
+
+    return transactionParamsSchema.parse(response);
   }
 
   /**
    * Create a new transaction
    * @param businessId The business ID to create the transaction for
    * @param params Transaction creation parameters
-   * @returns Promise<Transaction>
+   * @returns Promise<z.infer<typeof transactionSchema>>
    * @throws {ZodError} If the parameters are invalid
    */
   async create(
@@ -212,13 +222,13 @@ export class Transactions {
       outputs: NewSolidityStructParam[];
       callbackUrl?: string | null;
     }
-  ): Promise<Transaction> {
+  ): Promise<z.infer<typeof transactionSchema>> {
     const validatedParams = createTransactionSchema.parse({
       businessId,
       params,
     });
 
-    const response = await this.client.request<Transaction>(
+    const response = await this.client.request<z.infer<typeof transactionSchema>>(
       'POST',
       `/business/${validatedParams.businessId}/transactions`,
       validatedParams
@@ -231,7 +241,7 @@ export class Transactions {
    * Import transactions from an ABI
    * @param businessId The business ID to create the transactions for
    * @param params ABI import parameters
-   * @returns Promise<Transaction[]>
+   * @returns Promise<z.infer<typeof transactionSchema>[]>
    * @throws {ZodError} If the parameters are invalid
    */
   async importFromABI(
@@ -244,13 +254,13 @@ export class Transactions {
       description: string;
       abi: EthereumAbi;
     }
-  ): Promise<Transaction[]> {
+  ): Promise<z.infer<typeof transactionSchema>[]> {
     const validatedParams = importFromABISchema.parse({
       businessId,
       params,
     });
 
-    const response = await this.client.request<Transaction[]>(
+    const response = await this.client.request<z.infer<typeof transactionSchema>[]>(
       'POST',
       `/business/${validatedParams.businessId}/transactions/import`,
       validatedParams.params
@@ -263,7 +273,7 @@ export class Transactions {
    * Update a transaction
    * @param transactionId The ID of the transaction to update
    * @param params Update parameters
-   * @returns Promise<Transaction>
+   * @returns Promise<z.infer<typeof transactionSchema>>
    * @throws {ZodError} If the parameters are invalid
    */
   async update(
@@ -279,13 +289,13 @@ export class Transactions {
       nativeTransaction?: boolean;
       callbackUrl?: string | null;
     }
-  ): Promise<Transaction> {
+  ): Promise<z.infer<typeof transactionSchema>> {
     const validatedParams = updateTransactionSchema.parse({
       transactionId,
       params,
     });
 
-    const response = await this.client.request<Transaction>(
+    const response = await this.client.request<z.infer<typeof transactionSchema>>(
       'PUT',
       `/transactions/${validatedParams.transactionId}`,
       validatedParams.params
@@ -309,13 +319,13 @@ export class Transactions {
   /**
    * Restore a deleted transaction
    * @param transactionId The ID of the transaction to restore
-   * @returns Promise<Transaction[]>
+   * @returns Promise<z.infer<typeof transactionSchema>[]>
    * @throws {ZodError} If the transaction ID is invalid
    */
-  async restore(transactionId: string): Promise<Transaction[]> {
+  async restore(transactionId: string): Promise<z.infer<typeof transactionSchema>[]> {
     const validatedParams = restoreTransactionSchema.parse({ transactionId });
 
-    const response = await this.client.request<Transaction[]>(
+    const response = await this.client.request<z.infer<typeof transactionSchema>[]>(
       'PUT',
       `/transactions/${validatedParams.transactionId}/restore`,
       { rewardIds: [validatedParams.transactionId] }
@@ -328,16 +338,19 @@ export class Transactions {
    * Search for contract descriptions using semantic search
    * @param query The search query to find relevant contracts
    * @param params Optional parameters including chain
-   * @returns Promise<FullContractDescription[]>
+   * @returns Promise<z.infer<typeof fullContractDescriptionSchema>[]>
    * @throws {ZodError} If the parameters are invalid
    */
-  async search(query: string, params?: { chain?: number }): Promise<FullContractDescription[]> {
+  async search(
+    query: string,
+    params?: { chain?: number }
+  ): Promise<z.infer<typeof fullContractDescriptionSchema>[]> {
     const validatedParams = contractSearchSchema.parse({
       query,
       ...params,
     });
 
-    const response = await this.client.request<FullContractDescription[]>(
+    const response = await this.client.request<z.infer<typeof fullContractDescriptionSchema>[]>(
       'POST',
       '/contracts/descriptions/search',
       validatedParams
@@ -350,7 +363,7 @@ export class Transactions {
    * Create transactions from a contract description
    * @param businessId The business ID to create the transactions for
    * @param params Contract transaction parameters
-   * @returns Promise<Transaction[]>
+   * @returns Promise<z.infer<typeof transactionSchema>[]>
    * @throws {ZodError} If the parameters are invalid
    */
   async contractTransactions(
@@ -360,13 +373,13 @@ export class Transactions {
       contractAddress: string;
       escrowWalletId: string;
     }
-  ): Promise<Transaction[]> {
+  ): Promise<z.infer<typeof transactionSchema>[]> {
     const validatedParams = contractTransactionsSchema.parse({
       businessId,
       ...params,
     });
 
-    const response = await this.client.request<Transaction[]>(
+    const response = await this.client.request<z.infer<typeof transactionSchema>[]>(
       'POST',
       `/business/${validatedParams.businessId}/transactions/contract`,
       {

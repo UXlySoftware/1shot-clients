@@ -16,24 +16,23 @@ export const transactionStatusSchema = z
   );
 
 // Validation for transaction parameters
-type TransactionParamsSchema = z.ZodType<Record<string, any>>;
-
-export const transactionParamsSchema: TransactionParamsSchema = z
-  .record(
+/**
+ * Schema for transaction parameters. This is a recursive schema that can handle nested objects and arrays.
+ */
+export const transactionParamsSchema: z.ZodType<{
+  [key: string]: string | number | boolean | null | undefined | { [key: string]: any } | Array<any>;
+}> = z.record(
+  z.string(),
+  z.union([
     z.string(),
-    z.union([
-      z.string(),
-      z.number(),
-      z.boolean(),
-      z.null(),
-      z.undefined(),
-      z.lazy(() => transactionParamsSchema as TransactionParamsSchema),
-      z.array(z.lazy(() => transactionParamsSchema as TransactionParamsSchema)),
-    ])
-  )
-  .describe(
-    'A JSON-compatible value that can be used as a parameter for a transaction. Supports nested objects and arrays for complex parameter structures'
-  );
+    z.number(),
+    z.boolean(),
+    z.null(),
+    z.undefined(),
+    z.lazy(() => transactionParamsSchema),
+    z.array(z.lazy(() => transactionParamsSchema)),
+  ])
+);
 
 // Validation for transaction estimate
 export const transactionEstimateSchema = z
@@ -214,9 +213,6 @@ export const transactionSchema = z
       .describe(
         'Unix timestamp of when the transaction was created. Used for tracking creation time'
       ),
-    deleted: z
-      .boolean()
-      .describe('Whether the transaction has been deleted. Used for soft deletion and filtering'),
   })
   .describe(
     'A single defined transaction, corresponding a method call on a smart contract on a chain. You can have multiple Transactions defined for the same method in the contract if you want to use different setups for static parameters. Transactions are sometimes referred to as Endpoints'
@@ -524,28 +520,25 @@ export const restoreTransactionSchema = z
     'Parameters for restoring a transaction - undeletes transaction objects. Used to recover previously deleted transactions'
   );
 
-// Validation for contract function input description
-export const contractFunctionInputDescriptionSchema = z
+// Validation for contract function parameter description
+export const contractFunctionParamDescriptionSchema = z
   .object({
-    index: z
-      .number()
-      .int()
-      .nonnegative()
-      .describe('The index of the input parameter. Starts at 0.'),
+    index: z.number().int().nonnegative().describe('The index of the parameter. Starts at 0'),
     name: z
       .string()
-      .describe('The name of the input parameter, as defined in the Solidity contract.'),
-    type: z
-      .string()
-      .describe('The Solidity type of the function parameter (e.g., uint256, address).'),
+      .describe(
+        'The name of the parameter, as defined in the Solidity contract. Input parameters are required to have names; this may be blank for output parameters'
+      ),
     description: z
       .string()
-      .describe('A human-provided description of the parameter and its purpose.'),
+      .describe(
+        'A description of the parameter and its purpose. These descriptions are provided by either humans or AI and are intended for AI agent consumption'
+      ),
     tags: z
       .array(z.string())
-      .describe('An array of tag names associated with the function parameter.'),
+      .describe('An array of tag names associated with the function parameter'),
   })
-  .describe('A description of a function input parameter');
+  .describe('A description of a function parameter. This may be an input or an output parameter');
 
 // Validation for contract function description
 export const contractFunctionDescriptionSchema = z
@@ -558,14 +551,18 @@ export const contractFunctionDescriptionSchema = z
     description: z
       .string()
       .describe(
-        'A human provided description of the function, what it does, and a basic overview of its parameters.'
+        'A human provided description of the function, what it does, and a basic overview of its parameters'
       ),
     tags: z.array(z.string()).describe('An array of tag names provided to the contract function'),
-    inputs: z.array(contractFunctionInputDescriptionSchema),
-    outputDescription: z
-      .string()
+    inputs: z
+      .array(contractFunctionParamDescriptionSchema)
       .describe(
-        'Only meaningful for view functions, this is a description of the output of the function.'
+        'An array of input parameters for the function. All inputs are required to be named'
+      ),
+    outputs: z
+      .array(contractFunctionParamDescriptionSchema)
+      .describe(
+        'An array of input parameters for the function. All inputs are required to be named'
       ),
   })
   .describe('The description of a single function on a contract');
@@ -576,7 +573,7 @@ export const contractDescriptionSchema = z
     id: z.string().uuid().describe('internal ID of the contract description'),
     userId: z.string().uuid().describe('ID of the user that created'),
     chain: z.number().int().positive().describe('The ChainId of a supported chain on 1Shot API'),
-    contractAddress: z.string().describe('The address of the contract'),
+    contractAddress: z.string().describe('The address of the smart contract'),
     name: z
       .string()
       .describe(
@@ -601,10 +598,10 @@ export const fullContractDescriptionSchema = contractDescriptionSchema
     functions: z
       .array(contractFunctionDescriptionSchema)
       .describe(
-        'An array of Contract Function Descriptions, describing each function on the contract.'
+        'An array of Contract Function Descriptions, describing each function on the contract'
       ),
   })
-  .describe('A description of a contract with its functions');
+  .describe('A description of a smart contract, including all functions and parameters');
 
 // Validation for contract search request
 export const contractSearchSchema = z
@@ -652,3 +649,20 @@ export const contractTransactionsSchema = z
   .describe(
     'Parameters for creating transactions from a contract description. This is based on the verified contract ABI and the highest-ranked Contract Description.'
   );
+
+// Validation for transaction test result
+export const transactionTestResultSchema = z
+  .object({
+    success: z.boolean().describe('Whether or not the transaction would run successfully'),
+    result: z
+      .record(z.any())
+      .nullable()
+      .describe(
+        'The result returned by the transaction, if it was successful. When running a test, no changes are made on the blockchain, so these results are hypothetical'
+      ),
+    error: z
+      .record(z.any())
+      .nullable()
+      .describe('The error that occurred, if the transaction was not successful'),
+  })
+  .describe('The result of running /test on a transaction');

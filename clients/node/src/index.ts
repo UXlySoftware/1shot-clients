@@ -3,7 +3,6 @@ export * from './client.js';
 
 // Type exports
 export * from './types/common.js';
-export * from './types/transaction.js';
 export * from './types/wallet.js';
 export * from './types/execution.js';
 export * from './types/abi.js';

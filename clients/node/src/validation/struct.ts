@@ -134,7 +134,11 @@ export const solidityStructParamSchema: z.ZodType<SolidityStructParam> = z
   .object({
     id: z.string().uuid().describe('Internal ID of the parameter'),
     structId: z.string().uuid().describe('Internal ID struct that owns this parameter'),
-    name: z.string().min(1).describe('The name of the parameter'),
+    name: z
+      .string()
+      .describe(
+        'The name of the parameter. This is required for input parameters but may be blank for output parameters'
+      ),
     description: z.string().optional().describe('Description of the parameter'),
     type: solidityTypeSchema,
     index: z
