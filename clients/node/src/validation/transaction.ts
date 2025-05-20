@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { newSolidityStructParamSchema, solidityStructParamSchema } from './struct.js';
+import { ethereumAbiSchema } from './abi.js';
 
 // Validation for transaction state mutability
 export const transactionStateMutabilitySchema = z
@@ -443,44 +444,36 @@ export const createTransactionSchema = z
 // Validation for importing transactions from ABI
 export const importFromABISchema = z
   .object({
-    businessId: z
+    businessId: z.string().uuid().describe('The ID of the business that owns the transaction'),
+    chain: z
+      .number()
+      .int()
+      .positive()
+      .describe(
+        'The ChainId of a supported chain on 1Shot API. Determines which blockchain network the transaction will be executed on'
+      ),
+    contractAddress: z
+      .string()
+      .describe('The address of the smart contract that contains the function to be called'),
+    escrowWalletId: z
       .string()
       .uuid()
       .describe(
-        'The business ID to create the transactions for. Used for access control and organization'
+        'The ID of the escrow wallet that will execute the transaction. Must be for the same chain as the transaction'
       ),
-    params: z.object({
-      chain: z
-        .number()
-        .int()
-        .positive()
-        .describe(
-          'The ChainId of a supported chain on 1Shot API. Determines which blockchain network the transactions will operate on'
-        ),
-      contractAddress: z
-        .string()
-        .describe('The address of the smart contract that contains the functions to be imported'),
-      escrowWalletId: z
-        .string()
-        .uuid()
-        .describe(
-          'The ID of the escrow wallet that will execute the transactions. Must be for the same chain as the transactions'
-        ),
-      name: z.string().describe('Name of the contract. Used for display purposes and organization'),
-      description: z
-        .string()
-        .describe(
-          "Description of the contract. Provides context about the contract's purpose and functionality"
-        ),
-      abi: z
-        .array(z.any())
-        .describe(
-          'The Ethereum ABI to import. Contains the function definitions to be converted into transactions'
-        ),
-    }),
+    abi: ethereumAbiSchema,
+    name: z
+      .string()
+      .optional()
+      .describe("The name of the smart contract, if it doesn't already exist"),
+    description: z
+      .string()
+      .optional()
+      .describe("A description of the smart contract, if it doesn't already exist"),
+    tags: z.array(z.string()).optional().describe('Tags to add to the smart contract'),
   })
   .describe(
-    "Parameters for importing transactions from ABI. Used to automatically create transactions from a contract's ABI"
+    'Parameters for importing transactions from an Ethereum ABI. Creates transactions for each function in the ABI'
   );
 
 // Validation for updating a transaction
