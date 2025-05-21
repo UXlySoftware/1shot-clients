@@ -1,22 +1,18 @@
-import { OneShotClient } from '../client';
+import { IOneShotClient } from '../types/client.js';
 import {
   SolidityStruct,
   SolidityStructParamUpdateRequest,
   NewSolidityStructParam,
-} from '../types/struct';
+} from '../types/struct.js';
 import {
   structUpdateSchema,
-  structParamUpdateRequestSchema,
-  structParamUpdateSchema,
-} from '../validation/struct';
-import { z } from 'zod';
+  addStructParamSchema,
+  updateStructParamsSchema,
+  removeStructParamSchema,
+} from '../validation/struct.js';
 
 export class Structs {
-  private client: OneShotClient;
-
-  constructor(client: OneShotClient) {
-    this.client = client;
-  }
+  constructor(private client: IOneShotClient) {}
 
   /**
    * Update an existing solidity struct
@@ -45,13 +41,17 @@ export class Structs {
     structId: string,
     param: NewSolidityStructParam
   ): Promise<SolidityStruct> {
-    // Validate the parameter
-    const validatedData = structParamUpdateSchema.parse(param);
+    // Validate all parameters using the schema
+    const validatedParams = addStructParamSchema.parse({
+      businessId,
+      structId,
+      param,
+    });
 
     return this.client.request<SolidityStruct>(
       'POST',
-      `/business/${businessId}/structs/${structId}/params`,
-      validatedData
+      `/business/${validatedParams.businessId}/structs/${validatedParams.structId}/params`,
+      validatedParams.param
     );
   }
 
@@ -68,13 +68,17 @@ export class Structs {
     structId: string,
     updates: SolidityStructParamUpdateRequest[]
   ): Promise<SolidityStruct> {
-    // Validate all updates
-    const validatedUpdates = updates.map((update) => structParamUpdateRequestSchema.parse(update));
+    // Validate all parameters using the schema
+    const validatedParams = updateStructParamsSchema.parse({
+      businessId,
+      structId,
+      updates,
+    });
 
     return this.client.request<SolidityStruct>(
       'PUT',
-      `/business/${businessId}/structs/${structId}/params`,
-      { updates: validatedUpdates }
+      `/business/${validatedParams.businessId}/structs/${validatedParams.structId}/params`,
+      { updates: validatedParams.updates }
     );
   }
 
@@ -86,12 +90,15 @@ export class Structs {
    * @throws {ZodError} If the parameter ID is invalid
    */
   async removeParam(structId: string, structParamId: string): Promise<SolidityStruct> {
-    // Validate the parameter ID
-    const validatedId = z.string().uuid().parse(structParamId);
+    // Validate all parameters using the schema
+    const validatedParams = removeStructParamSchema.parse({
+      structId,
+      structParamId,
+    });
 
     return this.client.request<SolidityStruct>(
       'DELETE',
-      `/structs/${structId}/params/${validatedId}`
+      `/structs/${validatedParams.structId}/params/${validatedParams.structParamId}`
     );
   }
 }

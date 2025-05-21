@@ -15,6 +15,10 @@ from uxly_1shot_client.models.transaction import (
     ListTransactionsParams,
     TransactionCreateParams,
     TransactionUpdateParams,
+    ContractDescription,
+    FullContractDescription,
+    ContractSearchParams,
+    ContractTransactionsParams,
 )
 
 class BaseTransactions:
@@ -117,6 +121,25 @@ class BaseTransactions:
         """
         return f"/business/{business_id}/transactions/abi"
 
+    def _get_contract_transactions_url(self, business_id: str) -> str:
+        """Get the URL for creating transactions from a contract description.
+
+        Args:
+            business_id: The business ID
+
+        Returns:
+            The URL for creating transactions from a contract description
+        """
+        return f"/business/{business_id}/transactions/contract"
+
+    def _get_contract_search_url(self) -> str:
+        """Get the URL for searching contract descriptions.
+
+        Returns:
+            The URL for searching contract descriptions
+        """
+        return "/contracts/descriptions/search"
+
     def _get_update_url(self, transaction_id: str) -> str:
         """Get the URL for updating a transaction.
 
@@ -163,14 +186,14 @@ class SyncTransactions(BaseTransactions):
         self._client = client
 
     def test(self, transaction_id: str, params: Dict[str, Any]) -> TransactionTestResult:
-        """Test a transaction execution.
+        """Test a transaction execution. This method simulates the execution of a transaction. No gas will be spent and nothing on chain will change, but it will let you know whether or not an execution would succeed.
 
         Args:
             transaction_id: The transaction ID
             params: Parameters for the transaction
 
         Returns:
-            The test result
+            The test result, including success status and potential error information
 
         Raises:
             requests.exceptions.RequestException: If the request fails
@@ -182,23 +205,28 @@ class SyncTransactions(BaseTransactions):
         )
         return TransactionTestResult.model_validate(response)
 
-    def estimate(self, transaction_id: str, params: Dict[str, Any]) -> TransactionEstimate:
-        """Estimate the cost of executing a transaction.
+    def estimate(self, transaction_id: str, params: Dict[str, Any], escrow_wallet_id: Optional[str] = None) -> TransactionEstimate:
+        """Estimate the cost of executing a transaction. Returns data about the fees and amount of gas.
 
         Args:
             transaction_id: The transaction ID
             params: Parameters for the transaction
+            escrow_wallet_id: Optional ID of the escrow wallet to use for the estimate
 
         Returns:
-            The cost estimate
+            The cost estimate, including gas amount and fees
 
         Raises:
             requests.exceptions.RequestException: If the request fails
         """
+        data: Dict[str, Any] = {"params": params}
+        if escrow_wallet_id is not None:
+            data["escrowWalletId"] = escrow_wallet_id
+
         response = self._client._request(
             "POST",
             self._get_estimate_url(transaction_id),
-            data={"params": params},
+            data=data,
         )
         return TransactionEstimate.model_validate(response)
 
@@ -209,13 +237,13 @@ class SyncTransactions(BaseTransactions):
         escrow_wallet_id: Optional[str] = None,
         memo: Optional[str] = None,
     ) -> TransactionExecution:
-        """Execute a transaction.
+        """Execute a transaction. You can only execute transactions that are payable or nonpayable. Use /read for view and pure transactions.
 
         Args:
             transaction_id: The transaction ID
             params: Parameters for the transaction
             escrow_wallet_id: Optional ID of the escrow wallet to use
-            memo: Optional memo for the execution
+            memo: Optional memo for the execution. You may include any text you like when you execute a transaction, as a note to yourself about why it was done. This text can be JSON or similar if you want to store formatted data.
 
         Returns:
             The execution result
@@ -225,7 +253,7 @@ class SyncTransactions(BaseTransactions):
         """
         data: Dict[str, Any] = {"params": params}
         if escrow_wallet_id is not None:
-            data["escrow_wallet_id"] = escrow_wallet_id
+            data["escrowWalletId"] = escrow_wallet_id
         if memo is not None:
             data["memo"] = memo
 
@@ -237,7 +265,7 @@ class SyncTransactions(BaseTransactions):
         return TransactionExecution.model_validate(response)
 
     def read(self, transaction_id: str, params: Dict[str, Any]) -> Dict[str, Any]:
-        """Read the result of a view/pure function.
+        """Read the result of a view or pure function. This will error on payable and nonpayable transactions.
 
         Args:
             transaction_id: The transaction ID
@@ -257,7 +285,7 @@ class SyncTransactions(BaseTransactions):
         return response
 
     def get(self, transaction_id: str) -> Transaction:
-        """Get a transaction by ID.
+        """Get a single Transaction via its TransactionId.
 
         Args:
             transaction_id: The transaction ID
@@ -303,7 +331,7 @@ class SyncTransactions(BaseTransactions):
         business_id: str,
         params: Union[TransactionCreateParams, Dict[str, Any]],
     ) -> Transaction:
-        """Create a new transaction.
+        """Create a new Transaction. A Transaction is sometimes referred to as an Endpoint. A Transaction corresponds to a single method on a smart contract.
 
         Args:
             business_id: The business ID
@@ -329,7 +357,7 @@ class SyncTransactions(BaseTransactions):
         business_id: str,
         params: Dict[str, Any],
     ) -> List[Transaction]:
-        """Import transactions from an ABI.
+        """Import a complete ethereum ABI and creates Transactions for each "function" type entry. Every transaction will be associated with the same Escrow Wallet.
 
         Args:
             business_id: The business ID
@@ -355,12 +383,62 @@ class SyncTransactions(BaseTransactions):
         )
         return [Transaction.model_validate(tx) for tx in response]
 
+    def create_from_contract(
+        self,
+        business_id: str,
+        params: Union[ContractTransactionsParams, Dict[str, Any]],
+    ) -> List[Transaction]:
+        """Assures that Transactions exist for a given contract. This is based on the verified contract ABI and the highest-ranked Contract Description. If Transactions already exist, they are not modified. If they do not exist, any methods that are in the Contract Description will be created with the details from the Contract Description.
+
+        Args:
+            business_id: The business ID
+            params: Contract transactions parameters, either as a dict or ContractTransactionsParams instance
+
+        Returns:
+            The created transactions
+
+        Raises:
+            requests.exceptions.RequestException: If the request fails
+        """
+        if not isinstance(params, ContractTransactionsParams):
+            params = ContractTransactionsParams.model_validate(params, by_alias=True, by_name=True)
+        response = self._client._request(
+            "POST",
+            self._get_contract_transactions_url(business_id),
+            data=params.model_dump(exclude_none=True, by_alias=True),
+        )
+        return [Transaction.model_validate(tx) for tx in response]
+
+    def search_contracts(
+        self,
+        params: Union[ContractSearchParams, Dict[str, Any]],
+    ) -> List[FullContractDescription]:
+        """Performs a semantic search on contract descriptions to find the most relevant contracts.
+
+        Args:
+            params: Search parameters, either as a dict or ContractSearchParams instance
+
+        Returns:
+            A list of contract descriptions matching the search query
+
+        Raises:
+            requests.exceptions.RequestException: If the request fails
+        """
+        if not isinstance(params, ContractSearchParams):
+            params = ContractSearchParams.model_validate(params, by_alias=True, by_name=True)
+        response = self._client._request(
+            "POST",
+            self._get_contract_search_url(),
+            data=params.model_dump(exclude_none=True, by_alias=True),
+        )
+        return [FullContractDescription.model_validate(desc) for desc in response]
+
     def update(
         self,
         transaction_id: str,
         params: Union[TransactionUpdateParams, Dict[str, Any]],
     ) -> Transaction:
-        """Update a transaction.
+        """Update a Transaction. You can update most of the properties of a transaction via this method, but you can't change the inputs or outputs. Use the Struct API calls for that instead.
 
         Args:
             transaction_id: The transaction ID
@@ -395,14 +473,14 @@ class SyncTransactions(BaseTransactions):
             self._get_delete_url(transaction_id),
         )
 
-    def restore(self, transaction_id: str) -> List[Transaction]:
+    def restore(self, transaction_id: str) -> Transaction:
         """Restore a deleted transaction.
 
         Args:
             transaction_id: The transaction ID
 
         Returns:
-            The restored transactions
+            The restored transaction
 
         Raises:
             requests.exceptions.RequestException: If the request fails
@@ -410,9 +488,8 @@ class SyncTransactions(BaseTransactions):
         response = self._client._request(
             "PUT",
             self._get_restore_url(transaction_id),
-            data={"rewardIds": [transaction_id]},
         )
-        return [Transaction.model_validate(tx) for tx in response]
+        return Transaction.model_validate(response)
 
 
 class AsyncTransactions(BaseTransactions):
@@ -427,17 +504,17 @@ class AsyncTransactions(BaseTransactions):
         self._client = client
 
     async def test(self, transaction_id: str, params: Dict[str, Any]) -> TransactionTestResult:
-        """Test a transaction execution.
+        """Test a transaction execution. This method simulates the execution of a transaction. No gas will be spent and nothing on chain will change, but it will let you know whether or not an execution would succeed.
 
         Args:
             transaction_id: The transaction ID
             params: Parameters for the transaction
 
         Returns:
-            The test result
+            The test result, including success status and potential error information
 
         Raises:
-            httpx.HTTPError: If the request fails
+            aiohttp.ClientError: If the request fails
         """
         response = await self._client._request(
             "POST",
@@ -446,23 +523,28 @@ class AsyncTransactions(BaseTransactions):
         )
         return TransactionTestResult.model_validate(response)
 
-    async def estimate(self, transaction_id: str, params: Dict[str, Any]) -> TransactionEstimate:
-        """Estimate the cost of executing a transaction.
+    async def estimate(self, transaction_id: str, params: Dict[str, Any], escrow_wallet_id: Optional[str] = None) -> TransactionEstimate:
+        """Estimate the cost of executing a transaction. Returns data about the fees and amount of gas.
 
         Args:
             transaction_id: The transaction ID
             params: Parameters for the transaction
+            escrow_wallet_id: Optional ID of the escrow wallet to use for the estimate
 
         Returns:
-            The cost estimate
+            The cost estimate, including gas amount and fees
 
         Raises:
-            httpx.HTTPError: If the request fails
+            aiohttp.ClientError: If the request fails
         """
+        data: Dict[str, Any] = {"params": params}
+        if escrow_wallet_id is not None:
+            data["escrowWalletId"] = escrow_wallet_id
+
         response = await self._client._request(
             "POST",
             self._get_estimate_url(transaction_id),
-            data={"params": params},
+            data=data,
         )
         return TransactionEstimate.model_validate(response)
 
@@ -473,23 +555,23 @@ class AsyncTransactions(BaseTransactions):
         escrow_wallet_id: Optional[str] = None,
         memo: Optional[str] = None,
     ) -> TransactionExecution:
-        """Execute a transaction.
+        """Execute a transaction. You can only execute transactions that are payable or nonpayable. Use /read for view and pure transactions.
 
         Args:
             transaction_id: The transaction ID
             params: Parameters for the transaction
             escrow_wallet_id: Optional ID of the escrow wallet to use
-            memo: Optional memo for the execution
+            memo: Optional memo for the execution. You may include any text you like when you execute a transaction, as a note to yourself about why it was done. This text can be JSON or similar if you want to store formatted data.
 
         Returns:
             The execution result
 
         Raises:
-            httpx.HTTPError: If the request fails
+            aiohttp.ClientError: If the request fails
         """
         data: Dict[str, Any] = {"params": params}
         if escrow_wallet_id is not None:
-            data["escrow_wallet_id"] = escrow_wallet_id
+            data["escrowWalletId"] = escrow_wallet_id
         if memo is not None:
             data["memo"] = memo
 
@@ -501,7 +583,7 @@ class AsyncTransactions(BaseTransactions):
         return TransactionExecution.model_validate(response)
 
     async def read(self, transaction_id: str, params: Dict[str, Any]) -> Dict[str, Any]:
-        """Read the result of a view/pure function.
+        """Read the result of a view or pure function. This will error on payable and nonpayable transactions.
 
         Args:
             transaction_id: The transaction ID
@@ -511,7 +593,7 @@ class AsyncTransactions(BaseTransactions):
             The function result
 
         Raises:
-            httpx.HTTPError: If the request fails
+            aiohttp.ClientError: If the request fails
         """
         response = await self._client._request(
             "POST",
@@ -521,7 +603,7 @@ class AsyncTransactions(BaseTransactions):
         return response
 
     async def get(self, transaction_id: str) -> Transaction:
-        """Get a transaction by ID.
+        """Get a single Transaction via its TransactionId.
 
         Args:
             transaction_id: The transaction ID
@@ -530,7 +612,7 @@ class AsyncTransactions(BaseTransactions):
             The transaction
 
         Raises:
-            httpx.HTTPError: If the request fails
+            aiohttp.ClientError: If the request fails
         """
         response = await self._client._request(
             "GET",
@@ -553,7 +635,7 @@ class AsyncTransactions(BaseTransactions):
             A paged response of transactions
 
         Raises:
-            httpx.HTTPError: If the request fails
+            aiohttp.ClientError: If the request fails
         """
         if params is not None and not isinstance(params, ListTransactionsParams):
             params = ListTransactionsParams.model_validate(params, by_alias=True, by_name=True)
@@ -567,7 +649,7 @@ class AsyncTransactions(BaseTransactions):
         business_id: str,
         params: Union[TransactionCreateParams, Dict[str, Any]],
     ) -> Transaction:
-        """Create a new transaction.
+        """Create a new Transaction. A Transaction is sometimes referred to as an Endpoint. A Transaction corresponds to a single method on a smart contract.
 
         Args:
             business_id: The business ID
@@ -577,7 +659,7 @@ class AsyncTransactions(BaseTransactions):
             The created transaction
 
         Raises:
-            httpx.HTTPError: If the request fails
+            aiohttp.ClientError: If the request fails
         """
         if not isinstance(params, TransactionCreateParams):
             params = TransactionCreateParams.model_validate(params, by_alias=True, by_name=True)
@@ -593,7 +675,7 @@ class AsyncTransactions(BaseTransactions):
         business_id: str,
         params: Dict[str, Any],
     ) -> List[Transaction]:
-        """Import transactions from an ABI.
+        """Import a complete ethereum ABI and creates Transactions for each "function" type entry. Every transaction will be associated with the same Escrow Wallet.
 
         Args:
             business_id: The business ID
@@ -610,7 +692,7 @@ class AsyncTransactions(BaseTransactions):
             The imported transactions
 
         Raises:
-            httpx.HTTPError: If the request fails
+            aiohttp.ClientError: If the request fails
         """
         response = await self._client._request(
             "POST",
@@ -619,12 +701,62 @@ class AsyncTransactions(BaseTransactions):
         )
         return [Transaction.model_validate(tx) for tx in response]
 
+    async def create_from_contract(
+        self,
+        business_id: str,
+        params: Union[ContractTransactionsParams, Dict[str, Any]],
+    ) -> List[Transaction]:
+        """Assures that Transactions exist for a given contract. This is based on the verified contract ABI and the highest-ranked Contract Description. If Transactions already exist, they are not modified. If they do not exist, any methods that are in the Contract Description will be created with the details from the Contract Description.
+
+        Args:
+            business_id: The business ID
+            params: Contract transactions parameters, either as a dict or ContractTransactionsParams instance
+
+        Returns:
+            The created transactions
+
+        Raises:
+            aiohttp.ClientError: If the request fails
+        """
+        if not isinstance(params, ContractTransactionsParams):
+            params = ContractTransactionsParams.model_validate(params, by_alias=True, by_name=True)
+        response = await self._client._request(
+            "POST",
+            self._get_contract_transactions_url(business_id),
+            data=params.model_dump(exclude_none=True, by_alias=True),
+        )
+        return [Transaction.model_validate(tx) for tx in response]
+
+    async def search_contracts(
+        self,
+        params: Union[ContractSearchParams, Dict[str, Any]],
+    ) -> List[FullContractDescription]:
+        """Performs a semantic search on contract descriptions to find the most relevant contracts.
+
+        Args:
+            params: Search parameters, either as a dict or ContractSearchParams instance
+
+        Returns:
+            A list of contract descriptions matching the search query
+
+        Raises:
+            aiohttp.ClientError: If the request fails
+        """
+        if not isinstance(params, ContractSearchParams):
+            params = ContractSearchParams.model_validate(params, by_alias=True, by_name=True)
+        response = await self._client._request(
+            "POST",
+            self._get_contract_search_url(),
+            data=params.model_dump(exclude_none=True, by_alias=True),
+        )
+        return [FullContractDescription.model_validate(desc) for desc in response]
+
     async def update(
         self,
         transaction_id: str,
         params: Union[TransactionUpdateParams, Dict[str, Any]],
     ) -> Transaction:
-        """Update a transaction.
+        """Update a Transaction. You can update most of the properties of a transaction via this method, but you can't change the inputs or outputs. Use the Struct API calls for that instead.
 
         Args:
             transaction_id: The transaction ID
@@ -634,7 +766,7 @@ class AsyncTransactions(BaseTransactions):
             The updated transaction
 
         Raises:
-            httpx.HTTPError: If the request fails
+            aiohttp.ClientError: If the request fails
         """
         if not isinstance(params, TransactionUpdateParams):
             params = TransactionUpdateParams.model_validate(params, by_alias=True, by_name=True)
@@ -652,28 +784,27 @@ class AsyncTransactions(BaseTransactions):
             transaction_id: The transaction ID
 
         Raises:
-            httpx.HTTPError: If the request fails
+            aiohttp.ClientError: If the request fails
         """
         await self._client._request(
             "DELETE",
             self._get_delete_url(transaction_id),
         )
 
-    async def restore(self, transaction_id: str) -> List[Transaction]:
+    async def restore(self, transaction_id: str) -> Transaction:
         """Restore a deleted transaction.
 
         Args:
             transaction_id: The transaction ID
 
         Returns:
-            The restored transactions
+            The restored transaction
 
         Raises:
-            httpx.HTTPError: If the request fails
+            aiohttp.ClientError: If the request fails
         """
         response = await self._client._request(
             "PUT",
             self._get_restore_url(transaction_id),
-            data={"rewardIds": [transaction_id]},
         )
-        return [Transaction.model_validate(tx) for tx in response] 
+        return Transaction.model_validate(response) 

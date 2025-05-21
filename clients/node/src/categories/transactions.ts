@@ -1,21 +1,38 @@
-import { OneShotClient } from '../client.js';
-import { Transaction, TransactionParams, TransactionEstimate } from '../types/transaction.js';
-import { SolidityStructParam } from '../types/solidity.js';
-import { PagedResponse } from '../types/common.js';
-import { TransactionExecution } from '../types/execution.js';
+import { IOneShotClient } from '../types/client.js';
 import { EthereumAbi } from '../types/abi.js';
+import { NewSolidityStructParam } from '../types/struct.js';
+import { FullContractDescription } from '../types/contract.js';
+import {
+  Transaction,
+  TransactionList,
+  TransactionEstimate,
+  TransactionTestResult,
+  TransactionParams,
+  TransactionStateMutability,
+} from '../types/transactions.js';
 import {
   transactionSchema,
   transactionListSchema,
   transactionEstimateSchema,
-  transactionCreateSchema,
-  transactionUpdateSchema,
-  transactionParamsSchema,
+  listTransactionsSchema,
+  executeTransactionSchema,
+  testTransactionSchema,
+  getTransactionSchema,
+  estimateTransactionSchema,
+  readTransactionSchema,
+  createTransactionSchema,
+  importFromABISchema,
+  updateTransactionSchema,
+  deleteTransactionSchema,
+  restoreTransactionSchema,
+  contractSearchSchema,
+  fullContractDescriptionSchema,
+  contractTransactionsSchema,
+  transactionTestResultSchema,
 } from '../validation/transaction.js';
-import { z } from 'zod';
 
 export class Transactions {
-  constructor(private client: OneShotClient) {}
+  constructor(private client: IOneShotClient) {}
 
   /**
    * Execute a transaction
@@ -23,7 +40,7 @@ export class Transactions {
    * @param params Configuration parameters for the transaction
    * @param escrowWalletId Optional ID of the escrow wallet to use
    * @param memo Optional memo for the transaction
-   * @returns Promise<TransactionExecution>
+   * @returns Promise<Transaction>
    * @throws {ZodError} If the parameters are invalid
    */
   async execute(
@@ -31,48 +48,47 @@ export class Transactions {
     params: TransactionParams,
     escrowWalletId?: string,
     memo?: string
-  ): Promise<TransactionExecution> {
-    // Validate the transaction ID
-    const validatedTransactionId = z.string().uuid().parse(transactionId);
+  ): Promise<Transaction> {
+    const validatedParams = executeTransactionSchema.parse({
+      transactionId,
+      params,
+      escrowWalletId,
+      memo,
+    });
 
-    // Validate the parameters
-    const validatedParams = transactionParamsSchema.parse(params);
-
-    // Validate the escrow wallet ID if provided
-    const validatedEscrowWalletId = escrowWalletId
-      ? z.string().uuid().parse(escrowWalletId)
-      : undefined;
-
-    return this.client.request<TransactionExecution>(
+    const response = await this.client.request<Transaction>(
       'POST',
-      `/transactions/${validatedTransactionId}/execute`,
+      `/transactions/${validatedParams.transactionId}/execute`,
       {
-        params: validatedParams,
-        escrowWalletId: validatedEscrowWalletId,
-        memo,
+        params: validatedParams.params,
+        escrowWalletId: validatedParams.escrowWalletId,
+        memo: validatedParams.memo,
       }
     );
+
+    return transactionSchema.parse(response);
   }
 
   /**
    * Test a transaction without actually executing it
    * @param transactionId The ID of the transaction to test
    * @param params Configuration parameters for the transaction
-   * @returns Promise<TransactionParams> - Returns the result of the test execution
+   * @returns Promise<TransactionTestResult>
    * @throws {ZodError} If the parameters are invalid
    */
-  async test(transactionId: string, params: TransactionParams): Promise<TransactionParams> {
-    // Validate the transaction ID
-    const validatedTransactionId = z.string().uuid().parse(transactionId);
+  async test(transactionId: string, params: TransactionParams): Promise<TransactionTestResult> {
+    const validatedParams = testTransactionSchema.parse({
+      transactionId,
+      params,
+    });
 
-    // Validate the parameters
-    const validatedParams = transactionParamsSchema.parse(params);
-
-    return this.client.request<TransactionParams>(
+    const response = await this.client.request<TransactionTestResult>(
       'POST',
-      `/transactions/${validatedTransactionId}/test`,
-      { params: validatedParams }
+      `/transactions/${validatedParams.transactionId}/test`,
+      { params: validatedParams.params }
     );
+
+    return transactionTestResultSchema.parse(response);
   }
 
   /**
@@ -82,12 +98,13 @@ export class Transactions {
    * @throws {ZodError} If the ID is invalid
    */
   async get(id: string): Promise<Transaction> {
-    // Validate the transaction ID
-    const validatedId = z.string().uuid().parse(id);
+    const validatedParams = getTransactionSchema.parse({ id });
 
-    const response = await this.client.request<Transaction>('GET', `/transactions/${validatedId}`);
+    const response = await this.client.request<Transaction>(
+      'GET',
+      `/transactions/${validatedParams.id}`
+    );
 
-    // Validate the response
     return transactionSchema.parse(response);
   }
 
@@ -95,7 +112,7 @@ export class Transactions {
    * List transactions for a business
    * @param businessId The business ID to list transactions for
    * @param params Optional filter parameters
-   * @returns Promise<PagedResponse<Transaction>>
+   * @returns Promise<TransactionList>
    * @throws {ZodError} If the parameters are invalid
    */
   async list(
@@ -108,38 +125,25 @@ export class Transactions {
       status?: 'live' | 'archived' | 'both';
       contractAddress?: string;
     }
-  ): Promise<PagedResponse<Transaction>> {
-    // Validate the business ID
-    const validatedBusinessId = z.string().uuid().parse(businessId);
-
-    // Validate the parameters if provided
-    if (params) {
-      const paramsSchema = z.object({
-        pageSize: z.number().int().positive().optional(),
-        page: z.number().int().positive().optional(),
-        chainId: z.number().int().positive().optional(),
-        name: z.string().optional(),
-        status: z.enum(['live', 'archived', 'both']).optional(),
-        contractAddress: z.string().optional(),
-      });
-
-      paramsSchema.parse(params);
-    }
+  ): Promise<TransactionList> {
+    // Validate all parameters using the schema
+    const validatedParams = listTransactionsSchema.parse({
+      businessId,
+      ...params,
+    });
 
     const queryParams = new URLSearchParams();
-    if (params) {
-      Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined) {
-          queryParams.append(key, value.toString());
-        }
-      });
-    }
+    Object.entries(validatedParams).forEach(([key, value]) => {
+      if (value !== undefined && key !== 'businessId') {
+        queryParams.append(key, value.toString());
+      }
+    });
     const queryString = queryParams.toString();
     const path = queryString
-      ? `/business/${validatedBusinessId}/transactions?${queryString}`
-      : `/business/${validatedBusinessId}/transactions`;
+      ? `/business/${validatedParams.businessId}/transactions?${queryString}`
+      : `/business/${validatedParams.businessId}/transactions`;
 
-    const response = await this.client.request<PagedResponse<Transaction>>('GET', path);
+    const response = await this.client.request<TransactionList>('GET', path);
 
     // Validate the response
     return transactionListSchema.parse(response);
@@ -158,27 +162,21 @@ export class Transactions {
     params: TransactionParams,
     escrowWalletId?: string
   ): Promise<TransactionEstimate> {
-    // Validate the transaction ID
-    const validatedTransactionId = z.string().uuid().parse(transactionId);
-
-    // Validate the parameters
-    const validatedParams = transactionParamsSchema.parse(params);
-
-    // Validate the escrow wallet ID if provided
-    const validatedEscrowWalletId = escrowWalletId
-      ? z.string().uuid().parse(escrowWalletId)
-      : undefined;
+    const validatedParams = estimateTransactionSchema.parse({
+      transactionId,
+      params,
+      escrowWalletId,
+    });
 
     const response = await this.client.request<TransactionEstimate>(
       'POST',
-      `/transactions/${validatedTransactionId}/estimate`,
+      `/transactions/${validatedParams.transactionId}/estimate`,
       {
-        params: validatedParams,
-        escrowWalletId: validatedEscrowWalletId,
+        params: validatedParams.params,
+        escrowWalletId: validatedParams.escrowWalletId,
       }
     );
 
-    // Validate the response
     return transactionEstimateSchema.parse(response);
   }
 
@@ -186,28 +184,29 @@ export class Transactions {
    * Read the result of a view or pure function
    * @param transactionId The ID of the transaction to read
    * @param params Configuration parameters for the transaction
-   * @returns Promise<TransactionParams> - Returns the result of the read operation
+   * @returns Promise<any> The JSON value returned by the function
    * @throws {ZodError} If the parameters are invalid
    */
-  async read(transactionId: string, params: TransactionParams): Promise<TransactionParams> {
-    // Validate the transaction ID
-    const validatedTransactionId = z.string().uuid().parse(transactionId);
+  async read(transactionId: string, params: TransactionParams): Promise<any> {
+    const validatedParams = readTransactionSchema.parse({
+      transactionId,
+      params,
+    });
 
-    // Validate the parameters
-    const validatedParams = transactionParamsSchema.parse(params);
-
-    return this.client.request<TransactionParams>(
+    const response = await this.client.request<any>(
       'POST',
-      `/transactions/${validatedTransactionId}/read`,
-      { params: validatedParams }
+      `/transactions/${validatedParams.transactionId}/read`,
+      { params: validatedParams.params }
     );
+
+    return response;
   }
 
   /**
    * Create a new transaction
    * @param businessId The business ID to create the transaction for
    * @param params Transaction creation parameters
-   * @returns Promise<Transaction[]>
+   * @returns Promise<Transaction>
    * @throws {ZodError} If the parameters are invalid
    */
   async create(
@@ -219,26 +218,24 @@ export class Transactions {
       name: string;
       description: string;
       functionName: string;
-      stateMutability: 'nonpayable' | 'payable' | 'view' | 'pure';
-      inputs: SolidityStructParam[];
-      outputs: SolidityStructParam[];
-      callbackUrl?: string;
+      stateMutability: TransactionStateMutability;
+      inputs: NewSolidityStructParam[];
+      outputs: NewSolidityStructParam[];
+      callbackUrl?: string | null;
     }
-  ): Promise<Transaction[]> {
-    // Validate the business ID
-    const validatedBusinessId = z.string().uuid().parse(businessId);
+  ): Promise<Transaction> {
+    const validatedParams = createTransactionSchema.parse({
+      businessId,
+      params,
+    });
 
-    // Validate the creation parameters
-    const validatedParams = transactionCreateSchema.parse(params);
-
-    const response = await this.client.request<Transaction[]>(
+    const response = await this.client.request<Transaction>(
       'POST',
-      `/business/${validatedBusinessId}/transactions`,
+      `/business/${validatedParams.businessId}/transactions`,
       validatedParams
     );
 
-    // Validate the response
-    return z.array(transactionSchema).parse(response);
+    return transactionSchema.parse(response);
   }
 
   /**
@@ -248,7 +245,7 @@ export class Transactions {
    * @returns Promise<Transaction[]>
    * @throws {ZodError} If the parameters are invalid
    */
-  async importFromAbi(
+  async importFromABI(
     businessId: string,
     params: {
       chain: number;
@@ -256,24 +253,21 @@ export class Transactions {
       escrowWalletId: string;
       name: string;
       description: string;
-      functionName: string;
       abi: EthereumAbi;
     }
   ): Promise<Transaction[]> {
-    // Validate the business ID
-    const validatedBusinessId = z.string().uuid().parse(businessId);
-
-    // Validate the import parameters
-    const validatedParams = transactionCreateSchema.parse(params);
+    const validatedParams = importFromABISchema.parse({
+      businessId,
+      ...params,
+    });
 
     const response = await this.client.request<Transaction[]>(
       'POST',
-      `/business/${validatedBusinessId}/transactions/abi`,
+      `/business/${validatedParams.businessId}/transactions/abi`,
       validatedParams
     );
 
-    // Validate the response
-    return z.array(transactionSchema).parse(response);
+    return response.map((item) => transactionSchema.parse(item));
   }
 
   /**
@@ -297,19 +291,17 @@ export class Transactions {
       callbackUrl?: string | null;
     }
   ): Promise<Transaction> {
-    // Validate the transaction ID
-    const validatedTransactionId = z.string().uuid().parse(transactionId);
-
-    // Validate the update parameters
-    const validatedParams = transactionUpdateSchema.parse(params);
+    const validatedParams = updateTransactionSchema.parse({
+      transactionId,
+      params,
+    });
 
     const response = await this.client.request<Transaction>(
       'PUT',
-      `/transactions/${validatedTransactionId}`,
-      validatedParams
+      `/transactions/${validatedParams.transactionId}`,
+      validatedParams.params
     );
 
-    // Validate the response
     return transactionSchema.parse(response);
   }
 
@@ -317,32 +309,79 @@ export class Transactions {
    * Delete a transaction
    * @param transactionId The ID of the transaction to delete
    * @returns Promise<void>
-   * @throws {ZodError} If the transaction ID is invalid
+   * @throws {ZodError} If the ID is invalid
    */
   async delete(transactionId: string): Promise<void> {
-    // Validate the transaction ID
-    const validatedTransactionId = z.string().uuid().parse(transactionId);
+    const validatedParams = deleteTransactionSchema.parse({ transactionId });
 
-    return this.client.request<void>('DELETE', `/transactions/${validatedTransactionId}`);
+    await this.client.request<void>('DELETE', `/transactions/${validatedParams.transactionId}`);
   }
 
   /**
    * Restore a deleted transaction
    * @param transactionId The ID of the transaction to restore
    * @returns Promise<Transaction[]>
-   * @throws {ZodError} If the transaction ID is invalid
+   * @throws {ZodError} If the ID is invalid
    */
   async restore(transactionId: string): Promise<Transaction[]> {
-    // Validate the transaction ID
-    const validatedTransactionId = z.string().uuid().parse(transactionId);
+    const validatedParams = restoreTransactionSchema.parse({ transactionId });
 
     const response = await this.client.request<Transaction[]>(
       'PUT',
-      `/transactions/${validatedTransactionId}/restore`,
-      { rewardIds: [validatedTransactionId] }
+      `/transactions/${validatedParams.transactionId}/restore`
     );
 
-    // Validate the response
-    return z.array(transactionSchema).parse(response);
+    return response.map((item) => transactionSchema.parse(item));
+  }
+
+  /**
+   * Search for contract descriptions
+   * @param query Search query
+   * @param params Optional search parameters
+   * @returns Promise<FullContractDescription[]>
+   * @throws {ZodError} If the parameters are invalid
+   */
+  async search(query: string, params?: { chain?: number }): Promise<FullContractDescription[]> {
+    const validatedParams = contractSearchSchema.parse({
+      query,
+      ...params,
+    });
+
+    const response = await this.client.request<FullContractDescription[]>(
+      'POST',
+      '/contracts/descriptions/search',
+      validatedParams
+    );
+
+    return response.map((item) => fullContractDescriptionSchema.parse(item));
+  }
+
+  /**
+   * Create transactions from a contract description
+   * @param businessId The business ID to create the transactions for
+   * @param params Contract transaction parameters
+   * @returns Promise<Transaction[]>
+   * @throws {ZodError} If the parameters are invalid
+   */
+  async contractTransactions(
+    businessId: string,
+    params: {
+      chain: number;
+      contractAddress: string;
+      escrowWalletId: string;
+    }
+  ): Promise<Transaction[]> {
+    const validatedParams = contractTransactionsSchema.parse({
+      businessId,
+      ...params,
+    });
+
+    const response = await this.client.request<Transaction[]>(
+      'POST',
+      `/business/${validatedParams.businessId}/transactions/contract`,
+      validatedParams
+    );
+
+    return response.map((item) => transactionSchema.parse(item));
   }
 }
