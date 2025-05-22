@@ -2,77 +2,113 @@ package client
 
 import (
 	"context"
+	"fmt"
 
 	swagger "github.com/1shotapi/go-client/internal/generated"
-	"github.com/antihax/optional"
 )
 
+// Client represents a 1Shot API client
 type Client struct {
-	api *swagger.APIClient
+	api          *swagger.APIClient
+	businessId   string
+	accessToken  string
+	transactions *Transactions
+	wallets      *Wallets
+	executions   *Executions
+	structs      *Structs
 }
 
-// NewClient creates a new client with the given API key
-func NewClient(apiKey string) *Client {
-	cfg := swagger.NewConfiguration()
-	cfg.AddDefaultHeader("Authorization", "Bearer "+apiKey)
-	return &Client{
-		api: swagger.NewAPIClient(cfg),
-	}
+// ClientConfig holds the configuration for creating a new client
+type ClientConfig struct {
+	ClientID     string
+	ClientSecret string
+	BusinessID   string
+	BaseURL      string // Optional, defaults to production URL
 }
 
-// Transactions returns a new Transactions client
-func (c *Client) Transactions() *TransactionsClient {
-	return &TransactionsClient{
-		api: c.api.TransactionApi,
-	}
-}
-
-// TransactionsClient handles all transaction-related operations
-type TransactionsClient struct {
-	api *swagger.TransactionApiService
-}
-
-// ListTransactionsParams contains optional parameters for listing transactions
-type ListTransactionsParams struct {
-	PageSize        *int32
-	Page            *int32
-	ChainId         *swagger.EChain
-	Name            *string
-	Status          *swagger.EDeletedStatusSelector
-	ContractAddress *string
-}
-
-// List returns a list of transactions
-func (c *TransactionsClient) List(ctx context.Context, params *ListTransactionsParams) ([]swagger.Transaction, error) {
-	opts := &swagger.TransactionApiBusinessBusinessIdTransactionsGetOpts{}
-	if params != nil {
-		if params.PageSize != nil {
-			opts.PageSize = optional.NewInterface(*params.PageSize)
-		}
-		if params.Page != nil {
-			opts.Page = optional.NewInterface(*params.Page)
-		}
-		if params.ChainId != nil {
-			opts.ChainId = optional.NewInterface(*params.ChainId)
-		}
-		if params.Name != nil {
-			opts.Name = optional.NewString(*params.Name)
-		}
-		if params.Status != nil {
-			opts.Status = optional.NewInterface(*params.Status)
-		}
-		if params.ContractAddress != nil {
-			opts.ContractAddress = optional.NewInterface(*params.ContractAddress)
-		}
+// NewClient creates a new client with the given configuration
+func NewClient(cfg ClientConfig) (*Client, error) {
+	// Create base configuration
+	apiCfg := swagger.NewConfiguration()
+	if cfg.BaseURL != "" {
+		apiCfg.BasePath = cfg.BaseURL
 	}
 
-	// TODO: Get business ID from configuration or context
-	businessId := "your-business-id"
-	resp, _, err := c.api.BusinessBusinessIdTransactionsGet(ctx, businessId, opts)
+	// Create API client
+	apiClient := swagger.NewAPIClient(apiCfg)
+
+	// Create our client
+	c := &Client{
+		api:        apiClient,
+		businessId: cfg.BusinessID,
+	}
+
+	// Get initial access token
+	if err := c.refreshToken(cfg.ClientID, cfg.ClientSecret); err != nil {
+		return nil, fmt.Errorf("failed to get initial access token: %w", err)
+	}
+
+	// Initialize categories
+	c.transactions = &Transactions{
+		api:        apiClient.TransactionApi,
+		businessId: cfg.BusinessID,
+	}
+	c.wallets = &Wallets{
+		api:        apiClient.EscrowWalletsApi,
+		businessId: cfg.BusinessID,
+	}
+	c.executions = &Executions{
+		api:        apiClient.TransactionExecutionApi,
+		businessId: cfg.BusinessID,
+	}
+	c.structs = &Structs{
+		api:        apiClient.SolidityStructsApi,
+		businessId: cfg.BusinessID,
+	}
+
+	return c, nil
+}
+
+// refreshToken gets a new access token using client credentials
+func (c *Client) refreshToken(clientID, clientSecret string) error {
+	// Make the token request
+	resp, _, err := c.api.AuthenticationApi.GetAccessToken(
+		context.Background(),
+		"client_credentials",
+		clientID,
+		clientSecret,
+	)
 	if err != nil {
-		return nil, err
+		return fmt.Errorf("token request failed: %w", err)
 	}
-	return resp.Response, nil
+
+	// Store the token
+	c.accessToken = resp.AccessToken
+
+	// Update the API client's default header
+	apiCfg := swagger.NewConfiguration()
+	apiCfg.AddDefaultHeader("Authorization", "Bearer "+c.accessToken)
+	c.api = swagger.NewAPIClient(apiCfg)
+
+	return nil
 }
 
-// Add ergonomic methods here that use c.api
+// Transactions returns the transactions category client
+func (c *Client) Transactions() *Transactions {
+	return c.transactions
+}
+
+// Wallets returns the wallets category client
+func (c *Client) Wallets() *Wallets {
+	return c.wallets
+}
+
+// Executions returns the executions category client
+func (c *Client) Executions() *Executions {
+	return c.executions
+}
+
+// Structs returns the structs category client
+func (c *Client) Structs() *Structs {
+	return c.structs
+}

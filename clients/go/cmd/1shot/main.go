@@ -10,20 +10,29 @@ import (
 )
 
 func main() {
-	// Get API key from environment variable
-	apiKey := os.Getenv("ONESHOT_API_KEY")
-	if apiKey == "" {
-		log.Fatal("ONESHOT_API_KEY environment variable is required")
+	// Get credentials from environment variables
+	clientID := os.Getenv("ONESHOT_CLIENT_ID")
+	clientSecret := os.Getenv("ONESHOT_CLIENT_SECRET")
+	businessID := os.Getenv("ONESHOT_BUSINESS_ID")
+
+	if clientID == "" || clientSecret == "" || businessID == "" {
+		log.Fatal("ONESHOT_CLIENT_ID, ONESHOT_CLIENT_SECRET, and ONESHOT_BUSINESS_ID environment variables are required")
 	}
 
 	// Create a new client
-	c := client.NewClient(apiKey)
+	c, err := client.NewClient(client.ClientConfig{
+		ClientID:     clientID,
+		ClientSecret: clientSecret,
+		BusinessID:   businessID,
+	})
+	if err != nil {
+		log.Fatalf("Failed to create client: %v", err)
+	}
 
 	// Create a context
 	ctx := context.Background()
 
 	// Example: List transactions
-	// transactions, err := c.Transactions().List(ctx, nil)
 	transactions, err := c.Transactions().List(ctx, nil)
 	if err != nil {
 		log.Fatalf("Failed to list transactions: %v", err)
