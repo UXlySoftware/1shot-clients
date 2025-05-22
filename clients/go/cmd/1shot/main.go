@@ -7,16 +7,22 @@ import (
 	"os"
 
 	"github.com/1shotapi/go-client/pkg/client"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	// Load .env file
+	if err := godotenv.Load(); err != nil {
+		log.Fatal("Error loading .env file. Please create a .env file with ONESHOT_CLIENT_ID, ONESHOT_CLIENT_SECRET, and ONESHOT_BUSINESS_ID")
+	}
+
 	// Get credentials from environment variables
 	clientID := os.Getenv("ONESHOT_CLIENT_ID")
 	clientSecret := os.Getenv("ONESHOT_CLIENT_SECRET")
 	businessID := os.Getenv("ONESHOT_BUSINESS_ID")
 
 	if clientID == "" || clientSecret == "" || businessID == "" {
-		log.Fatal("ONESHOT_CLIENT_ID, ONESHOT_CLIENT_SECRET, and ONESHOT_BUSINESS_ID environment variables are required")
+		log.Fatal("ONESHOT_CLIENT_ID, ONESHOT_CLIENT_SECRET, and ONESHOT_BUSINESS_ID must be set in .env file")
 	}
 
 	// Create a new client
