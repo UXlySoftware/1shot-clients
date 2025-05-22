@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	swagger "github.com/1shotapi/go-client/internal/generated"
+	swagger "github.com/UXlySoftware/1shot-clients/clients/go/internal/generated"
 )
 
 // Client represents a 1Shot API client
@@ -12,6 +12,7 @@ type Client struct {
 	api          *swagger.APIClient
 	businessId   string
 	accessToken  string
+	baseURL      string
 	transactions *Transactions
 	wallets      *Wallets
 	executions   *Executions
@@ -41,14 +42,10 @@ func NewClient(cfg ClientConfig) (*Client, error) {
 	c := &Client{
 		api:        apiClient,
 		businessId: cfg.BusinessID,
+		baseURL:    cfg.BaseURL,
 	}
 
-	// Get initial access token
-	if err := c.refreshToken(cfg.ClientID, cfg.ClientSecret); err != nil {
-		return nil, fmt.Errorf("failed to get initial access token: %w", err)
-	}
-
-	// Initialize categories
+	// Initialize categories first
 	c.transactions = &Transactions{
 		api:        apiClient.TransactionApi,
 		businessId: cfg.BusinessID,
@@ -64,6 +61,11 @@ func NewClient(cfg ClientConfig) (*Client, error) {
 	c.structs = &Structs{
 		api:        apiClient.SolidityStructsApi,
 		businessId: cfg.BusinessID,
+	}
+
+	// Get initial access token after everything is initialized
+	if err := c.refreshToken(cfg.ClientID, cfg.ClientSecret); err != nil {
+		return nil, fmt.Errorf("failed to get initial access token: %w", err)
 	}
 
 	return c, nil
@@ -85,10 +87,21 @@ func (c *Client) refreshToken(clientID, clientSecret string) error {
 	// Store the token
 	c.accessToken = resp.AccessToken
 
-	// Update the API client's default header
+	// Create new configuration with the token
 	apiCfg := swagger.NewConfiguration()
+	if c.baseURL != "" {
+		apiCfg.BasePath = c.baseURL
+	}
 	apiCfg.AddDefaultHeader("Authorization", "Bearer "+c.accessToken)
+
+	// Create new API client
 	c.api = swagger.NewAPIClient(apiCfg)
+
+	// Update category clients
+	c.transactions.api = c.api.TransactionApi
+	c.wallets.api = c.api.EscrowWalletsApi
+	c.executions.api = c.api.TransactionExecutionApi
+	c.structs.api = c.api.SolidityStructsApi
 
 	return nil
 }

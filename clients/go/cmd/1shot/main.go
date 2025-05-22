@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/1shotapi/go-client/pkg/client"
+	"github.com/UXlySoftware/1shot-clients/clients/go/pkg/client"
 	"github.com/joho/godotenv"
 )
 
