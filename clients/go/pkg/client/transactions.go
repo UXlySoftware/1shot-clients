@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+	"encoding/json"
 
 	swagger "github.com/1shotapi/go-client/internal/generated"
 	"github.com/antihax/optional"
@@ -17,8 +18,15 @@ type Transactions struct {
 func (t *Transactions) Execute(ctx context.Context, transactionId string, params map[string]interface{}, escrowWalletId, memo *string) (*swagger.TransactionExecution, error) {
 	body := swagger.TransactionIdExecuteBody{}
 	if params != nil {
-		obj := swagger.Object(params)
-		body.Params = &obj
+		jsonBytes, err := json.Marshal(params)
+		if err != nil {
+			return nil, err
+		}
+		var jsonValue swagger.JsonValue
+		if err := json.Unmarshal(jsonBytes, &jsonValue); err != nil {
+			return nil, err
+		}
+		body.Params = &jsonValue
 	}
 	if escrowWalletId != nil {
 		body.EscrowWalletId = *escrowWalletId
@@ -37,8 +45,15 @@ func (t *Transactions) Execute(ctx context.Context, transactionId string, params
 func (t *Transactions) Test(ctx context.Context, transactionId string, params map[string]interface{}) (*swagger.TransactionTestResult, error) {
 	body := swagger.TransactionIdTestBody{}
 	if params != nil {
-		obj := swagger.Object(params)
-		body.Params = &obj
+		jsonBytes, err := json.Marshal(params)
+		if err != nil {
+			return nil, err
+		}
+		var jsonValue swagger.JsonValue
+		if err := json.Unmarshal(jsonBytes, &jsonValue); err != nil {
+			return nil, err
+		}
+		body.Params = &jsonValue
 	}
 	resp, _, err := t.api.TransactionsTransactionIdTestPost(ctx, body, transactionId)
 	if err != nil {
@@ -88,8 +103,15 @@ func (t *Transactions) List(ctx context.Context, pageSize, page *int32, chainId 
 func (t *Transactions) Estimate(ctx context.Context, transactionId string, params map[string]interface{}, escrowWalletId *string) (*swagger.TransactionEstimate, error) {
 	body := swagger.TransactionIdEstimateBody{}
 	if params != nil {
-		obj := swagger.Object(params)
-		body.Params = &obj
+		jsonBytes, err := json.Marshal(params)
+		if err != nil {
+			return nil, err
+		}
+		var jsonValue swagger.JsonValue
+		if err := json.Unmarshal(jsonBytes, &jsonValue); err != nil {
+			return nil, err
+		}
+		body.Params = &jsonValue
 	}
 	if escrowWalletId != nil {
 		body.EscrowWalletId = *escrowWalletId
@@ -102,17 +124,32 @@ func (t *Transactions) Estimate(ctx context.Context, transactionId string, param
 }
 
 // Read reads the result of a view or pure function
-func (t *Transactions) Read(ctx context.Context, transactionId string, params map[string]interface{}) (*swagger.Object, error) {
+func (t *Transactions) Read(ctx context.Context, transactionId string, params map[string]interface{}) (map[string]interface{}, error) {
 	body := swagger.TransactionIdReadBody{}
 	if params != nil {
-		obj := swagger.Object(params)
-		body.Params = &obj
+		jsonBytes, err := json.Marshal(params)
+		if err != nil {
+			return nil, err
+		}
+		var jsonValue swagger.JsonValue
+		if err := json.Unmarshal(jsonBytes, &jsonValue); err != nil {
+			return nil, err
+		}
+		body.Params = &jsonValue
 	}
 	resp, _, err := t.api.TransactionsTransactionIdReadPost(ctx, body, transactionId)
 	if err != nil {
 		return nil, err
 	}
-	return resp, nil
+	jsonBytes, err := json.Marshal(resp)
+	if err != nil {
+		return nil, err
+	}
+	var result map[string]interface{}
+	if err := json.Unmarshal(jsonBytes, &result); err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 // Create creates a new transaction
@@ -158,7 +195,7 @@ func (t *Transactions) ImportFromABI(
 	escrowWalletId string,
 	name string,
 	description string,
-	abi swagger.Object,
+	abi []swagger.OneOfEthereumAbiItems,
 ) ([]swagger.Transaction, error) {
 	body := swagger.TransactionsAbiBody{
 		Chain:           &chain,
@@ -166,7 +203,7 @@ func (t *Transactions) ImportFromABI(
 		EscrowWalletId:  escrowWalletId,
 		Name:            name,
 		Description:     description,
-		Abi:             abi,
+		Abi:             &abi,
 	}
 	resp, _, err := t.api.BusinessBusinessIdTransactionsAbiPost(ctx, body, t.businessId)
 	if err != nil {
@@ -183,16 +220,33 @@ func (t *Transactions) Update(
 	contractAddress, escrowWalletId, name, description, functionName, callbackUrl *string,
 	payable, nativeTransaction *bool,
 ) (*swagger.Transaction, error) {
-	body := swagger.TransactionsTransactionIdBody{
-		Chain:             chain,
-		ContractAddress:   contractAddress,
-		EscrowWalletId:    escrowWalletId,
-		Name:              name,
-		Description:       description,
-		FunctionName:      functionName,
-		Payable:           payable,
-		NativeTransaction: nativeTransaction,
-		CallbackUrl:       callbackUrl,
+	body := swagger.TransactionsTransactionIdBody{}
+	if chain != nil {
+		body.Chain = chain
+	}
+	if contractAddress != nil {
+		body.ContractAddress = *contractAddress
+	}
+	if escrowWalletId != nil {
+		body.EscrowWalletId = *escrowWalletId
+	}
+	if name != nil {
+		body.Name = *name
+	}
+	if description != nil {
+		body.Description = *description
+	}
+	if functionName != nil {
+		body.FunctionName = *functionName
+	}
+	if payable != nil {
+		body.Payable = *payable
+	}
+	if nativeTransaction != nil {
+		body.NativeTransaction = *nativeTransaction
+	}
+	if callbackUrl != nil {
+		body.CallbackUrl = *callbackUrl
 	}
 	resp, _, err := t.api.TransactionsTransactionIdPut(ctx, body, transactionId)
 	if err != nil {

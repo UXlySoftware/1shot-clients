@@ -33,7 +33,8 @@ func main() {
 	ctx := context.Background()
 
 	// Example: List transactions
-	transactions, err := c.Transactions().List(ctx, nil)
+	// All parameters are optional, so we can pass nil for all of them
+	transactions, err := c.Transactions().List(ctx, nil, nil, nil, nil, nil, nil)
 	if err != nil {
 		log.Fatalf("Failed to list transactions: %v", err)
 	}
