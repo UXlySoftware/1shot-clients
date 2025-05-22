@@ -1,11 +1,11 @@
 # 1Shot Go Client
 
-This is the official Go client for the 1Shot API, providing a simple and efficient way to interact with the 1Shot platform programmatically.
+This is the official Go client for the 1Shot API. It provides a simple and type-safe way to interact with the 1Shot API from Go applications.
 
 ## Installation
 
 ```bash
-go get github.com/1shotapi/go-client
+go get github.com/UXlySoftware/1shot-clients/clients/go
 ```
 
 ## Environment Setup
@@ -32,7 +32,7 @@ import (
     "log"
     "os"
 
-    "github.com/1shotapi/go-client/pkg/client"
+    "github.com/UXlySoftware/1shot-clients/clients/go/pkg/client"
 )
 
 func main() {
@@ -115,6 +115,28 @@ if err != nil {
 
 // Get execution details
 execution, err := c.Executions().Get(ctx, "execution-id")
+```
+
+## Versioning
+
+This Go client follows semantic versioning and is versioned independently of other clients in this monorepo. The versioning is managed through Git tags in the format `clients/go/vX.Y.Z`.
+
+To use a specific version:
+
+```bash
+# Latest version
+go get github.com/UXlySoftware/1shot-clients/clients/go
+
+# Specific version
+go get github.com/UXlySoftware/1shot-clients/clients/go@v0.1.0
+```
+
+In your `go.mod`, you can specify version constraints:
+
+```go
+require (
+    github.com/UXlySoftware/1shot-clients/clients/go v0.1.0  // exact version
+)
 ```
 
 ## Development
@@ -289,4 +311,4 @@ The example will:
 
 ## License
 
-Apache 2.0 
+This project is licensed under the MIT License - see the [LICENSE](../LICENSE) file for details. 
