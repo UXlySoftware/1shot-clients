@@ -9,6 +9,7 @@ import {
   TransactionTestResult,
   TransactionParams,
   TransactionStateMutability,
+  ERC7702Authorization,
 } from '../types/transactions.js';
 import {
   transactionSchema,
@@ -47,13 +48,15 @@ export class Transactions {
     transactionId: string,
     params: TransactionParams,
     escrowWalletId?: string,
-    memo?: string
+    memo?: string,
+    authorizationList?: ERC7702Authorization[]
   ): Promise<Transaction> {
     const validatedParams = executeTransactionSchema.parse({
       transactionId,
       params,
       escrowWalletId,
       memo,
+      authorizationList,
     });
 
     const response = await this.client.request<Transaction>(
@@ -63,6 +66,7 @@ export class Transactions {
         params: validatedParams.params,
         escrowWalletId: validatedParams.escrowWalletId,
         memo: validatedParams.memo,
+        authorizationList: validatedParams.authorizationList,
       }
     );
 

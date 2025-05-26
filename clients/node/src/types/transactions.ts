@@ -22,6 +22,7 @@ import {
   contractSearchSchema,
   contractTransactionsSchema,
   transactionTestResultSchema,
+  erc7702AuthorizationSchema,
 } from '../validation/transaction.js';
 
 export type TransactionStateMutability = z.infer<typeof transactionStateMutabilitySchema>;
@@ -48,3 +49,4 @@ export type ContractFunctionParamDescription = z.infer<
 export type ContractSearch = z.infer<typeof contractSearchSchema>;
 export type ContractTransactions = z.infer<typeof contractTransactionsSchema>;
 export type TransactionTestResult = z.infer<typeof transactionTestResultSchema>;
+export type ERC7702Authorization = z.infer<typeof erc7702AuthorizationSchema>;

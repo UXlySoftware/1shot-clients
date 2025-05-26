@@ -293,6 +293,29 @@ export const listTransactionsSchema = z
   })
   .describe('Parameters for listing transactions. Used to filter and paginate transaction lists');
 
+// Validation for ERC7702Authorization
+export const erc7702AuthorizationSchema = z
+  .object({
+    address: z
+      .string()
+      .describe('The contract address that is being authorized to act on behalf of the EOA'),
+    nonce: z
+      .string()
+      .describe(
+        'The delegation nonce. This starts at 0 and must be positive. The EOA must keep track of this nonce itself'
+      ),
+    chainId: z.number().int().positive().describe('The chain ID where the authorization is valid'),
+    signature: z
+      .string()
+      .regex(/^0x[a-fA-F0-9]+$/)
+      .describe(
+        'The signature of the authorization, from the EOA that is delegating the authorization to the contract at address'
+      ),
+  })
+  .describe(
+    'A single authorization for an ERC-7702 transaction. It represents a single potential delegation from an EOA to a contract'
+  );
+
 // Validation for executing a transaction
 export const executeTransactionSchema = z
   .object({
@@ -306,7 +329,7 @@ export const executeTransactionSchema = z
       .uuid()
       .optional()
       .describe(
-        'Optional ID of the escrow wallet to use. Overrides the default escrow wallet if specified'
+        'The ID of the escrow wallet that will execute the transaction. If not provided, the default escrow wallet for the transaction will be used'
       ),
     memo: z
       .string()
@@ -314,9 +337,15 @@ export const executeTransactionSchema = z
       .describe(
         "Optional text supplied when the transaction is executed. This can be a note to the user about why the execution was done, or formatted information such as JSON that can be used by the user's system"
       ),
+    authorizationList: z
+      .array(erc7702AuthorizationSchema)
+      .optional()
+      .describe(
+        'A list of authorizations for the transaction. If you are using ERC-7702, you must provide at least one authorization'
+      ),
   })
   .describe(
-    'Parameters for executing a transaction. Used to run a transaction with specific parameters and optional overrides'
+    'Parameters required to execute a transaction. Includes the function parameters, optional escrow wallet override, and optional memo'
   );
 
 // Validation for testing a transaction

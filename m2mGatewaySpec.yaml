@@ -1,4 +1,4 @@
-openapi: 3.1.1
+openapi: 3.0.3
 info:
   title: M2M Gateway API
   description: The M2M Gateway API is for communication by 3rd party servers for automated tasks in the Framework
@@ -172,6 +172,12 @@ paths:
                 memo:
                   type: string
                   description: You may include any text you like when you execute a transaction, as a note to yourself about why it was done. This text can be JSON or similar if you want to store formatted data.
+                authorizationList:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/ERC7702Authorization"
+                  description: A list of authorizations for the transaction. If you are using ERC-7702, you must provide at least one authorization.
+                  example: [{"address": "0x1234567890abcdef", "nonce": "1", "chainId": "1", "signature": "0x1234567890abcdef"}]
       responses:
         200:
           description: "Success"
@@ -1351,6 +1357,7 @@ components:
           $ref: "#/components/schemas/EscrowWalletAddress"
         balance:
           type: string
+          format: big-number-string
           description: The balance of the token as a Big Number String
           example: 123400000000000000000
         decimals:
@@ -1638,15 +1645,19 @@ components:
           type: string
         gasAmount:
           type: string
-          description: The amount of gas units it will use
+          format: big-number-string
+          description: The amount of gas units it will use. This is a stringified bigint.
         maxFeePerGas:
           type: string
+          format: big-number-string
           nullable: true
         maxPriorityFeePerGas:
           type: string
+          format: big-number-string
           nullable: true
         gasPrice:
           type: string
+          format: big-number-string
           nullable: true
       required:
         - chain
@@ -1916,3 +1927,26 @@ components:
         - success
         - result
         - error
+
+    ERC7702Authorization:
+      description: A single authorization for an ERC-7702 transaction. It represents a single potential delegation from an EOA to a contract. The EOA must sign a message with the contract address, the chain ID, and a nonce. Authorizations are sticky, once a transaction has been executed with an authorization, future transactions may be submitted for the EOA using the authorized contract without a new authorization being submitted.
+      type: object
+      properties:
+        address:
+          $ref: "#/components/schemas/ContractAddress"
+        nonce:
+          type: string
+          format: big-number-string
+          description: The delegation nonce. This starts at 0 and must be positive. The EOA must keep track of this nonce itself.
+        chainId:
+          $ref: "#/components/schemas/EChain"
+        signature:
+          type: string
+          format: hex-string
+          description: The signature of the authorization, from the EOA that is delegating the authorization to the contract at address.
+          example: "0x1234567890abcdef"
+      required:
+        - address
+        - nonce
+        - chainId
+        - signature
