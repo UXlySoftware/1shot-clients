@@ -19,6 +19,7 @@ from uxly_1shot_client.models.transaction import (
     FullContractDescription,
     ContractSearchParams,
     ContractTransactionsParams,
+    ERC7702Authorization,
 )
 
 class BaseTransactions:
@@ -236,6 +237,7 @@ class SyncTransactions(BaseTransactions):
         params: Dict[str, Any],
         escrow_wallet_id: Optional[str] = None,
         memo: Optional[str] = None,
+        authorization_list: Optional[List[ERC7702Authorization]] = None,
     ) -> TransactionExecution:
         """Execute a transaction. You can only execute transactions that are payable or nonpayable. Use /read for view and pure transactions.
 
@@ -244,6 +246,7 @@ class SyncTransactions(BaseTransactions):
             params: Parameters for the transaction
             escrow_wallet_id: Optional ID of the escrow wallet to use
             memo: Optional memo for the execution. You may include any text you like when you execute a transaction, as a note to yourself about why it was done. This text can be JSON or similar if you want to store formatted data.
+            authorization_list: Optional list of ERC-7702 authorizations. If you are using ERC-7702, you must provide at least one authorization.
 
         Returns:
             The execution result
@@ -256,6 +259,8 @@ class SyncTransactions(BaseTransactions):
             data["escrowWalletId"] = escrow_wallet_id
         if memo is not None:
             data["memo"] = memo
+        if authorization_list is not None:
+            data["authorizationList"] = [auth.model_dump(by_alias=True) for auth in authorization_list]
 
         response = self._client._request(
             "POST",
@@ -554,6 +559,7 @@ class AsyncTransactions(BaseTransactions):
         params: Dict[str, Any],
         escrow_wallet_id: Optional[str] = None,
         memo: Optional[str] = None,
+        authorization_list: Optional[List[ERC7702Authorization]] = None,
     ) -> TransactionExecution:
         """Execute a transaction. You can only execute transactions that are payable or nonpayable. Use /read for view and pure transactions.
 
@@ -562,6 +568,7 @@ class AsyncTransactions(BaseTransactions):
             params: Parameters for the transaction
             escrow_wallet_id: Optional ID of the escrow wallet to use
             memo: Optional memo for the execution. You may include any text you like when you execute a transaction, as a note to yourself about why it was done. This text can be JSON or similar if you want to store formatted data.
+            authorization_list: Optional list of ERC-7702 authorizations. If you are using ERC-7702, you must provide at least one authorization.
 
         Returns:
             The execution result
@@ -574,6 +581,8 @@ class AsyncTransactions(BaseTransactions):
             data["escrowWalletId"] = escrow_wallet_id
         if memo is not None:
             data["memo"] = memo
+        if authorization_list is not None:
+            data["authorizationList"] = [auth.model_dump(by_alias=True) for auth in authorization_list]
 
         response = await self._client._request(
             "POST",

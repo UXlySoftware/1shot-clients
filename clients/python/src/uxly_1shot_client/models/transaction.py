@@ -150,6 +150,37 @@ class TransactionTestResult(BaseModel):
     error: Optional[Dict[str, Any]] = Field(None, description="The error that occurred, if the transaction was not successful")
 
 
+class ERC7702Authorization(BaseModel):
+    """A single authorization for an ERC-7702 transaction. It represents a single potential delegation from an EOA to a contract."""
+
+    address: str = Field(..., description="The contract address that is being authorized to act on behalf of the EOA")
+    nonce: str = Field(..., description="The delegation nonce. This starts at 0 and must be positive. The EOA must keep track of this nonce itself")
+    chain_id: int = Field(..., alias="chainId", description="The chain ID where the authorization is valid")
+    signature: str = Field(..., description="The signature of the authorization, from the EOA that is delegating the authorization to the contract at address")
+
+    @validator('address')
+    def validate_address(cls, v):
+        if not v.startswith('0x'):
+            raise ValueError('Address must start with 0x')
+        if len(v) != 42:
+            raise ValueError('Address must be 42 characters long (including 0x)')
+        return v
+
+    @validator('chain_id')
+    def validate_chain_id(cls, v):
+        if v not in VALID_CHAIN_IDS:
+            raise ValueError(f'Chain ID must be one of {VALID_CHAIN_IDS}')
+        return v
+
+    @validator('signature')
+    def validate_signature(cls, v):
+        if not v.startswith('0x'):
+            raise ValueError('Signature must start with 0x')
+        if not all(c in '0123456789abcdefABCDEF' for c in v[2:]):
+            raise ValueError('Signature must contain only hex characters')
+        return v
+
+
 class TransactionCreateParams(BaseModel):
     """Parameters for creating a new Transaction. A Transaction is sometimes referred to as an Endpoint. A Transaction corresponds to a single method on a smart contract."""
     
