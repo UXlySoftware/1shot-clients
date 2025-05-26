@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 // Validation for transaction execution status
 export const transactionExecutionStatusSchema = z
-  .enum(['Submitted', 'Completed', 'Retrying', 'Failed'])
+  .enum(['Submitted', 'Completed', 'Retrying', 'Failed', 'Pending'])
   .describe(
     'The current status of a transaction execution. Tracks the lifecycle of a transaction from submission to completion or failure. Used for monitoring and error handling'
   );

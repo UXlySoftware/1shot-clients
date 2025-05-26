@@ -31,6 +31,8 @@ import {
   contractTransactionsSchema,
   transactionTestResultSchema,
 } from '../validation/transaction.js';
+import { TransactionExecution } from '../types/execution.js';
+import { transactionExecutionSchema } from '../validation/execution.js';
 
 export class Transactions {
   constructor(private client: IOneShotClient) {}
@@ -50,7 +52,7 @@ export class Transactions {
     escrowWalletId?: string,
     memo?: string,
     authorizationList?: ERC7702Authorization[]
-  ): Promise<Transaction> {
+  ): Promise<TransactionExecution> {
     const validatedParams = executeTransactionSchema.parse({
       transactionId,
       params,
@@ -70,7 +72,7 @@ export class Transactions {
       }
     );
 
-    return transactionSchema.parse(response);
+    return transactionExecutionSchema.parse(response);
   }
 
   /**
