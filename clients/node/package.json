@@ -19,7 +19,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/uxly/1shot-clients.git"
+    "url": "git+https://github.com/UXlySoftware/1shot-clients.git"
   },
   "keywords": [
     "1shot",
@@ -27,12 +27,12 @@
     "client",
     "typescript"
   ],
-  "author": "UXly",
+  "author": "UXly Software",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/uxly/1shot-clients/issues"
+    "url": "https://github.com/UXlySoftware/1shot-clients/issues"
   },
-  "homepage": "https://github.com/uxly/1shot-clients#readme",
+  "homepage": "https://github.com/UXlySoftware/1shot-clients#readme",
   "devDependencies": {
     "@types/jest": "^29.5.12",
     "@types/node": "^22.15.2",
