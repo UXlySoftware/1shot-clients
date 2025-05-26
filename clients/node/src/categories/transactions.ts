@@ -83,7 +83,7 @@ export class Transactions {
   async test(transactionId: string, params: TransactionParams): Promise<TransactionTestResult> {
     const validatedParams = testTransactionSchema.parse({
       transactionId,
-      params,
+      ...params,
     });
 
     const response = await this.client.request<TransactionTestResult>(
@@ -230,7 +230,7 @@ export class Transactions {
   ): Promise<Transaction> {
     const validatedParams = createTransactionSchema.parse({
       businessId,
-      params,
+      ...params,
     });
 
     const response = await this.client.request<Transaction>(
@@ -297,7 +297,7 @@ export class Transactions {
   ): Promise<Transaction> {
     const validatedParams = updateTransactionSchema.parse({
       transactionId,
-      params,
+      ...params,
     });
 
     const response = await this.client.request<Transaction>(
