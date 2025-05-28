@@ -13,4 +13,6 @@ type TransactionsContractBody struct {
 	Chain *EChain `json:"chain"`
 	ContractAddress string `json:"contractAddress"`
 	EscrowWalletId string `json:"escrowWalletId"`
+	// The ID of the contract description that you want to use. If not provided, the highest-ranked Contract Description for the chain and contract address will be used. This is optional, and a Transaction can drift from the original Contract Description but retain this association.
+	ContractDescriptionId string `json:"contractDescriptionId,omitempty"`
 }

@@ -3,7 +3,7 @@ package client
 import (
 	"context"
 
-	swagger "github.com/1shotapi/go-client/internal/generated"
+	swagger "github.com/UXlySoftware/1shot-clients/clients/go/internal/generated"
 )
 
 // Structs handles all solidity struct-related operations

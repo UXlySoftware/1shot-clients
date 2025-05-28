@@ -168,6 +168,7 @@ Lists transactions for a business
      * @param "Name" (optional.String) - 
      * @param "Status" (optional.Interface of EDeletedStatusSelector) - 
      * @param "ContractAddress" (optional.Interface of string) - 
+     * @param "ContractDescriptionId" (optional.Interface of string) -  The ID of the Contract Description you want to filter by. If provided, only transactions created from this Contract Description will be returned.
 @return InlineResponse2001
 */
 
@@ -178,6 +179,7 @@ type ListApiBusinessBusinessIdTransactionsGetOpts struct {
     Name optional.String
     Status optional.Interface
     ContractAddress optional.Interface
+    ContractDescriptionId optional.Interface
 }
 
 func (a *ListApiService) BusinessBusinessIdTransactionsGet(ctx context.Context, businessId string, localVarOptionals *ListApiBusinessBusinessIdTransactionsGetOpts) (InlineResponse2001, *http.Response, error) {
@@ -214,6 +216,9 @@ func (a *ListApiService) BusinessBusinessIdTransactionsGet(ctx context.Context, 
 	}
 	if localVarOptionals != nil && localVarOptionals.ContractAddress.IsSet() {
 		localVarQueryParams.Add("contractAddress", parameterToString(localVarOptionals.ContractAddress.Value(), ""))
+	}
+	if localVarOptionals != nil && localVarOptionals.ContractDescriptionId.IsSet() {
+		localVarQueryParams.Add("contractDescriptionId", parameterToString(localVarOptionals.ContractDescriptionId.Value(), ""))
 	}
 	// to determine the Content-Type header
 	localVarHttpContentTypes := []string{}

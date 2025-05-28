@@ -14,7 +14,7 @@ type TransactionEstimate struct {
 	Chain *EChain `json:"chain"`
 	ContractAddress string `json:"contractAddress"`
 	FunctionName string `json:"functionName"`
-	// The amount of gas units it will use
+	// The amount of gas units it will use. This is a stringified bigint.
 	GasAmount string `json:"gasAmount"`
 	MaxFeePerGas string `json:"maxFeePerGas"`
 	MaxPriorityFeePerGas string `json:"maxPriorityFeePerGas"`

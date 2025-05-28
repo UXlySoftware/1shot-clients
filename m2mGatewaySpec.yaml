@@ -77,7 +77,6 @@ paths:
       tags:
         - Transaction
         - Transaction Execution
-        - Test
       description: This method simulates the execution of a transaction. No gas will be spent and nothing on chain will change, but it will let you know whether or not an execution would succeed. Internally, this method relies on staticCall.
       parameters:
         - name: transactionId
@@ -345,6 +344,14 @@ paths:
           required: false
           schema:
             $ref: "#/components/schemas/ContractAddress"
+        - name: contractDescriptionId
+          in: query
+          required: false
+          description: The ID of the Contract Description you want to filter by. If provided, only transactions created from this Contract Description will be returned.
+          schema:
+            type: string
+            format: uuid
+            example: 8a6e0804-2bd0-4672-b79d-d97027f90720
       security:
         - OAuth2ClientCredentials:
           - read:api
@@ -433,7 +440,7 @@ paths:
       tags:
         - Transaction
         - Create
-      description: Assures that Transactions exist for a given contract. This is based on the verified contract ABI and the highest-ranked Contract Description. If Transactions already exist, they are not modified. If they do not exist, any methods that are in the Contract Description will be created with the details from the Contract Description.
+      description: Assures that Transactions exist for a given Contract Description. This is based on the verified contract ABI and either the highest-ranked Contract Description or the contractDescriptionId provided. If Transactions already exist, they are not modified. If they do not exist, any methods that are in the Contract Description will be created with the details from the Contract Description. We return every Transaction for methods defined in the Contract Description.
       parameters:
         - name: businessId
           in: path
@@ -457,13 +464,18 @@ paths:
                   $ref: "#/components/schemas/ContractAddress"
                 escrowWalletId:
                   $ref: "#/components/schemas/EscrowWalletId"
+                contractDescriptionId:
+                  type: string
+                  format: uuid
+                  description: The ID of the contract description that you want to use. If not provided, the highest-ranked Contract Description for the chain and contract address will be used. This is optional, and a Transaction can drift from the original Contract Description but retain this association.
+                  example: 100d2e83-dddd-480d-88ad-74a71c214912
               required:
                 - chain
                 - contractAddress
                 - escrowWalletId
       responses:
         200:
-          description: Returns all the transactions defined by the Contract Description.
+          description: Returns all the transactions defined by the Contract Description. It is possible for the descriptions of these transactions to drift from the original Contract Description. In the case that multiple Transactions exist for the same Contract Description, the most recently created one will be returned.
           content:
             application/json:
               schema:
@@ -1410,6 +1422,12 @@ components:
                 $ref: "#/components/schemas/SolidityStructParam"
             stateMutability: 
               $ref: "#/components/schemas/ESolidityStateMutability"
+            contractDescriptionId:
+              type: string
+              format: uuid
+              nullable: true
+              description: The ID of the contract description that this transaction was created from. This is optional, and a Transaction can drift from the original Contract Description but retain this association.
+              example: 100d2e83-dddd-480d-88ad-74a71c214912
             callbackUrl:
               type: string
               nullable: true
@@ -1432,6 +1450,7 @@ components:
             - inputs
             - outputs
             - stateMutability
+            - contractDescriptionId
             - callbackUrl
             - publicKey
         - $ref: "#/components/schemas/EntityBookKeeping"
