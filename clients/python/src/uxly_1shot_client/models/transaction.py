@@ -25,6 +25,7 @@ class ListTransactionsParams(BaseModel):
         name: Filter transactions by name
         status: Filter by deletion status - 'live', 'archived', or 'both'
         contract_address: Filter by contract address
+        contract_description_id: Filter by contract description ID. If provided, only transactions created from this Contract Description will be returned.
     """
     
     page_size: Optional[int] = Field(None, alias="pageSize", description="The size of the page to return. Defaults to 25")
@@ -33,6 +34,7 @@ class ListTransactionsParams(BaseModel):
     name: Optional[str] = Field(None, description="Filter transactions by name")
     status: Optional[str] = Field(None, description="Filter by deletion status - 'live', 'archived', or 'both'")
     contract_address: Optional[str] = Field(None, alias="contractAddress", description="Filter by contract address")
+    contract_description_id: Optional[str] = Field(None, alias="contractDescriptionId", description="Filter by contract description ID. If provided, only transactions created from this Contract Description will be returned.")
 
     @validator('status')
     def validate_status(cls, v):
@@ -67,6 +69,13 @@ class ListTransactionsParams(BaseModel):
                 raise ValueError('Contract address must be 42 characters long (including 0x)')
         return v
 
+    @validator('contract_description_id')
+    def validate_contract_description_id(cls, v):
+        if v is not None:
+            if not v.replace('-', '').isalnum():
+                raise ValueError('Contract description ID must be a valid UUID')
+        return v
+
 
 class Transaction(BaseModel):
     """A transaction model representing a single defined transaction, corresponding to a method call on a smart contract on a chain."""
@@ -82,6 +91,7 @@ class Transaction(BaseModel):
     state_mutability: str = Field(..., alias="stateMutability", description="The state mutability of a Solidity function")
     inputs: List[Dict[str, Any]] = Field(..., description="The input parameters for the transaction function")
     outputs: List[Dict[str, Any]] = Field(..., description="The output parameters for the transaction function")
+    contract_description_id: Optional[str] = Field(None, alias="contractDescriptionId", description="The ID of the contract description that this transaction was created from. This is optional, and a Transaction can drift from the original Contract Description but retain this association.")
     callback_url: Optional[str] = Field(None, alias="callbackUrl", description="The current destination for webhooks to be sent when this transaction is executed. Will be null if no webhook is assigned")
     public_key: Optional[str] = Field(None, alias="publicKey", description="The current public key for verifying the integrity of the webhook when this transaction is executed. 1Shot will sign its webhooks with a private key and provide a signature for the webhook that can be validated with this key. It will be null if there is no webhook destination specified")
     updated: int = Field(..., description="Unix timestamp of when the transaction was last updated")
@@ -113,6 +123,13 @@ class Transaction(BaseModel):
         if v is not None:
             if not v.startswith(('http://', 'https://')):
                 raise ValueError('Callback URL must start with http:// or https://')
+        return v
+
+    @validator('contract_description_id')
+    def validate_contract_description_id(cls, v):
+        if v is not None:
+            if not v.replace('-', '').isalnum():
+                raise ValueError('Contract description ID must be a valid UUID')
         return v
 
 
@@ -148,6 +165,37 @@ class TransactionTestResult(BaseModel):
     success: bool = Field(..., description="Whether or not the transaction would run successfully")
     result: Optional[Dict[str, Any]] = Field(None, description="The result returned by the transaction, if it was successful. When running a test, no changes are made on the blockchain, so these results are hypothetical")
     error: Optional[Dict[str, Any]] = Field(None, description="The error that occurred, if the transaction was not successful")
+
+
+class ERC7702Authorization(BaseModel):
+    """A single authorization for an ERC-7702 transaction. It represents a single potential delegation from an EOA to a contract."""
+
+    address: str = Field(..., description="The contract address that is being authorized to act on behalf of the EOA")
+    nonce: str = Field(..., description="The delegation nonce. This starts at 0 and must be positive. The EOA must keep track of this nonce itself")
+    chain_id: int = Field(..., alias="chainId", description="The chain ID where the authorization is valid")
+    signature: str = Field(..., description="The signature of the authorization, from the EOA that is delegating the authorization to the contract at address")
+
+    @validator('address')
+    def validate_address(cls, v):
+        if not v.startswith('0x'):
+            raise ValueError('Address must start with 0x')
+        if len(v) != 42:
+            raise ValueError('Address must be 42 characters long (including 0x)')
+        return v
+
+    @validator('chain_id')
+    def validate_chain_id(cls, v):
+        if v not in VALID_CHAIN_IDS:
+            raise ValueError(f'Chain ID must be one of {VALID_CHAIN_IDS}')
+        return v
+
+    @validator('signature')
+    def validate_signature(cls, v):
+        if not v.startswith('0x'):
+            raise ValueError('Signature must start with 0x')
+        if not all(c in '0123456789abcdefABCDEF' for c in v[2:]):
+            raise ValueError('Signature must contain only hex characters')
+        return v
 
 
 class TransactionCreateParams(BaseModel):
@@ -305,6 +353,7 @@ class ContractTransactionsParams(BaseModel):
     chain: int = Field(..., description="The ChainId of a supported chain on 1Shot API")
     contract_address: str = Field(..., alias="contractAddress", description="string address of contract")
     escrow_wallet_id: str = Field(..., alias="escrowWalletId", description="The ID of the escrow wallet that will execute the transactions")
+    contract_description_id: Optional[str] = Field(None, alias="contractDescriptionId", description="The ID of the contract description that you want to use. If not provided, the highest-ranked Contract Description for the chain and contract address will be used. This is optional, and a Transaction can drift from the original Contract Description but retain this association.")
 
     @validator('chain')
     def validate_chain(cls, v):
@@ -318,4 +367,11 @@ class ContractTransactionsParams(BaseModel):
             raise ValueError('Contract address must start with 0x')
         if len(v) != 42:
             raise ValueError('Contract address must be 42 characters long (including 0x)')
+        return v
+
+    @validator('contract_description_id')
+    def validate_contract_description_id(cls, v):
+        if v is not None:
+            if not v.replace('-', '').isalnum():
+                raise ValueError('Contract description ID must be a valid UUID')
         return v 

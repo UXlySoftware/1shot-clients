@@ -50,7 +50,6 @@ Class | Method | HTTP request | Description
 *SolidityStructsApi* | [**BusinessBusinessIdStructsStructIdParamsPut**](docs/SolidityStructsApi.md#businessbusinessidstructsstructidparamsput) | **Put** /business/{businessId}/structs/{structId}/params | 
 *SolidityStructsApi* | [**StructsStructIdParamsStructParamIdDelete**](docs/SolidityStructsApi.md#structsstructidparamsstructparamiddelete) | **Delete** /structs/{structId}/params/{structParamId} | 
 *SolidityStructsApi* | [**StructsStructIdPut**](docs/SolidityStructsApi.md#structsstructidput) | **Put** /structs/{structId} | 
-*TestApi* | [**TransactionsTransactionIdTestPost**](docs/TestApi.md#transactionstransactionidtestpost) | **Post** /transactions/{transactionId}/test | 
 *TransactionApi* | [**BusinessBusinessIdTransactionsAbiPost**](docs/TransactionApi.md#businessbusinessidtransactionsabipost) | **Post** /business/{businessId}/transactions/abi | 
 *TransactionApi* | [**BusinessBusinessIdTransactionsContractPost**](docs/TransactionApi.md#businessbusinessidtransactionscontractpost) | **Post** /business/{businessId}/transactions/contract | 
 *TransactionApi* | [**BusinessBusinessIdTransactionsExecutionsGet**](docs/TransactionApi.md#businessbusinessidtransactionsexecutionsget) | **Get** /business/{businessId}/transactions/executions | 
@@ -101,6 +100,7 @@ Class | Method | HTTP request | Description
  - [EWebhookStatus](docs/EWebhookStatus.md)
  - [EntityBookKeeping](docs/EntityBookKeeping.md)
  - [EntityBookKeepingWithoutDeleted](docs/EntityBookKeepingWithoutDeleted.md)
+ - [Erc7702Authorization](docs/Erc7702Authorization.md)
  - [EscrowWallet](docs/EscrowWallet.md)
  - [FullContractDescription](docs/FullContractDescription.md)
  - [InlineResponse200](docs/InlineResponse200.md)

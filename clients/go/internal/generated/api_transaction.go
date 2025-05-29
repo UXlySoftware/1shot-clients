@@ -116,7 +116,7 @@ func (a *TransactionApiService) BusinessBusinessIdTransactionsAbiPost(ctx contex
 }
 /*
 TransactionApiService
-Assures that Transactions exist for a given contract. This is based on the verified contract ABI and the highest-ranked Contract Description. If Transactions already exist, they are not modified. If they do not exist, any methods that are in the Contract Description will be created with the details from the Contract Description.
+Assures that Transactions exist for a given Contract Description. This is based on the verified contract ABI and either the highest-ranked Contract Description or the contractDescriptionId provided. If Transactions already exist, they are not modified. If they do not exist, any methods that are in the Contract Description will be created with the details from the Contract Description. We return every Transaction for methods defined in the Contract Description.
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param body
  * @param businessId The internal uuid of the Business you are interested in
@@ -344,6 +344,7 @@ Lists transactions for a business
      * @param "Name" (optional.String) - 
      * @param "Status" (optional.Interface of EDeletedStatusSelector) - 
      * @param "ContractAddress" (optional.Interface of string) - 
+     * @param "ContractDescriptionId" (optional.Interface of string) -  The ID of the Contract Description you want to filter by. If provided, only transactions created from this Contract Description will be returned.
 @return InlineResponse2001
 */
 
@@ -354,6 +355,7 @@ type TransactionApiBusinessBusinessIdTransactionsGetOpts struct {
     Name optional.String
     Status optional.Interface
     ContractAddress optional.Interface
+    ContractDescriptionId optional.Interface
 }
 
 func (a *TransactionApiService) BusinessBusinessIdTransactionsGet(ctx context.Context, businessId string, localVarOptionals *TransactionApiBusinessBusinessIdTransactionsGetOpts) (InlineResponse2001, *http.Response, error) {
@@ -390,6 +392,9 @@ func (a *TransactionApiService) BusinessBusinessIdTransactionsGet(ctx context.Co
 	}
 	if localVarOptionals != nil && localVarOptionals.ContractAddress.IsSet() {
 		localVarQueryParams.Add("contractAddress", parameterToString(localVarOptionals.ContractAddress.Value(), ""))
+	}
+	if localVarOptionals != nil && localVarOptionals.ContractDescriptionId.IsSet() {
+		localVarQueryParams.Add("contractDescriptionId", parameterToString(localVarOptionals.ContractDescriptionId.Value(), ""))
 	}
 	// to determine the Content-Type header
 	localVarHttpContentTypes := []string{}

@@ -205,7 +205,7 @@ func (a *CreateApiService) BusinessBusinessIdTransactionsAbiPost(ctx context.Con
 }
 /*
 CreateApiService
-Assures that Transactions exist for a given contract. This is based on the verified contract ABI and the highest-ranked Contract Description. If Transactions already exist, they are not modified. If they do not exist, any methods that are in the Contract Description will be created with the details from the Contract Description.
+Assures that Transactions exist for a given Contract Description. This is based on the verified contract ABI and either the highest-ranked Contract Description or the contractDescriptionId provided. If Transactions already exist, they are not modified. If they do not exist, any methods that are in the Contract Description will be created with the details from the Contract Description. We return every Transaction for methods defined in the Contract Description.
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param body
  * @param businessId The internal uuid of the Business you are interested in

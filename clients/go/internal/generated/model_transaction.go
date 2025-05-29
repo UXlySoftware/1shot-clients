@@ -25,6 +25,8 @@ type Transaction struct {
 	Inputs []SolidityStructParam `json:"inputs"`
 	Outputs []SolidityStructParam `json:"outputs"`
 	StateMutability *ESolidityStateMutability `json:"stateMutability"`
+	// The ID of the contract description that this transaction was created from. This is optional, and a Transaction can drift from the original Contract Description but retain this association.
+	ContractDescriptionId string `json:"contractDescriptionId"`
 	// The current destination for webhooks to be sent when this transaction is executed. Will be null if no webhook is assigned.
 	CallbackUrl string `json:"callbackUrl"`
 	// The current public key for verifying the integrity of the webhook when this transaction is executed. 1Shot will sign its webhooks with a private key and provide a signature for the webhook that can be validated with this key. It will be null if there is no webhook destination specified.

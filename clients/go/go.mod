@@ -1,7 +1,12 @@
 module github.com/UXlySoftware/1shot-clients/clients/go
 
-go 1.21
+go 1.23.0
+
+toolchain go1.24.3
+
+require github.com/joho/godotenv v1.5.1
 
 require (
-	github.com/joho/godotenv v1.5.1
+	github.com/antihax/optional v1.0.0 // indirect
+	golang.org/x/oauth2 v0.30.0 // indirect
 )

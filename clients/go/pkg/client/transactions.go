@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 
-	swagger "github.com/1shotapi/go-client/internal/generated"
+	swagger "github.com/UXlySoftware/1shot-clients/clients/go/internal/generated"
 	"github.com/antihax/optional"
 )
 
@@ -15,7 +15,13 @@ type Transactions struct {
 }
 
 // Execute executes a transaction
-func (t *Transactions) Execute(ctx context.Context, transactionId string, params map[string]interface{}, escrowWalletId, memo *string) (*swagger.TransactionExecution, error) {
+func (t *Transactions) Execute(
+	ctx context.Context,
+	transactionId string,
+	params map[string]interface{},
+	escrowWalletId, memo *string,
+	authorizationList []swagger.Erc7702Authorization,
+) (*swagger.TransactionExecution, error) {
 	body := swagger.TransactionIdExecuteBody{}
 	if params != nil {
 		jsonBytes, err := json.Marshal(params)
@@ -33,6 +39,9 @@ func (t *Transactions) Execute(ctx context.Context, transactionId string, params
 	}
 	if memo != nil {
 		body.Memo = *memo
+	}
+	if authorizationList != nil {
+		body.AuthorizationList = authorizationList
 	}
 	resp, _, err := t.api.TransactionsTransactionIdExecutePost(ctx, body, transactionId)
 	if err != nil {
@@ -72,7 +81,15 @@ func (t *Transactions) Get(ctx context.Context, id string) (*swagger.Transaction
 }
 
 // List lists transactions for a business
-func (t *Transactions) List(ctx context.Context, pageSize, page *int32, chainId *swagger.EChain, name *string, status *swagger.EDeletedStatusSelector, contractAddress *string) ([]swagger.Transaction, error) {
+func (t *Transactions) List(
+	ctx context.Context,
+	pageSize, page *int32,
+	chainId *swagger.EChain,
+	name *string,
+	status *swagger.EDeletedStatusSelector,
+	contractAddress *string,
+	contractDescriptionId *string,
+) ([]swagger.Transaction, error) {
 	opts := &swagger.TransactionApiBusinessBusinessIdTransactionsGetOpts{}
 	if pageSize != nil {
 		opts.PageSize = optional.NewInterface(*pageSize)
@@ -92,6 +109,10 @@ func (t *Transactions) List(ctx context.Context, pageSize, page *int32, chainId 
 	if contractAddress != nil {
 		opts.ContractAddress = optional.NewInterface(*contractAddress)
 	}
+	if contractDescriptionId != nil {
+		opts.ContractDescriptionId = optional.NewInterface(*contractDescriptionId)
+	}
+
 	resp, _, err := t.api.BusinessBusinessIdTransactionsGet(ctx, t.businessId, opts)
 	if err != nil {
 		return nil, err

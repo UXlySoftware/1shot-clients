@@ -15,4 +15,6 @@ type TransactionIdExecuteBody struct {
 	EscrowWalletId string `json:"escrowWalletId,omitempty"`
 	// You may include any text you like when you execute a transaction, as a note to yourself about why it was done. This text can be JSON or similar if you want to store formatted data.
 	Memo string `json:"memo,omitempty"`
+	// A list of authorizations for the transaction. If you are using ERC-7702, you must provide at least one authorization.
+	AuthorizationList []Erc7702Authorization `json:"authorizationList,omitempty"`
 }

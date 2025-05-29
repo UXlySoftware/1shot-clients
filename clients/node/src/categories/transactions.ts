@@ -9,6 +9,7 @@ import {
   TransactionTestResult,
   TransactionParams,
   TransactionStateMutability,
+  ERC7702Authorization,
 } from '../types/transactions.js';
 import {
   transactionSchema,
@@ -30,6 +31,8 @@ import {
   contractTransactionsSchema,
   transactionTestResultSchema,
 } from '../validation/transaction.js';
+import { TransactionExecution } from '../types/execution.js';
+import { transactionExecutionSchema } from '../validation/execution.js';
 
 export class Transactions {
   constructor(private client: IOneShotClient) {}
@@ -47,13 +50,15 @@ export class Transactions {
     transactionId: string,
     params: TransactionParams,
     escrowWalletId?: string,
-    memo?: string
-  ): Promise<Transaction> {
+    memo?: string,
+    authorizationList?: ERC7702Authorization[]
+  ): Promise<TransactionExecution> {
     const validatedParams = executeTransactionSchema.parse({
       transactionId,
       params,
       escrowWalletId,
       memo,
+      authorizationList,
     });
 
     const response = await this.client.request<Transaction>(
@@ -63,10 +68,11 @@ export class Transactions {
         params: validatedParams.params,
         escrowWalletId: validatedParams.escrowWalletId,
         memo: validatedParams.memo,
+        authorizationList: validatedParams.authorizationList,
       }
     );
 
-    return transactionSchema.parse(response);
+    return transactionExecutionSchema.parse(response);
   }
 
   /**
@@ -79,7 +85,7 @@ export class Transactions {
   async test(transactionId: string, params: TransactionParams): Promise<TransactionTestResult> {
     const validatedParams = testTransactionSchema.parse({
       transactionId,
-      params,
+      ...params,
     });
 
     const response = await this.client.request<TransactionTestResult>(
@@ -226,7 +232,7 @@ export class Transactions {
   ): Promise<Transaction> {
     const validatedParams = createTransactionSchema.parse({
       businessId,
-      params,
+      ...params,
     });
 
     const response = await this.client.request<Transaction>(
@@ -293,7 +299,7 @@ export class Transactions {
   ): Promise<Transaction> {
     const validatedParams = updateTransactionSchema.parse({
       transactionId,
-      params,
+      ...params,
     });
 
     const response = await this.client.request<Transaction>(
