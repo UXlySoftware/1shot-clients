@@ -18,7 +18,7 @@ class AccountBalanceDetails(BaseModel):
 
 
 class Wallet(BaseModel):
-    """Escrow wallet stored by chain service"""
+    """Wallet stored by chain service"""
 
     id: str = Field(..., description="internal ID of the wallet object")
     account_address: str = Field(..., alias="accountAddress", description="string address of a wallet insight platform holds keys for")

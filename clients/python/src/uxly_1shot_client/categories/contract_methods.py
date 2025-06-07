@@ -122,7 +122,15 @@ class BaseContractMethods:
         """
         return f"/business/{business_id}/methods/abi"
 
-    def _get_create_contract_methods_from_prompt_url_url(self, business_id: str) -> str:
+    def _get_contract_search_url(self) -> str:
+        """Get the URL for searching prompts.
+
+        Returns:
+            The URL for searching prompts
+        """
+        return "/prompts/search"
+
+    def _get_create_contract_methods_from_prompt_url(self, business_id: str) -> str:
         """Get the URL for creating contract methods from a prompt.
 
         Args:
@@ -132,14 +140,6 @@ class BaseContractMethods:
             The URL for creating contract methods from a prompt
         """
         return f"/business/{business_id}/methods/prompt"
-
-    def _get_contract_search_url(self) -> str:
-        """Get the URL for searching prompts.
-
-        Returns:
-            The URL for searching prompts
-        """
-        return "/contracts/descriptions/search"
 
     def _get_update_url(self, contract_method_id: str) -> str:
         """Get the URL for updating a contract method.
@@ -206,13 +206,13 @@ class SyncContractMethods(BaseContractMethods):
         )
         return ContractMethodTestResult.model_validate(response)
 
-    def estimate(self, contract_method_id: str, params: Dict[str, Any], escrow_wallet_id: Optional[str] = None) -> ContractMethodEstimate:
+    def estimate(self, contract_method_id: str, params: Dict[str, Any], wallet_id: Optional[str] = None) -> ContractMethodEstimate:
         """Estimate the cost of executing a contract method. Returns data about the fees and amount of gas.
 
         Args:
             contract_method_id: The Contract Method ID
             params: Parameters for the contract method
-            escrow_wallet_id: Optional ID of the escrow wallet to use for the estimate
+            wallet_id: Optional ID of the wallet to use for the estimate
 
         Returns:
             The cost estimate, including gas amount and fees
@@ -221,8 +221,8 @@ class SyncContractMethods(BaseContractMethods):
             requests.exceptions.RequestException: If the request fails
         """
         data: Dict[str, Any] = {"params": params}
-        if escrow_wallet_id is not None:
-            data["escrowWalletId"] = escrow_wallet_id
+        if wallet_id is not None:
+            data["walletId"] = wallet_id
 
         response = self._client._request(
             "POST",
@@ -235,7 +235,7 @@ class SyncContractMethods(BaseContractMethods):
         self,
         contract_method_id: str,
         params: Dict[str, Any],
-        escrow_wallet_id: Optional[str] = None,
+        wallet_id: Optional[str] = None,
         memo: Optional[str] = None,
         authorization_list: Optional[List[ERC7702Authorization]] = None,
     ) -> Transaction:
@@ -244,19 +244,19 @@ class SyncContractMethods(BaseContractMethods):
         Args:
             contract_method_id: The Contract Method ID
             params: Parameters for the contract method
-            escrow_wallet_id: Optional ID of the escrow wallet to use
+            wallet_id: Optional ID of the wallet to use
             memo: Optional memo for the execution. You may include any text you like when you execute a contract method, as a note to yourself about why it was done. This text can be JSON or similar if you want to store formatted data.
             authorization_list: Optional list of ERC-7702 authorizations. If you are using ERC-7702, you must provide at least one authorization.
 
         Returns:
-            The execution result
+            The transaction object
 
         Raises:
             requests.exceptions.RequestException: If the request fails
         """
         data: Dict[str, Any] = {"params": params}
-        if escrow_wallet_id is not None:
-            data["escrowWalletId"] = escrow_wallet_id
+        if wallet_id is not None:
+            data["walletId"] = wallet_id
         if memo is not None:
             data["memo"] = memo
         if authorization_list is not None:
@@ -409,7 +409,7 @@ class SyncContractMethods(BaseContractMethods):
             params = ContractContractMethodsParams.model_validate(params, by_alias=True, by_name=True)
         response = self._client._request(
             "POST",
-            self._get_create_contract_methods_from_prompt_url_url(business_id),
+            self._get_create_contract_methods_from_prompt_url(business_id),
             data=params.model_dump(exclude_none=True, by_alias=True),
         )
         return [ContractMethod.model_validate(tx) for tx in response]
@@ -528,13 +528,12 @@ class AsyncContractMethods(BaseContractMethods):
         )
         return ContractMethodTestResult.model_validate(response)
 
-    async def estimate(self, contract_method_id: str, params: Dict[str, Any], escrow_wallet_id: Optional[str] = None) -> ContractMethodEstimate:
+    async def estimate(self, contract_method_id: str, params: Dict[str, Any]) -> ContractMethodEstimate:
         """Estimate the cost of executing a contract method. Returns data about the fees and amount of gas.
 
         Args:
             contract_method_id: The Contract Method ID
             params: Parameters for the contract method
-            escrow_wallet_id: Optional ID of the escrow wallet to use for the estimate
 
         Returns:
             The cost estimate, including gas amount and fees
@@ -543,8 +542,6 @@ class AsyncContractMethods(BaseContractMethods):
             aiohttp.ClientError: If the request fails
         """
         data: Dict[str, Any] = {"params": params}
-        if escrow_wallet_id is not None:
-            data["escrowWalletId"] = escrow_wallet_id
 
         response = await self._client._request(
             "POST",
@@ -557,7 +554,7 @@ class AsyncContractMethods(BaseContractMethods):
         self,
         contract_method_id: str,
         params: Dict[str, Any],
-        escrow_wallet_id: Optional[str] = None,
+        wallet_id: Optional[str] = None,
         memo: Optional[str] = None,
         authorization_list: Optional[List[ERC7702Authorization]] = None,
     ) -> Transaction:
@@ -566,19 +563,19 @@ class AsyncContractMethods(BaseContractMethods):
         Args:
             contract_method_id: The Contract Method ID
             params: Parameters for the contract method
-            escrow_wallet_id: Optional ID of the escrow wallet to use
+            wallet_id: Optional ID of the wallet to use
             memo: Optional memo for the execution. You may include any text you like when you execute a contract method, as a note to yourself about why it was done. This text can be JSON or similar if you want to store formatted data.
             authorization_list: Optional list of ERC-7702 authorizations. If you are using ERC-7702, you must provide at least one authorization.
 
         Returns:
-            The execution result
+            The transaction object
 
         Raises:
             aiohttp.ClientError: If the request fails
         """
         data: Dict[str, Any] = {"params": params}
-        if escrow_wallet_id is not None:
-            data["escrowWalletId"] = escrow_wallet_id
+        if wallet_id is not None:
+            data["walletId"] = wallet_id
         if memo is not None:
             data["memo"] = memo
         if authorization_list is not None:
@@ -731,7 +728,7 @@ class AsyncContractMethods(BaseContractMethods):
             params = ContractContractMethodsParams.model_validate(params, by_alias=True, by_name=True)
         response = await self._client._request(
             "POST",
-            self._get_create_contract_methods_from_prompt_url_url(business_id),
+            self._get_create_contract_methods_from_prompt_url(business_id),
             data=params.model_dump(exclude_none=True, by_alias=True),
         )
         return [ContractMethod.model_validate(tx) for tx in response]

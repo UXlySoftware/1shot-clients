@@ -10,7 +10,7 @@ class Transaction(BaseModel):
     """A single execution of a transaction- ie, a function call"""
 
     id: str = Field(..., description="internal ID of the transaction execution")
-    contract_method_id: str = Field(..., alias="transactionId", description="internal ID of the transaction")
+    contract_method_id: str = Field(..., alias="contractMethodId", description="internal ID of the transaction")
     api_credential_id: Optional[str] = Field(
         None, 
         alias="apiCredentialId", 
@@ -69,8 +69,8 @@ class TransactionListParams(BaseModel):
     page: Optional[int] = Field(None, description="Which page to return. This is 1 indexed, and default to the first page, 1")
     chain_id: Optional[int] = Field(None, alias="chainId", description="The specific chain to get the executions for")
     status: Optional[str] = Field(None, description="The status of the executions to return")
-    escrow_wallet_id: Optional[str] = Field(None, alias="escrowWalletId", description="The escrow wallet ID to get the executions for")
-    contract_method_id: Optional[str] = Field(None, alias="transactionId", description="The transaction ID to get the executions for")
+    wallet_id: Optional[str] = Field(None, alias="walletId", description="The wallet ID to get the executions for")
+    contract_method_id: Optional[str] = Field(None, alias="contractMethodId", description="The contract method ID to get the executions for")
     api_credential_id: Optional[str] = Field(None, alias="apiCredentialId", description="The API credential ID to get the executions for")
     user_id: Optional[str] = Field(None, alias="userId", description="The user ID to get the executions for")
 

@@ -25,7 +25,7 @@ class ListContractMethodsParams(BaseModel):
         name: Filter contract methods by name
         status: Filter by deletion status - 'live', 'archived', or 'both'
         contract_address: Filter by contract address
-        prompt_id: Filter by contract description ID. If provided, only contract methods created from this Contract Description will be returned.
+        prompt_id: Filter by prompt ID. If provided, only contract methods created from this Contract Description will be returned.
     """
     
     page_size: Optional[int] = Field(None, alias="pageSize", description="The size of the page to return. Defaults to 25")
@@ -34,7 +34,7 @@ class ListContractMethodsParams(BaseModel):
     name: Optional[str] = Field(None, description="Filter contract methods by name")
     status: Optional[str] = Field(None, description="Filter by deletion status - 'live', 'archived', or 'both'")
     contract_address: Optional[str] = Field(None, alias="contractAddress", description="Filter by contract address")
-    prompt_id: Optional[str] = Field(None, alias="contractDescriptionId", description="Filter by contract description ID. If provided, only contract methods created from this Contract Description will be returned.")
+    prompt_id: Optional[str] = Field(None, alias="promptId", description="Filter by prompt ID. If provided, only contract methods created from this Contract Description will be returned.")
 
     @validator('status')
     def validate_status(cls, v):
@@ -91,7 +91,7 @@ class ContractMethod(BaseModel):
     state_mutability: str = Field(..., alias="stateMutability", description="The state mutability of a Solidity function")
     inputs: List[Dict[str, Any]] = Field(..., description="The input parameters for the contract method function")
     outputs: List[Dict[str, Any]] = Field(..., description="The output parameters for the contract method function")
-    prompt_id: Optional[str] = Field(None, alias="contractDescriptionId", description="The ID of the contract description that this contract method was created from. This is optional, and a ContractMethod can drift from the original Contract Description but retain this association.")
+    prompt_id: Optional[str] = Field(None, alias="promptId", description="The ID of the prompt that this contract method was created from. This is optional, and a ContractMethod can drift from the original Contract Description but retain this association.")
     callback_url: Optional[str] = Field(None, alias="callbackUrl", description="The current destination for webhooks to be sent when this contract method is executed. Will be null if no webhook is assigned")
     public_key: Optional[str] = Field(None, alias="publicKey", description="The current public key for verifying the integrity of the webhook when this contract method is executed. 1Shot will sign its webhooks with a private key and provide a signature for the webhook that can be validated with this key. It will be null if there is no webhook destination specified")
     updated: int = Field(..., description="Unix timestamp of when the contract method was last updated")
@@ -281,7 +281,7 @@ class ContractMethodUpdateParams(BaseModel):
         return v
 
 
-class ContractFunctionParamDescription(BaseModel):
+class ContractFunctionParamPrompt(BaseModel):
     """A description of a function parameter. This may be an input or an output parameter."""
 
     index: int = Field(..., description="The index of the parameter. Starts at 0")
@@ -290,28 +290,28 @@ class ContractFunctionParamDescription(BaseModel):
     tags: List[str] = Field(..., description="An array of tag names associated with the function parameter")
 
 
-class ContractFunctionDescription(BaseModel):
+class ContractFunctionPrompt(BaseModel):
     """The description of a single function on a contract."""
 
     name: str = Field(..., description="The name of the function. This has to exactly match the name of the function in the Solidity contract, including the case and whitespace")
     description: str = Field(..., description="A human provided description of the function, what it does, and a basic overview of its parameters")
     tags: List[str] = Field(..., description="An array of tag names provided to the contract function")
-    inputs: List[ContractFunctionParamDescription] = Field(..., description="An array of input parameters for the function. All inputs are required to be named")
-    outputs: List[ContractFunctionParamDescription] = Field(..., description="An array of input parameters for the function. All inputs are required to be named")
+    inputs: List[ContractFunctionParamPrompt] = Field(..., description="An array of input parameters for the function. All inputs are required to be named")
+    outputs: List[ContractFunctionParamPrompt] = Field(..., description="An array of input parameters for the function. All inputs are required to be named")
 
 
-class ContractDescription(BaseModel):
+class Prompt(BaseModel):
     """A description of a contract, designed to be used for contract discovery by AI agents."""
 
-    id: str = Field(..., description="Internal ID of the contract description")
+    id: str = Field(..., description="Internal ID of the prompt")
     user_id: str = Field(..., alias="userId", description="ID of the user that created")
     chain_id: int = Field(..., description="The ChainId of a supported chain on 1Shot API")
     contract_address: str = Field(..., alias="contractAddress", description="string address of contract")
     name: str = Field(..., description="The name of the contract. This is human provided and has no technical significance")
     description: str = Field(..., description="The human provided description of what the contract is and does, and the top level")
     tags: List[str] = Field(..., description="An array of tag names provided to the contract")
-    updated: int = Field(..., description="Unix timestamp of when the contract description was last updated")
-    created: int = Field(..., description="Unix timestamp of when the contract description was created")
+    updated: int = Field(..., description="Unix timestamp of when the prompt was last updated")
+    created: int = Field(..., description="Unix timestamp of when the prompt was created")
 
     @validator('chain')
     def validate_chain(cls, v):
@@ -328,14 +328,14 @@ class ContractDescription(BaseModel):
         return v
 
 
-class FullContractDescription(ContractDescription):
+class FullPrompt(Prompt):
     """A description of a smart contract, including all functions and parameters."""
 
-    functions: List[ContractFunctionDescription] = Field(..., description="An array of Contract Function Descriptions, describing each function on the contract")
+    functions: List[ContractFunctionPrompt] = Field(..., description="An array of Contract Function Descriptions, describing each function on the contract")
 
 
 class ContractSearchParams(BaseModel):
-    """Parameters for searching contract descriptions."""
+    """Parameters for searching prompts."""
 
     query: str = Field(..., description="A free-form query to search for contracts. This uses semantic search to find the most relevant contracts")
     chain_id: Optional[int] = Field(None, description="The ChainId of a supported chain on 1Shot API")
@@ -348,12 +348,12 @@ class ContractSearchParams(BaseModel):
 
 
 class ContractContractMethodsParams(BaseModel):
-    """Parameters for creating contract methods from a contract description."""
+    """Parameters for creating contract methods from a prompt."""
 
     chain_id: int = Field(..., description="The ChainId of a supported chain on 1Shot API")
     contract_address: str = Field(..., alias="contractAddress", description="string address of contract")
     wallet_id: str = Field(..., alias="walletId", description="The ID of the wallet that will execute the contract methods")
-    prompt_id: Optional[str] = Field(None, alias="contractDescriptionId", description="The ID of the contract description that you want to use. If not provided, the highest-ranked Contract Description for the chain and contract address will be used. This is optional, and a ContractMethod can drift from the original Contract Description but retain this association.")
+    prompt_id: Optional[str] = Field(None, alias="promptId", description="The ID of the prompt that you want to use. If not provided, the highest-ranked Contract Description for the chain and contract address will be used. This is optional, and a ContractMethod can drift from the original Contract Description but retain this association.")
 
     @validator('chain')
     def validate_chain(cls, v):

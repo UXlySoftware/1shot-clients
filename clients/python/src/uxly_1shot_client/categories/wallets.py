@@ -173,16 +173,15 @@ class SyncWallets(BaseWallets):
         return Wallet.model_validate(response)
 
     def delete(self, wallet_id: str) -> None:
-        """Delete an escrow wallet.
+        """Delete a wallet. The API Credential must have Admin level permissions on the Business that owns this Wallet, and the Wallet must be near empty.
 
         Args:
             wallet_id: The wallet ID
 
-        Returns:
-            A dictionary with a success flag
+        Raises:
+            requests.exceptions.RequestException: If the request fails
         """
-        url = self._get_delete_url(wallet_id)
-        self._client._request("DELETE", url)
+        self._client._request("DELETE", self._get_delete_url(wallet_id))
 
 
 class AsyncWallets(BaseWallets):
@@ -267,14 +266,13 @@ class AsyncWallets(BaseWallets):
         response = await self._client._request("PUT", url, data=params.model_dump(exclude_none=True, by_alias=True))
         return Wallet.model_validate(response)
 
-    async def delete(self, wallet_id: str) -> Dict[str, bool]:
-        """Delete an escrow wallet.
+    async def delete(self, wallet_id: str) -> None:
+        """Delete a wallet. The API Credential must have Admin level permissions on the Business that owns this Wallet, and the Wallet must be near empty.
 
         Args:
             wallet_id: The wallet ID
 
-        Returns:
-            A dictionary with a success flag
+        Raises:
+            aiohttp.ClientError: If the request fails
         """
-        url = self._get_delete_url(wallet_id)
-        return await self._client._request("DELETE", url) 
+        await self._client._request("DELETE", self._get_delete_url(wallet_id)) 
