@@ -6,7 +6,7 @@ describe('validateWebhook', () => {
     eventName: 'TransactionExecutionSuccess',
     data: {
       businessId: 'c7c34dd2-4068-45b3-b894-081bbe68944d',
-      chain: 11155111,
+      chainId: 11155111,
       logs: [
         {
           args: [

@@ -14,7 +14,7 @@ export const accountBalanceDetailsSchema = z
   .describe('Details about a token balance in a wallet');
 
 // Validation for escrow wallet
-export const escrowWalletSchema = z
+export const walletSchema = z
   .object({
     id: z.string().uuid().describe('Internal ID of the escrow wallet'),
     accountAddress: z.string().describe('Blockchain address of the escrow wallet'),
@@ -53,9 +53,9 @@ export const escrowWalletSchema = z
   .describe('An escrow wallet that can hold and manage funds');
 
 // Validation for escrow wallet list response
-export const escrowWalletListSchema = z
+export const walletListSchema = z
   .object({
-    response: z.array(escrowWalletSchema).describe('List of escrow wallets'),
+    response: z.array(walletSchema).describe('List of escrow wallets'),
     page: z.number().int().positive().describe('Current page number in the paginated results'),
     pageSize: z.number().int().positive().describe('Number of items per page'),
     totalResults: z
@@ -77,7 +77,7 @@ export const walletUpdateSchema = z
 // Validation for wallet creation parameters
 export const walletCreateSchema = z
   .object({
-    chain: z
+    chainId: z
       .number()
       .int()
       .positive()
@@ -88,7 +88,7 @@ export const walletCreateSchema = z
   .describe('Parameters for creating a new escrow wallet');
 
 // Validation for list escrow wallets parameters
-export const listEscrowWalletsSchema = z
+export const listWalletsSchema = z
   .object({
     businessId: z.string().uuid().describe('ID of the business to list wallets for'),
     chainId: z
@@ -104,10 +104,10 @@ export const listEscrowWalletsSchema = z
   .describe('Parameters for listing escrow wallets');
 
 // Validation for create escrow wallet parameters
-export const createEscrowWalletSchema = z
+export const createWalletSchema = z
   .object({
     businessId: z.string().uuid().describe('ID of the business to create the wallet for'),
-    chain: z
+    chainId: z
       .number()
       .int()
       .positive()
@@ -118,9 +118,9 @@ export const createEscrowWalletSchema = z
   .describe('Parameters for creating a new escrow wallet');
 
 // Validation for get escrow wallet parameters
-export const getEscrowWalletSchema = z
+export const getWalletSchema = z
   .object({
-    escrowWalletId: z.string().uuid().describe('ID of the escrow wallet to retrieve'),
+    walletId: z.string().uuid().describe('ID of the escrow wallet to retrieve'),
     includeBalances: z
       .boolean()
       .optional()
@@ -129,17 +129,17 @@ export const getEscrowWalletSchema = z
   .describe('Parameters for retrieving an escrow wallet');
 
 // Validation for update escrow wallet parameters
-export const updateEscrowWalletSchema = z
+export const updateWalletSchema = z
   .object({
-    escrowWalletId: z.string().uuid().describe('ID of the escrow wallet to update'),
+    walletId: z.string().uuid().describe('ID of the escrow wallet to update'),
     name: z.string().optional().describe('New name for the escrow wallet'),
     description: z.string().optional().describe('New description for the escrow wallet'),
   })
   .describe('Parameters for updating an escrow wallet');
 
 // Validation for delete escrow wallet parameters
-export const deleteEscrowWalletSchema = z
+export const deleteWalletSchema = z
   .object({
-    escrowWalletId: z.string().uuid().describe('ID of the escrow wallet to delete'),
+    walletId: z.string().uuid().describe('ID of the escrow wallet to delete'),
   })
   .describe('Parameters for deleting an escrow wallet');
