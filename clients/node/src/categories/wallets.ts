@@ -15,7 +15,7 @@ export class Wallets {
   constructor(private client: IOneShotClient) {}
 
   /**
-   * List escrow wallets for a business
+   * List wallets for a business
    * @param businessId The business ID to list wallets for
    * @param params Optional filter parameters
    * @returns Promise<PagedResponse<Wallet>>
@@ -56,7 +56,7 @@ export class Wallets {
   }
 
   /**
-   * Create a new escrow wallet for a business
+   * Create a new wallet for a business
    * @param businessId The business ID to create the wallet for
    * @param params Creation parameters including chainId, name, and optional description
    * @returns Promise<Wallet>
@@ -91,7 +91,7 @@ export class Wallets {
   }
 
   /**
-   * Get an escrow wallet by ID
+   * Get a wallet by ID
    * @param walletId The ID of the wallet to get
    * @param includeBalances Whether to include balance information
    * @returns Promise<Wallet>
@@ -120,7 +120,7 @@ export class Wallets {
   }
 
   /**
-   * Update an escrow wallet
+   * Update a wallet
    * @param walletId The ID of the wallet to update
    * @param params Update parameters
    * @returns Promise<Wallet>
@@ -153,7 +153,7 @@ export class Wallets {
   }
 
   /**
-   * Delete an escrow wallet
+   * Delete a wallet
    * @param walletId The ID of the wallet to delete
    * @returns Promise<{ success: boolean }>
    * @throws {ZodError} If the wallet ID is invalid

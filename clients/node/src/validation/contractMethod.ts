@@ -90,7 +90,7 @@ export const contractMethodUpdateSchema = z
       .uuid()
       .optional()
       .describe(
-        'The ID of the escrow wallet that will execute the contractMethod. Must be for the same chainId as the contractMethod'
+        'The ID of the wallet that will execute the contractMethod. Must be for the same chainId as the contractMethod'
       ),
     name: z
       .string()
@@ -115,12 +115,6 @@ export const contractMethodUpdateSchema = z
       .optional()
       .describe(
         'Whether the contractMethod can receive native tokens. Determines if the function can accept ETH or other native tokens'
-      ),
-    nativeTransaction: z
-      .boolean()
-      .optional()
-      .describe(
-        'Whether this is a native contractMethod (not a smart contract call). Used for direct blockchain contractMethods without contract interaction'
       ),
     callbackUrl: z
       .string()
@@ -197,7 +191,7 @@ export const contractMethodSchema = z
       .uuid()
       .nullable()
       .describe(
-        'The ID of the contract description that this contractMethod was created from. This is optional, and a ContractMethod can drift from the original Contract Description but retain this association'
+        'The ID of the Prompt that this contractMethod was created from. This is optional, and a ContractMethod can drift from the original Prompt but retain this association'
       ),
     callbackUrl: z
       .string()
@@ -597,7 +591,7 @@ export const contractFunctionParamDescriptionSchema = z
   .describe('A description of a function parameter. This may be an input or an output parameter');
 
 // Validation for contract function description
-export const contractFunctionDescriptionSchema = z
+export const contractFunctionPromptSchema = z
   .object({
     name: z
       .string()
@@ -656,7 +650,7 @@ export const promptSchema = z
 export const fullPromptSchema = promptSchema
   .extend({
     functions: z
-      .array(contractFunctionDescriptionSchema)
+      .array(contractFunctionPromptSchema)
       .describe(
         'An array of Contract Function Descriptions, describing each function on the contract'
       ),
@@ -733,3 +727,22 @@ export const contractMethodTestResultSchema = z
       .describe('The error that occurred, if the contractMethod was not successful'),
   })
   .describe('The result of running /test on a contractMethod');
+
+// Validation for assure contract methods from prompt parameters
+export const assureContractMethodsFromPromptSchema = z
+  .object({
+    businessId: z.string().uuid().describe('ID of the business to create contract methods for'),
+    chainId: z
+      .number()
+      .int()
+      .positive()
+      .describe('ID of the blockchain network where the contract exists'),
+    contractAddress: z.string().describe('Address of the smart contract'),
+    walletId: z.string().uuid().describe('ID of the wallet that will execute the contract methods'),
+    promptId: z
+      .string()
+      .uuid()
+      .optional()
+      .describe('ID of the prompt to use. If not provided, the highest-ranked Prompt will be used'),
+  })
+  .describe('Parameters for assuring contract methods exist for a given Prompt');

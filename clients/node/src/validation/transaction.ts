@@ -158,17 +158,17 @@ export const listTransactionsSchema = z
         'Filter executions by blockchain network ID. Optional parameter to get executions for a specific chainId'
       ),
     status: z
-      .enum(['0', '1', '2', '3', '4'])
+      .enum(['Pending', 'Submitted', 'Completed', 'Retrying', 'Failed'])
       .optional()
       .describe(
-        'Filter executions by status (Pending = 0, Submitted = 1, Completed = 2,	Retrying = 3,	Failed = 4). Optional parameter to filter by execution state'
+        'Filter executions by status. Optional parameter to filter by execution state'
       ),
     walletId: z
       .string()
       .uuid()
       .optional()
       .describe(
-        'Filter executions by escrow wallet ID. Optional parameter to get executions for a specific wallet'
+        'Filter executions by wallet ID. Optional parameter to get executions for a specific wallet'
       ),
     contractMethodId: z
       .string()

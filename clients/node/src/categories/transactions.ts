@@ -45,9 +45,9 @@ export class Transactions {
       pageSize?: number;
       page?: number;
       chainId?: number;
-      status?: '0' | '1' | '2' | '3' | '4'; // Pending = 0, Submitted = 1, Completed = 2,	Retrying = 3,	Failed = 4,
+      status?: 'Pending' | 'Submitted' | 'Completed' | 'Retrying' | 'Failed';
       walletId?: string;
-      transactionId?: string;
+      contractMethodId?: string;
       apiCredentialId?: string;
       userId?: string;
     }

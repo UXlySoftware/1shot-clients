@@ -25,11 +25,10 @@ import {
   importFromABISchema,
   updateContractMethodSchema,
   deleteContractMethodSchema,
-  restoreContractMethodSchema,
   contractSearchSchema,
   fullPromptSchema,
-  contractContractMethodsSchema,
   contractMethodTestResultSchema,
+  assureContractMethodsFromPromptSchema,
 } from '../validation/contractMethod.js';
 import { Transaction } from '../types/transaction.js';
 import { transactionSchema } from '../validation/transaction.js';
@@ -41,7 +40,7 @@ export class ContractMethods {
    * Execute a contractMethod
    * @param contractMethodId The ID of the contractMethod to execute
    * @param params Configuration parameters for the contractMethod
-   * @param walletId Optional ID of the escrow wallet to use
+   * @param walletId Optional ID of the wallet to use
    * @param memo Optional memo for the contractMethod
    * @returns Promise<ContractMethod>
    * @throws {ZodError} If the parameters are invalid
@@ -297,7 +296,6 @@ export class ContractMethods {
       description?: string;
       functionName?: string;
       payable?: boolean;
-      nativeContractMethod?: boolean;
       callbackUrl?: string | null;
     }
   ): Promise<ContractMethod> {
@@ -309,7 +307,7 @@ export class ContractMethods {
     const response = await this.client.request<ContractMethod>(
       'PUT',
       `/contractMethods/${validatedParams.contractMethodId}`,
-      validatedParams.params
+      validatedParams
     );
 
     return contractMethodSchema.parse(response);
@@ -322,7 +320,9 @@ export class ContractMethods {
    * @throws {ZodError} If the ID is invalid
    */
   async delete(contractMethodId: string): Promise<void> {
-    const validatedParams = deleteContractMethodSchema.parse({ contractMethodId });
+    const validatedParams = deleteContractMethodSchema.parse({
+      contractMethodId,
+    });
 
     await this.client.request<void>(
       'DELETE',
@@ -331,25 +331,8 @@ export class ContractMethods {
   }
 
   /**
-   * Restore a deleted contractMethod
-   * @param contractMethodId The ID of the contractMethod to restore
-   * @returns Promise<ContractMethod[]>
-   * @throws {ZodError} If the ID is invalid
-   */
-  async restore(contractMethodId: string): Promise<ContractMethod[]> {
-    const validatedParams = restoreContractMethodSchema.parse({ contractMethodId });
-
-    const response = await this.client.request<ContractMethod[]>(
-      'PUT',
-      `/contractMethods/${validatedParams.contractMethodId}/restore`
-    );
-
-    return response.map((item) => contractMethodSchema.parse(item));
-  }
-
-  /**
-   * Search for prompts
-   * @param query Search query
+   * Search for contracts
+   * @param query The search query
    * @param params Optional search parameters
    * @returns Promise<FullPrompt[]>
    * @throws {ZodError} If the parameters are invalid
@@ -362,17 +345,17 @@ export class ContractMethods {
 
     const response = await this.client.request<FullPrompt[]>(
       'POST',
-      '/contracts/descriptions/search',
+      '/prompts/search',
       validatedParams
     );
 
-    return response.map((item) => fullPromptSchema.parse(item));
+    return fullPromptSchema.array().parse(response);
   }
 
   /**
-   * Create contractMethods from a prompt
-   * @param businessId The business ID to create the contractMethods for
-   * @param params Contract contractMethod parameters
+   * Assure contract methods exist for a given Prompt
+   * @param businessId The business ID to create the contract methods for
+   * @param params Parameters for creating contract methods from a Prompt
    * @returns Promise<ContractMethod[]>
    * @throws {ZodError} If the parameters are invalid
    */
@@ -385,17 +368,17 @@ export class ContractMethods {
       promptId?: string;
     }
   ): Promise<ContractMethod[]> {
-    const validatedParams = contractContractMethodsSchema.parse({
+    const validatedParams = assureContractMethodsFromPromptSchema.parse({
       businessId,
       ...params,
     });
 
     const response = await this.client.request<ContractMethod[]>(
       'POST',
-      `/business/${validatedParams.businessId}/contractMethods/prompt`,
+      `/business/${validatedParams.businessId}/methods/prompt`,
       validatedParams
     );
 
-    return response.map((item) => contractMethodSchema.parse(item));
+    return contractMethodSchema.array().parse(response);
   }
 }
