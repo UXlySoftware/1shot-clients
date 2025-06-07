@@ -190,6 +190,13 @@ export const transactionSchema = z
         'The output parameters for the transaction function. Defines the structure and types of values returned after execution'
       ),
     stateMutability: transactionStateMutabilitySchema,
+    contractDescriptionId: z
+      .string()
+      .uuid()
+      .nullable()
+      .describe(
+        'The ID of the contract description that this transaction was created from. This is optional, and a Transaction can drift from the original Contract Description but retain this association'
+      ),
     callbackUrl: z
       .string()
       .url()
@@ -289,6 +296,13 @@ export const listTransactionsSchema = z
       .optional()
       .describe(
         'Filter by contract address. Optional parameter to get transactions for a specific contract'
+      ),
+    contractDescriptionId: z
+      .string()
+      .uuid()
+      .optional()
+      .describe(
+        'Filter by contract description ID. If provided, only transactions created from this Contract Description will be returned'
       ),
   })
   .describe('Parameters for listing transactions. Used to filter and paginate transaction lists');
@@ -666,6 +680,13 @@ export const contractTransactionsSchema = z
       .uuid()
       .describe(
         'The ID of the escrow wallet that will execute the transactions. Must be for the same chain as the transactions'
+      ),
+    contractDescriptionId: z
+      .string()
+      .uuid()
+      .optional()
+      .describe(
+        'The ID of the contract description that you want to use. If not provided, the highest-ranked Contract Description for the chain and contract address will be used. This is optional, and a Transaction can drift from the original Contract Description but retain this association'
       ),
   })
   .describe(

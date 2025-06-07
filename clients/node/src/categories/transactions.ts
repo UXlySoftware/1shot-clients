@@ -130,6 +130,7 @@ export class Transactions {
       name?: string;
       status?: 'live' | 'archived' | 'both';
       contractAddress?: string;
+      contractDescriptionId?: string;
     }
   ): Promise<TransactionList> {
     // Validate all parameters using the schema
@@ -375,6 +376,7 @@ export class Transactions {
       chain: number;
       contractAddress: string;
       escrowWalletId: string;
+      contractDescriptionId?: string;
     }
   ): Promise<Transaction[]> {
     const validatedParams = contractTransactionsSchema.parse({
