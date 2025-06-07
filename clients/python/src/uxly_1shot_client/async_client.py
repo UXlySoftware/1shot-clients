@@ -6,9 +6,9 @@ from typing import Any, Dict, Optional, TypeVar
 import httpx
 
 from uxly_1shot_client.base import BaseClient, TokenResponse
-from uxly_1shot_client.categories.executions import AsyncExecutions
-from uxly_1shot_client.categories.structs import AsyncStructs
 from uxly_1shot_client.categories.transactions import AsyncTransactions
+from uxly_1shot_client.categories.structs import AsyncStructs
+from uxly_1shot_client.categories.contract_methods import AsyncContractMethods
 from uxly_1shot_client.categories.wallets import AsyncWallets
 
 T = TypeVar("T")
@@ -31,8 +31,8 @@ class AsyncClient(BaseClient):
             base_url: Base URL for the API
         """
         super().__init__(api_key, api_secret, base_url)
-        self.executions = AsyncExecutions(self)
         self.transactions = AsyncTransactions(self)
+        self.contract_methods = AsyncContractMethods(self)
         self.wallets = AsyncWallets(self)
         self.structs = AsyncStructs(self)
         self._client: Optional[httpx.AsyncClient] = None

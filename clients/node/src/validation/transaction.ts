@@ -160,9 +160,7 @@ export const listTransactionsSchema = z
     status: z
       .enum(['Pending', 'Submitted', 'Completed', 'Retrying', 'Failed'])
       .optional()
-      .describe(
-        'Filter executions by status. Optional parameter to filter by execution state'
-      ),
+      .describe('Filter executions by status. Optional parameter to filter by execution state'),
     walletId: z
       .string()
       .uuid()

@@ -32,7 +32,9 @@ export const walletSchema = z
     name: z.string().describe('Name of the wallet'),
     description: z.string().describe('Description of the wallet'),
     isAdmin: z.boolean().describe('Whether this is an admin wallet with special privileges'),
-    accountBalanceDetails: accountBalanceDetailsSchema.nullable().describe('Current balance details of the wallet'),
+    accountBalanceDetails: accountBalanceDetailsSchema
+      .nullable()
+      .describe('Current balance details of the wallet'),
     updated: z.number().describe('Unix timestamp of the last update to this wallet'),
     created: z.number().describe('Unix timestamp when this wallet was created'),
     deleted: z.boolean().describe('Whether this wallet has been deleted'),
