@@ -47,6 +47,7 @@ class Transaction(BaseModel):
     )
     chain_id: int = Field(
         ...,
+        alias="chainId", 
         description="The chain ID"
     )
     memo: Optional[str] = Field(

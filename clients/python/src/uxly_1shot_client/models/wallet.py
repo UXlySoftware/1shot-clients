@@ -61,7 +61,7 @@ class WalletListParams(BaseModel):
 class WalletCreateParams(BaseModel):
     """Parameters for creating a wallet."""
 
-    chain_id: int = Field(..., description="The chain ID to create the wallet on")
+    chain_id: int = Field(..., alias="chainId", description="The chain ID to create the wallet on")
     name: str = Field(..., description="The name of the wallet")
     description: Optional[str] = Field(None, description="A description of the wallet, such as it's intended use. This is for reference only.")
 

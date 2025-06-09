@@ -82,7 +82,7 @@ class ContractMethod(BaseModel):
 
     id: str = Field(..., description="Internal ID of the contract method object. ContractMethods are sometimes referred to as Endpoints. A ContractMethod is a single method on a smart contract")
     business_id: str = Field(..., alias="businessId", description="The internal ID of the business. Every object in the API is ultimately scoped to a single Business")
-    chain_id: int = Field(..., description="The ChainId of a supported chain on 1Shot API")
+    chain_id: int = Field(..., alias="chainId", description="The ChainId of a supported chain on 1Shot API")
     contract_address: str = Field(..., alias="contractAddress", description="string address of contract")
     wallet_id: str = Field(..., alias="walletId", description="The default wallet that will execute this ContractMethod")
     name: str = Field(..., description="Name of contract method")
@@ -136,7 +136,7 @@ class ContractMethod(BaseModel):
 class ContractMethodEstimate(BaseModel):
     """A summary of values required to estimate the cost of executing a contract method."""
 
-    chain_id: int = Field(..., description="The ChainId of a supported chain on 1Shot API")
+    chain_id: int = Field(..., alias="chainId", description="The ChainId of a supported chain on 1Shot API")
     contract_address: str = Field(..., alias="contractAddress", description="string address of contract")
     function_name: str = Field(..., alias="functionName", description="The name of the function on the contract")
     gas_amount: str = Field(..., alias="gasAmount", description="The amount of gas units it will use")
@@ -201,7 +201,7 @@ class ERC7702Authorization(BaseModel):
 class ContractMethodCreateParams(BaseModel):
     """Parameters for creating a new ContractMethod. A ContractMethod is sometimes referred to as an Endpoint. A ContractMethod corresponds to a single method on a smart contract."""
     
-    chain_id: int = Field(..., description="The ChainId of a supported chain on 1Shot API")
+    chain_id: int = Field(..., alias="chainId", description="The ChainId of a supported chain on 1Shot API")
     contract_address: str = Field(..., alias="contractAddress", description="string address of contract")
     wallet_id: str = Field(..., alias="walletId", description="The ID of the wallet that will execute the contract method")
     name: str = Field(..., description="Name of contract method")
@@ -305,7 +305,7 @@ class Prompt(BaseModel):
 
     id: str = Field(..., description="Internal ID of the prompt")
     user_id: str = Field(..., alias="userId", description="ID of the user that created")
-    chain_id: int = Field(..., description="The ChainId of a supported chain on 1Shot API")
+    chain_id: int = Field(..., alias="chainId", description="The ChainId of a supported chain on 1Shot API")
     contract_address: str = Field(..., alias="contractAddress", description="string address of contract")
     name: str = Field(..., description="The name of the contract. This is human provided and has no technical significance")
     description: str = Field(..., description="The human provided description of what the contract is and does, and the top level")
@@ -350,7 +350,7 @@ class ContractSearchParams(BaseModel):
 class ContractContractMethodsParams(BaseModel):
     """Parameters for creating contract methods from a prompt."""
 
-    chain_id: int = Field(..., description="The ChainId of a supported chain on 1Shot API")
+    chain_id: int = Field(..., alias="chainId", description="The ChainId of a supported chain on 1Shot API")
     contract_address: str = Field(..., alias="contractAddress", description="string address of contract")
     wallet_id: str = Field(..., alias="walletId", description="The ID of the wallet that will execute the contract methods")
     prompt_id: Optional[str] = Field(None, alias="promptId", description="The ID of the prompt that you want to use. If not provided, the highest-ranked Contract Description for the chain and contract address will be used. This is optional, and a ContractMethod can drift from the original Contract Description but retain this association.")
