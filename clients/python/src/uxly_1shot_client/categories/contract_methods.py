@@ -15,8 +15,8 @@ from uxly_1shot_client.models.contract_method import (
     ListContractMethodsParams,
     ContractMethodCreateParams,
     ContractMethodUpdateParams,
-    ContractDescription,
-    FullContractDescription,
+    Prompt,
+    FullPrompt,
     ContractSearchParams,
     ContractContractMethodsParams,
     ERC7702Authorization,
@@ -417,14 +417,14 @@ class SyncContractMethods(BaseContractMethods):
     def search_contracts(
         self,
         params: Union[ContractSearchParams, Dict[str, Any]],
-    ) -> List[FullContractDescription]:
-        """Performs a semantic search on prompts to find the most relevant contracts.
+    ) -> List[FullPrompt]:
+        """Search for prompts using semantic search.
 
         Args:
-            params: Search parameters, either as a dict or ContractSearchParams instance
+            params: The search parameters
 
         Returns:
-            A list of prompts matching the search query
+            A list of prompts matching the search criteria
 
         Raises:
             requests.exceptions.RequestException: If the request fails
@@ -436,7 +436,7 @@ class SyncContractMethods(BaseContractMethods):
             self._get_contract_search_url(),
             data=params.model_dump(exclude_none=True, by_alias=True),
         )
-        return [FullContractDescription.model_validate(desc) for desc in response]
+        return [FullPrompt.model_validate(prompt) for prompt in response]
 
     def update(
         self,
@@ -736,14 +736,14 @@ class AsyncContractMethods(BaseContractMethods):
     async def search_contracts(
         self,
         params: Union[ContractSearchParams, Dict[str, Any]],
-    ) -> List[FullContractDescription]:
-        """Performs a semantic search on prompts to find the most relevant contracts.
+    ) -> List[FullPrompt]:
+        """Search for prompts using semantic search.
 
         Args:
-            params: Search parameters, either as a dict or ContractSearchParams instance
+            params: The search parameters
 
         Returns:
-            A list of prompts matching the search query
+            A list of prompts matching the search criteria
 
         Raises:
             aiohttp.ClientError: If the request fails
@@ -755,7 +755,7 @@ class AsyncContractMethods(BaseContractMethods):
             self._get_contract_search_url(),
             data=params.model_dump(exclude_none=True, by_alias=True),
         )
-        return [FullContractDescription.model_validate(desc) for desc in response]
+        return [FullPrompt.model_validate(prompt) for prompt in response]
 
     async def update(
         self,

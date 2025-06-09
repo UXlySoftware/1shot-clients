@@ -98,8 +98,8 @@ class ContractMethod(BaseModel):
     created: int = Field(..., description="Unix timestamp of when the contract method was created")
     deleted: bool = Field(..., description="Whether the contract method is deleted")
 
-    @validator('chain')
-    def validate_chain(cls, v):
+    @validator('chain_id')
+    def validate_chain_id(cls, v):
         if v not in VALID_CHAIN_IDS:
             raise ValueError(f'Chain ID must be one of {VALID_CHAIN_IDS}')
         return v
@@ -144,8 +144,8 @@ class ContractMethodEstimate(BaseModel):
     max_priority_fee_per_gas: Optional[str] = Field(None, alias="maxPriorityFeePerGas")
     gas_price: Optional[str] = Field(None, alias="gasPrice")
 
-    @validator('chain')
-    def validate_chain(cls, v):
+    @validator('chain_id')
+    def validate_chain_id(cls, v):
         if v not in VALID_CHAIN_IDS:
             raise ValueError(f'Chain ID must be one of {VALID_CHAIN_IDS}')
         return v
@@ -212,8 +212,8 @@ class ContractMethodCreateParams(BaseModel):
     outputs: List[Dict[str, Any]] = Field(..., description="The output parameters for the contract method function")
     callback_url: Optional[str] = Field(None, alias="callbackUrl", description="The URL to send webhooks to when this contract method is executed. This must be a valid HTTP or HTTPS URL and include the protocol")
 
-    @validator('chain')
-    def validate_chain(cls, v):
+    @validator('chain_id')
+    def validate_chain_id(cls, v):
         if v not in VALID_CHAIN_IDS:
             raise ValueError(f'Chain ID must be one of {VALID_CHAIN_IDS}')
         return v
@@ -252,8 +252,8 @@ class ContractMethodUpdateParams(BaseModel):
     state_mutability: Optional[str] = Field(None, alias="stateMutability", description="The state mutability of a Solidity function")
     callback_url: Optional[str] = Field(None, alias="callbackUrl", description="The URL to send webhooks to when this contract method is executed. This must be a valid HTTP or HTTPS URL and include the protocol")
 
-    @validator('chain')
-    def validate_chain(cls, v):
+    @validator('chain_id')
+    def validate_chain_id(cls, v):
         if v is not None and v not in VALID_CHAIN_IDS:
             raise ValueError(f'Chain ID must be one of {VALID_CHAIN_IDS}')
         return v
@@ -313,8 +313,8 @@ class Prompt(BaseModel):
     updated: int = Field(..., description="Unix timestamp of when the prompt was last updated")
     created: int = Field(..., description="Unix timestamp of when the prompt was created")
 
-    @validator('chain')
-    def validate_chain(cls, v):
+    @validator('chain_id')
+    def validate_chain_id(cls, v):
         if v not in VALID_CHAIN_IDS:
             raise ValueError(f'Chain ID must be one of {VALID_CHAIN_IDS}')
         return v
@@ -340,8 +340,8 @@ class ContractSearchParams(BaseModel):
     query: str = Field(..., description="A free-form query to search for contracts. This uses semantic search to find the most relevant contracts")
     chain_id: Optional[int] = Field(None, description="The ChainId of a supported chain on 1Shot API")
 
-    @validator('chain')
-    def validate_chain(cls, v):
+    @validator('chain_id')
+    def validate_chain_id(cls, v):
         if v is not None and v not in VALID_CHAIN_IDS:
             raise ValueError(f'Chain ID must be one of {VALID_CHAIN_IDS}')
         return v
@@ -355,8 +355,8 @@ class ContractContractMethodsParams(BaseModel):
     wallet_id: str = Field(..., alias="walletId", description="The ID of the wallet that will execute the contract methods")
     prompt_id: Optional[str] = Field(None, alias="promptId", description="The ID of the prompt that you want to use. If not provided, the highest-ranked Contract Description for the chain and contract address will be used. This is optional, and a ContractMethod can drift from the original Contract Description but retain this association.")
 
-    @validator('chain')
-    def validate_chain(cls, v):
+    @validator('chain_id')
+    def validate_chain_id(cls, v):
         if v not in VALID_CHAIN_IDS:
             raise ValueError(f'Chain ID must be one of {VALID_CHAIN_IDS}')
         return v

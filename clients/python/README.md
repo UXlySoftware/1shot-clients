@@ -216,7 +216,7 @@ wallet = client.wallets.get(escrow_wallet_id="54ee551b-5586-48c9-a7ee-72d74ed889
 wallets = client.wallets.list(BUSINESS_ID)
 
 mint_endpoint_payload = {
-        "chain": 11155111,
+        "chain_id": 11155111,
         "contractAddress": "0xA1BfEd6c6F1C3A516590edDAc7A8e359C2189A61",
         "escrowWalletId": f"{wallet.id}",
         "name": "Sepolia Token Deployer",
@@ -419,19 +419,19 @@ hatch build
 4. Test the build:
 ```bash
 # On Windows:
-hatch run python -m pip install dist\uxly_1shot_client-1.1.0-py3-none-any.whl
+hatch run python -m pip install dist\uxly_1shot_client-1.1.1-py3-none-any.whl
 
 # On Unix-like systems (Linux/macOS):
-hatch run python -m pip install dist/uxly_1shot_client-1.1.0-py3-none-any.whl
+hatch run python -m pip install dist/uxly_1shot_client-1.1.1-py3-none-any.whl
 ```
 
 5. Upload to PyPI:
 ```bash
 # First, upload to TestPyPI to verify everything works
-python -m twine upload --repository testpypi dist/uxly_1shot_client-1.1.0-py3-none-any.whl dist/uxly_1shot_client-1.1.0.tar.gz
+python -m twine upload --repository testpypi dist/uxly_1shot_client-1.1.1-py3-none-any.whl dist/uxly_1shot_client-1.1.1.tar.gz
 
 # If everything looks good, upload to the real PyPI
-python -m twine upload dist/uxly_1shot_client-1.1.0-py3-none-any.whl dist/uxly_1shot_client-1.1.0.tar.gz
+python -m twine upload dist/uxly_1shot_client-1.1.1-py3-none-any.whl dist/uxly_1shot_client-1.1.1.tar.gz
 ```
 
 Note: You'll need to have a PyPI account and configure your credentials. You can do this by:
