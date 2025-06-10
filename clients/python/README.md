@@ -190,26 +190,26 @@ client = Client(
 )
 
 # List transactions for a business
-transactions = client.transactions.list(
+contract_methods = client.contract_methods.list(
     business_id=BUSINESS_ID,
     params={"page": 1, "page_size": 10}
 )
 
 # Get transaction endpoint details
-transaction_endpoint = client.transactions.get(transactions.response[0].id)
+contract_method = client.contract_methods.get(contract_methods.response[0].id)
 
 # Execute a transaction
-execution = client.transactions.execute(
-    transaction_id=transaction_endpoint.id,
+execution = client.contract_methods.execute(
+    contract_method_id=contract_method.id,
     params={
         "amount": "1000000000000000000",  # 1 ETH in wei
         "recipient": "0x123..."
     }
 )
 
-executions_list = client.executions.list(business_id=BUSINESS_ID)
+transactions_list = client.transactions.list(business_id=BUSINESS_ID)
 
-execution_status = client.executions.get(execution.id)
+transaction_status = client.transactions.get(transaction.id)
 
 wallet = client.wallets.get(escrow_wallet_id="54ee551b-5586-48c9-a7ee-72d74ed889c0", include_balances=True)
 
@@ -250,9 +250,9 @@ mint_endpoint_payload = {
     }
 
 # Create a new transaction
-new_transaction = client.transactions.create(
+new_contract_method = client.contract_methods.create(
     business_id=BUSINESS_ID,
-    params=mint_endpoint_payload
+    params=mint_method_payload
 )
 ```
 
@@ -276,21 +276,21 @@ async def main():
         api_secret=API_SECRET,
         base_url="https://api.1shotapi.com/v0"  # Optional, defaults to this URL
     )
-    # List transactions for a business
-    transactions = await client.transactions.list(
+    # List contract methods for a business
+    contract_methods = await client.contract_methods.list(
         business_id=BUSINESS_ID,
         params={"page": 1, "page_size": 10}
     )
     # Execute a transaction
-    execution = await client.transactions.execute(
-        transaction_id="424f56a9-cc15-4b5c-9bab-5fc5c9569869",
+    transaction = await client.contract_methods.execute(
+        contract_method_id="424f56a9-cc15-4b5c-9bab-5fc5c9569869",
         params={
             "account": "0xE936e8FAf4A5655469182A49a505055B71C17604"
         }
     )
     
     # Get available transaction endpoints attached to your organization
-    transaction = await client.executions.list(BUSINESS_ID)
+    transaction = await client.transactions.list(BUSINESS_ID)
     for transaction in transactions.response:
         print(f"Transaction ID: {transaction.id}, Status: {transaction.name}")
 
