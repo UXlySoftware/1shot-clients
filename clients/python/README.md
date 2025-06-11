@@ -1,6 +1,6 @@
 # 1Shot API Python Client
 
-A Python client for the 1Shot API that provides both synchronous and asynchronous interfaces.
+A Python client for the [1Shot API](https://1shotapi.com) that provides both synchronous and asynchronous interfaces.
 
 ## Installation
 
@@ -29,36 +29,41 @@ client = Client(
     base_url="https://api.1shotapi.com/v0"  # Optional, defaults to this URL
 )
 
-# List transactions for a business
-transactions = client.transactions.list(
+# List smart contract methods that available for a business
+contract_methods = client.contract_methods.list(
     business_id=BUSINESS_ID,
     params={"page": 1, "page_size": 10}
 )
 
-# Get transaction endpoint details
-transaction_endpoint = client.transactions.get(transactions.response[0].id)
+# Get details for a specific smart contract method
+contract_method = client.contract_methods.get(contract_methods.response[0].id)
 
 # Execute a transaction
-execution = client.transactions.execute(
-    transaction_id=transaction_endpoint.id,
+execution = client.contract_methods.execute(
+    contract_method_id=contract_method.id,
     params={
         "amount": "1000000000000000000",  # 1 ETH in wei
         "recipient": "0x123..."
     }
 )
 
-executions_list = client.executions.list(business_id=BUSINESS_ID)
+# get transaction history for a business' wallets
+transactions_list = client.transactions.list(business_id=BUSINESS_ID)
 
-execution_status = client.executions.get(execution.id)
+# get the current status of a specific transaction
+transaction_status = client.transactions.get(transaction.id)
 
-wallet = client.wallets.get(escrow_wallet_id="54ee551b-5586-48c9-a7ee-72d74ed889c0", include_balances=True)
+# fetch the details of a specific wallet
+wallet = client.wallets.get(wallet_id="54ee551b-5586-48c9-a7ee-72d74ed889c0", include_balances=True)
 
-wallets = client.wallets.list(BUSINESS_ID)
+# list all the wallets in a given business for a specific chain id
+wallets = client.wallets.list(BUSINESS_ID, {"chain_id": "84532"})
 
+# configuration to create a new smart contract method in a business
 mint_endpoint_payload = {
-        "chain": 11155111,
+        "chain_id": 11155111,
         "contractAddress": "0xA1BfEd6c6F1C3A516590edDAc7A8e359C2189A61",
-        "escrowWalletId": f"{wallet.id}",
+        "walletId": f"{wallet.id}",
         "name": "Sepolia Token Deployer",
         "description": "This deploys ERC20 tokens on Sepolia",
         "functionName": "deployToken",
@@ -89,10 +94,10 @@ mint_endpoint_payload = {
         "outputs": []
     }
 
-# Create a new transaction
-new_transaction = client.transactions.create(
+# Create the smart contract method
+new_contract_method = client.contract_methods.create(
     business_id=BUSINESS_ID,
-    params=mint_endpoint_payload
+    params=mint_method_payload
 )
 ```
 
@@ -116,21 +121,21 @@ async def main():
         api_secret=API_SECRET,
         base_url="https://api.1shotapi.com/v0"  # Optional, defaults to this URL
     )
-    # List transactions for a business
-    transactions = await client.transactions.list(
+    # List contract methods for a business
+    contract_methods = await client.contract_methods.list(
         business_id=BUSINESS_ID,
         params={"page": 1, "page_size": 10}
     )
     # Execute a transaction
-    execution = await client.transactions.execute(
-        transaction_id="424f56a9-cc15-4b5c-9bab-5fc5c9569869",
+    transaction = await client.contract_methods.execute(
+        contract_method_id="424f56a9-cc15-4b5c-9bab-5fc5c9569869",
         params={
             "account": "0xE936e8FAf4A5655469182A49a505055B71C17604"
         }
     )
     
-    # Get available transaction endpoints attached to your organization
-    transaction = await client.executions.list(BUSINESS_ID)
+    # List transaction history of your organization's wallets
+    transaction = await client.transactions.list(BUSINESS_ID)
     for transaction in transactions.response:
         print(f"Transaction ID: {transaction.id}, Status: {transaction.name}")
 

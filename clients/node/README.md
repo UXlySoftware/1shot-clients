@@ -22,31 +22,31 @@ const client = new OneShotClient({
   baseUrl: 'https://api.1shotapi.com/v1' // Optional, defaults to this URL
 });
 
-// List transactions for a business
-const transactions = await client.transactions.list({
+// List contractMethods for a business
+const contractMethods = await client.contractMethods.list({
   businessId: 'your_business_id',
   params: { page: 1, pageSize: 10 }
 });
 
-// Execute a transaction
-const execution = await client.transactions.execute({
-  transactionId: 'your_transaction_id',
+// Execute a Contract Method
+const transaction = await client.contractMethods.execute({
+  contractMethodId: 'your_contract_method_id',
   params: {
     amount: '1000000000000000000', // 1 ETH in wei
     recipient: '0x123...'
   }
 });
 
-// Get transaction details
-const transaction = await client.transactions.get('your_transaction_id');
+// Get Contract Method details
+const contractMethod = await client.contractMethods.get('your_contract_method_id');
 
 // Create a new transaction
-const newTransaction = await client.transactions.create({
+const newContractMethod = await client.contractMethods.create({
   businessId: 'your_business_id',
   params: {
     name: 'Transfer ETH',
     description: 'Transfer ETH to a recipient',
-    chain: 1, // Ethereum mainnet
+    chainId: 1, // Ethereum mainnet
     contractAddress: '0x...',
     functionName: 'transfer',
     stateMutability: 'nonpayable',

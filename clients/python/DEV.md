@@ -186,19 +186,20 @@ hatch build
 4. Test the build:
 ```bash
 # On Windows:
-hatch run python -m pip install dist\uxly_1shot_client-1.0.23-py3-none-any.whl
+hatch run python -m pip install dist\uxly_1shot_client-1.1.2-py3-none-any.whl
 
 # On Unix-like systems (Linux/macOS):
-hatch run python -m pip install dist/uxly_1shot_client-1.0.23-py3-none-any.whl
+hatch run python -m pip install dist/uxly_1shot_client-1.1.2-py3-none-any.whl
 ```
 
 5. Upload to PyPI:
 ```bash
 # First, upload to TestPyPI to verify everything works
-python -m twine upload --repository testpypi dist/uxly_1shot_client-1.0.23-py3-none-any.whl dist/uxly_1shot_client-1.0.23.tar.gz
+python -m twine upload --repository testpypi dist/uxly_1shot_client-1.1.2-py3-none-any.whl dist/uxly_1shot_client-1.1.2.tar.gz
 
 # If everything looks good, upload to the real PyPI
-python -m twine upload dist/uxly_1shot_client-1.0.23-py3-none-any.whl dist/uxly_1shot_client-1.0.23.tar.gz
+python -m twine upload dist/uxly_1shot_client-1.1.2-py3-none-any.whl dist/uxly_1shot_client-1.1.2.tar.gz
+
 ```
 
 Note: You'll need to have a PyPI account and configure your credentials. You can do this by:

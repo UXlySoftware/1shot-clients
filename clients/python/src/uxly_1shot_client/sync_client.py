@@ -6,9 +6,9 @@ from typing import Any, Dict, Optional, TypeVar, Generic
 import requests
 
 from uxly_1shot_client.base import BaseClient, TokenResponse
-from uxly_1shot_client.categories.executions import SyncExecutions
-from uxly_1shot_client.categories.structs import SyncStructs
 from uxly_1shot_client.categories.transactions import SyncTransactions
+from uxly_1shot_client.categories.structs import SyncStructs
+from uxly_1shot_client.categories.contract_methods import SyncContractMethods
 from uxly_1shot_client.categories.wallets import SyncWallets
 
 T = TypeVar("T")
@@ -31,8 +31,8 @@ class Client(BaseClient):
             base_url: Base URL for the API
         """
         super().__init__(api_key, api_secret, base_url)
-        self.executions = SyncExecutions(self)
         self.transactions = SyncTransactions(self)
+        self.contract_methods = SyncContractMethods(self)
         self.wallets = SyncWallets(self)
         self.structs = SyncStructs(self)
 

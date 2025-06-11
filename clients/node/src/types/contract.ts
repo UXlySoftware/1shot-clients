@@ -1,10 +1,10 @@
 import { z } from 'zod';
 import {
-  contractFunctionDescriptionSchema,
-  contractDescriptionSchema,
-  fullContractDescriptionSchema,
-} from '../validation/transaction.js';
+  contractFunctionPromptSchema,
+  promptSchema,
+  fullPromptSchema,
+} from '../validation/contractMethod.js';
 
-export type ContractFunctionDescription = z.infer<typeof contractFunctionDescriptionSchema>;
-export type ContractDescription = z.infer<typeof contractDescriptionSchema>;
-export type FullContractDescription = z.infer<typeof fullContractDescriptionSchema>;
+export type ContractFunctionPrompt = z.infer<typeof contractFunctionPromptSchema>;
+export type Prompt = z.infer<typeof promptSchema>;
+export type FullPrompt = z.infer<typeof fullPromptSchema>;
