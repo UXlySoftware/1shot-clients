@@ -199,6 +199,7 @@ python -m twine upload --repository testpypi dist/uxly_1shot_client-1.1.2-py3-no
 
 # If everything looks good, upload to the real PyPI
 python -m twine upload dist/uxly_1shot_client-1.1.2-py3-none-any.whl dist/uxly_1shot_client-1.1.2.tar.gz
+
 ```
 
 Note: You'll need to have a PyPI account and configure your credentials. You can do this by:

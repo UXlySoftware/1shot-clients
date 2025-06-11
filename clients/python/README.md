@@ -144,6 +144,10 @@ async def main():
     for wallet in wallets.response:
         print(f"Wallet ID: {wallet.id}, Address: {wallet.account_address}")
 
+    # Search for relevant smart contracts with natural language
+    contracts = await client.transactions.search_contracts({"query": "I need to transfer USDC on Sepolia testnet", "chain": "11155111"})
+    print("Contract Prompt: ", contracts[0].description)
+
 # Run the async code
 asyncio.run(main())
 ```
