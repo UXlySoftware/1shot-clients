@@ -1,24 +1,24 @@
 import { IOneShotClient } from '../types/client.js';
-import { EscrowWallet } from '../types/wallet.js';
+import { Wallet } from '../types/wallet.js';
 import { PagedResponse } from '../types/common.js';
 import {
-  escrowWalletSchema,
-  escrowWalletListSchema,
-  listEscrowWalletsSchema,
-  createEscrowWalletSchema,
-  getEscrowWalletSchema,
-  updateEscrowWalletSchema,
-  deleteEscrowWalletSchema,
+  walletSchema,
+  walletListSchema,
+  listWalletsSchema,
+  createWalletSchema,
+  getWalletSchema,
+  updateWalletSchema,
+  deleteWalletSchema,
 } from '../validation/wallet.js';
 
 export class Wallets {
   constructor(private client: IOneShotClient) {}
 
   /**
-   * List escrow wallets for a business
+   * List wallets for a business
    * @param businessId The business ID to list wallets for
    * @param params Optional filter parameters
-   * @returns Promise<PagedResponse<EscrowWallet>>
+   * @returns Promise<PagedResponse<Wallet>>
    * @throws {ZodError} If the parameters are invalid
    */
   async list(
@@ -29,9 +29,9 @@ export class Wallets {
       page?: number;
       name?: string;
     }
-  ): Promise<PagedResponse<EscrowWallet>> {
+  ): Promise<PagedResponse<Wallet>> {
     // Validate all parameters using the schema
-    const validatedParams = listEscrowWalletsSchema.parse({
+    const validatedParams = listWalletsSchema.parse({
       businessId,
       ...params,
     });
@@ -49,58 +49,58 @@ export class Wallets {
       ? `/business/${validatedParams.businessId}/wallets?${queryString}`
       : `/business/${validatedParams.businessId}/wallets`;
 
-    const response = await this.client.request<PagedResponse<EscrowWallet>>('GET', path);
+    const response = await this.client.request<PagedResponse<Wallet>>('GET', path);
 
     // Validate the response
-    return escrowWalletListSchema.parse(response);
+    return walletListSchema.parse(response);
   }
 
   /**
-   * Create a new escrow wallet for a business
+   * Create a new wallet for a business
    * @param businessId The business ID to create the wallet for
-   * @param params Creation parameters including chain, name, and optional description
-   * @returns Promise<EscrowWallet>
+   * @param params Creation parameters including chainId, name, and optional description
+   * @returns Promise<Wallet>
    * @throws {ZodError} If the parameters are invalid
    */
   async create(
     businessId: string,
     params: {
-      chain: number;
+      chainId: number;
       name: string;
       description?: string;
     }
-  ): Promise<EscrowWallet> {
+  ): Promise<Wallet> {
     // Validate all parameters using the schema
-    const validatedParams = createEscrowWalletSchema.parse({
+    const validatedParams = createWalletSchema.parse({
       businessId,
       ...params,
     });
 
-    const response = await this.client.request<EscrowWallet>(
+    const response = await this.client.request<Wallet>(
       'POST',
       `/business/${validatedParams.businessId}/wallets`,
       {
-        chain: validatedParams.chain,
+        chainId: validatedParams.chainId,
         name: validatedParams.name,
         description: validatedParams.description,
       }
     );
 
     // Validate the response
-    return escrowWalletSchema.parse(response);
+    return walletSchema.parse(response);
   }
 
   /**
-   * Get an escrow wallet by ID
-   * @param escrowWalletId The ID of the wallet to get
+   * Get a wallet by ID
+   * @param walletId The ID of the wallet to get
    * @param includeBalances Whether to include balance information
-   * @returns Promise<EscrowWallet>
+   * @returns Promise<Wallet>
    * @throws {ZodError} If the parameters are invalid
    */
-  async get(escrowWalletId: string, includeBalances?: boolean): Promise<EscrowWallet> {
+  async get(walletId: string, includeBalances?: boolean): Promise<Wallet> {
     // Validate all parameters using the schema
-    const validatedParams = getEscrowWalletSchema.parse({
-      escrowWalletId,
+    const validatedParams = getWalletSchema.parse({
+      walletId,
       includeBalances,
     });
 
@@ -110,38 +110,38 @@ export class Wallets {
     }
     const queryString = queryParams.toString();
     const path = queryString
-      ? `/wallets/${validatedParams.escrowWalletId}?${queryString}`
-      : `/wallets/${validatedParams.escrowWalletId}`;
+      ? `/wallets/${validatedParams.walletId}?${queryString}`
+      : `/wallets/${validatedParams.walletId}`;
 
-    const response = await this.client.request<EscrowWallet>('GET', path);
+    const response = await this.client.request<Wallet>('GET', path);
 
     // Validate the response
-    return escrowWalletSchema.parse(response);
+    return walletSchema.parse(response);
   }
 
   /**
-   * Update an escrow wallet
-   * @param escrowWalletId The ID of the wallet to update
+   * Update a wallet
+   * @param walletId The ID of the wallet to update
    * @param params Update parameters
-   * @returns Promise<EscrowWallet>
+   * @returns Promise<Wallet>
    * @throws {ZodError} If the parameters are invalid
    */
   async update(
-    escrowWalletId: string,
+    walletId: string,
     params: {
       name?: string;
       description?: string;
     }
-  ): Promise<EscrowWallet> {
+  ): Promise<Wallet> {
     // Validate all parameters using the schema
-    const validatedParams = updateEscrowWalletSchema.parse({
-      escrowWalletId,
+    const validatedParams = updateWalletSchema.parse({
+      walletId,
       ...params,
     });
 
-    const response = await this.client.request<EscrowWallet>(
+    const response = await this.client.request<Wallet>(
       'PUT',
-      `/wallets/${validatedParams.escrowWalletId}`,
+      `/wallets/${validatedParams.walletId}`,
       {
         name: validatedParams.name,
         description: validatedParams.description,
@@ -149,24 +149,24 @@ export class Wallets {
     );
 
     // Validate the response
-    return escrowWalletSchema.parse(response);
+    return walletSchema.parse(response);
   }
 
   /**
-   * Delete an escrow wallet
-   * @param escrowWalletId The ID of the wallet to delete
+   * Delete a wallet
+   * @param walletId The ID of the wallet to delete
    * @returns Promise<{ success: boolean }>
    * @throws {ZodError} If the wallet ID is invalid
    */
-  async delete(escrowWalletId: string): Promise<{ success: boolean }> {
+  async delete(walletId: string): Promise<{ success: boolean }> {
     // Validate all parameters using the schema
-    const validatedParams = deleteEscrowWalletSchema.parse({
-      escrowWalletId,
+    const validatedParams = deleteWalletSchema.parse({
+      walletId,
     });
 
     return this.client.request<{ success: boolean }>(
       'DELETE',
-      `/wallets/${validatedParams.escrowWalletId}`
+      `/wallets/${validatedParams.walletId}`
     );
   }
 }

@@ -1,6 +1,6 @@
 import { ClientConfig, TokenResponse } from './types.js';
+import { ContractMethods } from './categories/contractMethods.js';
 import { Transactions } from './categories/transactions.js';
-import { Executions } from './categories/executions.js';
 import { Wallets } from './categories/wallets.js';
 import { Structs } from './categories/structs.js';
 import { IOneShotClient } from './types/client.js';
@@ -11,7 +11,7 @@ export class OneShotClient implements IOneShotClient {
   private tokenExpiry: Date | null = null;
 
   public readonly transactions: Transactions;
-  public readonly executions: Executions;
+  public readonly contractMethods: ContractMethods;
   public readonly wallets: Wallets;
   public readonly structs: Structs;
 
@@ -21,7 +21,7 @@ export class OneShotClient implements IOneShotClient {
       baseUrl: config.baseUrl || 'https://api.1shotapi.com/v0',
     };
     this.transactions = new Transactions(this);
-    this.executions = new Executions(this);
+    this.contractMethods = new ContractMethods(this);
     this.wallets = new Wallets(this);
     this.structs = new Structs(this);
   }
