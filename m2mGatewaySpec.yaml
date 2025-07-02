@@ -71,6 +71,44 @@ paths:
           description: Invalid client credentials
         403:
           $ref: "#/components/responses/PermissionError"
+
+  /chains:
+    get:
+      tags:
+        - Chains
+        - List
+      description: Returns a listing of all chains supported by 1Shot API
+      parameters:
+        - name: pageSize
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/PageSize"
+        - name: page
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/Page"
+      security:
+        - OAuth2ClientCredentials:
+          - read:api
+      responses:
+        200:
+          description: Returns a list of Contract Method objects.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      response:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/ChainInfo"
+                  - $ref: "#/components/schemas/PagedResponse"
+
+        500:
+          $ref: "#/components/responses/DatabaseError"
   
   /methods/{contractMethodId}/test:  
     post:
@@ -96,6 +134,20 @@ paths:
               properties:
                 params:
                   $ref: '#/components/schemas/JSONValue'
+                walletId:
+                  $ref: "#/components/schemas/WalletId"
+                authorizationList:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/ERC7702Authorization"
+                  description: A list of authorizations for the Contract Method. If you are using ERC-7702, you must provide at least one authorization.
+                  example: [{"address": "0x1234567890abcdef", "nonce": "1", "chainId": "1", "signature": "0x1234567890abcdef"}]
+                value:
+                  type: string
+                  format: big-number-string
+                  description: The amount of native token to send along with the Contract Method. This is only applicable for Contract Methods that are payable. Including this value for a nonpayable method will result in an error.
+                contractAddress:
+                  $ref: "#/components/schemas/ContractAddress"
       responses:
         200:
           description: "Success"
@@ -103,6 +155,50 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ContractMethodTestResult'
+        500:
+          $ref: "#/components/responses/DatabaseError"
+
+  /methods/{contractMethodId}/encode:  
+    post:
+      tags:
+        - Contract Methods
+      description: This method encodes the transaction data for a Contract Method. It returns a hex string of the bytes of the encoded data. This can be used to call the Contract Method directly on the blockchain.
+      parameters:
+        - name: contractMethodId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/ContractMethodId"
+      security:
+        - OAuth2ClientCredentials:
+          - read:api
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: You need to provide a value for every parameter in the Contract Method via the name of the parameter
+              properties:
+                params:
+                  $ref: '#/components/schemas/JSONValue'
+                authorizationList:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/ERC7702Authorization"
+                  description: A list of authorizations for the Contract Method. If you are using ERC-7702, you must provide at least one authorization.
+                  example: [{"address": "0x1234567890abcdef", "nonce": "1", "chainId": "1", "signature": "0x1234567890abcdef"}]
+                value:
+                  type: string
+                  format: big-number-string
+                  description: The amount of native token to send along with the Contract Method. This is only applicable for Contract Methods that are payable. Including this value for a nonpayable method will result in an error.
+      responses:
+        200:
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContractMethodEncodeResult'
         500:
           $ref: "#/components/responses/DatabaseError"
 
@@ -128,6 +224,16 @@ paths:
               properties:
                 params:
                   $ref: '#/components/schemas/JSONValue'
+                authorizationList:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/ERC7702Authorization"
+                  description: A list of authorizations for the Contract Method. If you are using ERC-7702, you must provide at least one authorization.
+                  example: [{"address": "0x1234567890abcdef", "nonce": "1", "chainId": "1", "signature": "0x1234567890abcdef"}]
+                value:
+                  type: string
+                  format: big-number-string
+                  description: The amount of native token to send along with the Contract Method. This is only applicable for Contract Methods that are payable. Including this value for a nonpayable method will result in an error.
       responses:
         200:
           description: "Success"
@@ -173,6 +279,12 @@ paths:
                     $ref: "#/components/schemas/ERC7702Authorization"
                   description: A list of authorizations for the Contract Method. If you are using ERC-7702, you must provide at least one authorization.
                   example: [{"address": "0x1234567890abcdef", "nonce": "1", "chainId": "1", "signature": "0x1234567890abcdef"}]
+                value:
+                  type: string
+                  format: big-number-string
+                  description: The amount of native token to send along with the Contract Method. This is only applicable for Contract Methods that are payable. Including this value for a nonpayable method will result in an error.
+                contractAddress:
+                  $ref: "#/components/schemas/ContractAddress"
       responses:
         200:
           description: "Success"
@@ -552,12 +664,8 @@ paths:
                 functionName:
                   type: string
                   description: The name of the function on the contract. This is case-sensitive, so be sure to check your ABI.
-                payable:
-                  type: boolean
-                  description: Some Contract Methods can move tokens with them. Check your ABI.
-                nativeTransaction:
-                  type: boolean
-                  description: It is possible to create a "native" Contract Method, one that is part of the EVM and not a smart contract. Set this to true to enable native Contract Method handling.
+                stateMutability:
+                  $ref: "#/components/schemas/ESolidityStateMutability"
                 callbackUrl:
                   type: string
                   format: URL
@@ -662,6 +770,26 @@ paths:
             type: string
             format: uuid
             example: 8a6e0804-2bd0-4672-b79d-d97027f90720
+        - name: memo
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "Illicit Activities"
+        - name: createdAfter
+          in: query
+          required: false
+          schema:
+            type: number
+            format: unix-timestamp
+            example: 1659485172
+        - name: createdBefore
+          in: query
+          required: false
+          schema:
+            type: number
+            format: unix-timestamp
+            example: 1659485172
       security:
         - OAuth2ClientCredentials:
           - read:api
@@ -1262,6 +1390,13 @@ components:
       enum:
         - 0
 
+    EChainType:
+      type: string
+      enum:
+        - Mainnet
+        - Testnet
+        - Hardhat
+
     ContractAddress:
       type: string
       description: string address of contract
@@ -1574,6 +1709,8 @@ components:
               type: string
               nullable: true
               description: The hash of the Transaction. Only calculated once the status is Submitted. This is an immutable value and can be looked up on the appropriate block scanner.
+            contractAddress:
+              $ref: "#/components/schemas/ContractAddress"
             name:
               type: string
               description: the name of the associated Contract Method. Included as a convienience.
@@ -1592,6 +1729,13 @@ components:
               nullable: true
               format: unix-timestamp
               example: 1659485172
+            walletId:
+              $ref: "#/components/schemas/WalletId"
+            failureReason:
+              type: string
+              nullable: true
+              description: The reason the transaction failed. This is only set if the transaction failed.
+              example: "Transaction reverted"
           required:
             - id
             - contractMethodId
@@ -1600,11 +1744,13 @@ components:
             - userId
             - status
             - transactionHash
+            - contractAddress
             - name
             - functionName
             - chainId
             - memo
             - completed
+            - walletId
         - $ref: "#/components/schemas/EntityBookKeeping"
         
     JSONValue:
@@ -1814,6 +1960,11 @@ components:
               description: An array of tag names provided to the contract
               items:
                 type: string
+            image:
+              type: string
+              nullable: true
+              description: The URL of the image for the contract description.
+              example: https://storage.googleapis.com/uxly-public-bucket/contract-descriptions/100d2e83-dddd-480d-88ad-74a71c214912/image.png
           required:
             - id
             - userId
@@ -1822,6 +1973,7 @@ components:
             - name
             - description
             - tags
+            - image
         - $ref: "#/components/schemas/EntityBookKeepingWithoutDeleted"
   
     FullPrompt:
@@ -1914,6 +2066,15 @@ components:
         - result
         - error
 
+    ContractMethodEncodeResult:
+      description: The result of running /encode on a contract method.
+      type: object
+      properties:
+        data:
+          type: string
+          format: hex-string
+          description: The hex string of the encoded data.
+
     ERC7702Authorization:
       description: A single authorization for an ERC-7702 transaction. It represents a single potential delegation from an EOA to a contract. The EOA must sign a message with the contract address, the chain ID, and a nonce. Authorizations are sticky, once a Contract Method has been executed with an authorization, future Contract Methods may be executed for the EOA using the authorized contract without a new authorization being submitted.
       type: object
@@ -1936,3 +2097,34 @@ components:
         - nonce
         - chainId
         - signature
+
+    ChainInfo:
+      description: Information about a chain supported by 1Shot API
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the chain
+        chainId: 
+          $ref: "#/components/schemas/EChain"
+        averageBlockMiningTime:
+          type: number
+          description: The average time it takes to mine a block on the chain
+        nativeCurrency:
+          $ref: "#/components/schemas/NativeCurrencyInformation"
+        type:
+          $ref: "#/components/schemas/EChainType"
+
+    NativeCurrencyInformation:
+      description: Information about the native currency of a chain
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the currency
+        symbol:
+          type: string
+          description: The symbol of the currency
+        decimals:
+          type: number
+          description: The number of decimals of the currency

@@ -62,7 +62,7 @@ export class ContractMethods {
 
     const response = await this.client.request<ContractMethod>(
       'POST',
-      `/contractMethods/${validatedParams.contractMethodId}/execute`,
+      `/methods/${validatedParams.contractMethodId}/execute`,
       {
         params: validatedParams.params,
         walletId: validatedParams.walletId,
@@ -92,7 +92,7 @@ export class ContractMethods {
 
     const response = await this.client.request<ContractMethodTestResult>(
       'POST',
-      `/contractMethods/${validatedParams.contractMethodId}/test`,
+      `/methods/${validatedParams.contractMethodId}/test`,
       { params: validatedParams.params }
     );
 
@@ -110,7 +110,7 @@ export class ContractMethods {
 
     const response = await this.client.request<ContractMethod>(
       'GET',
-      `/contractMethods/${validatedParams.id}`
+      `/methods/${validatedParams.id}`
     );
 
     return contractMethodSchema.parse(response);
@@ -149,8 +149,8 @@ export class ContractMethods {
     });
     const queryString = queryParams.toString();
     const path = queryString
-      ? `/business/${validatedParams.businessId}/contractMethods?${queryString}`
-      : `/business/${validatedParams.businessId}/contractMethods`;
+      ? `/business/${validatedParams.businessId}/methods?${queryString}`
+      : `/business/${validatedParams.businessId}/methods`;
 
     const response = await this.client.request<ContractMethodList>('GET', path);
 
@@ -179,7 +179,7 @@ export class ContractMethods {
 
     const response = await this.client.request<ContractMethodEstimate>(
       'POST',
-      `/contractMethods/${validatedParams.contractMethodId}/estimate`,
+      `/methods/${validatedParams.contractMethodId}/estimate`,
       {
         params: validatedParams.params,
         walletId: validatedParams.walletId,
@@ -204,7 +204,7 @@ export class ContractMethods {
 
     const response = await this.client.request<any>(
       'POST',
-      `/contractMethods/${validatedParams.contractMethodId}/read`,
+      `/methods/${validatedParams.contractMethodId}/read`,
       { params: validatedParams.params }
     );
 
@@ -240,7 +240,7 @@ export class ContractMethods {
 
     const response = await this.client.request<ContractMethod>(
       'POST',
-      `/business/${validatedParams.businessId}/contractMethods`,
+      `/business/${validatedParams.businessId}/methods`,
       validatedParams
     );
 
@@ -272,7 +272,7 @@ export class ContractMethods {
 
     const response = await this.client.request<ContractMethod[]>(
       'POST',
-      `/business/${validatedParams.businessId}/contractMethods/abi`,
+      `/business/${validatedParams.businessId}/methods/abi`,
       validatedParams
     );
 
@@ -306,7 +306,7 @@ export class ContractMethods {
 
     const response = await this.client.request<ContractMethod>(
       'PUT',
-      `/contractMethods/${validatedParams.contractMethodId}`,
+      `/methods/${validatedParams.contractMethodId}`,
       validatedParams
     );
 
@@ -324,10 +324,7 @@ export class ContractMethods {
       contractMethodId,
     });
 
-    await this.client.request<void>(
-      'DELETE',
-      `/contractMethods/${validatedParams.contractMethodId}`
-    );
+    await this.client.request<void>('DELETE', `/methods/${validatedParams.contractMethodId}`);
   }
 
   /**
