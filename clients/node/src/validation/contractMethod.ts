@@ -302,6 +302,12 @@ export const listContractMethodsSchema = z
       .describe(
         'Filter by contract description ID. If provided, only contractMethods created from this Contract Description will be returned'
       ),
+    methodType: z
+      .enum(['read', 'write'])
+      .optional()
+      .describe(
+        'Which type of contract method you want to filter by - read or write methods. If not provided, all contract methods will be returned'
+      ),
   })
   .describe(
     'Parameters for listing contractMethods. Used to filter and paginate contractMethod lists'
