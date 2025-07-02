@@ -22,6 +22,7 @@ import {
   contractSearchSchema,
   contractContractMethodsSchema,
   contractMethodTestResultSchema,
+  contractMethodEncodeResultSchema,
   erc7702AuthorizationSchema,
 } from '../validation/contractMethod.js';
 
@@ -49,4 +50,5 @@ export type ContractFunctionParamDescription = z.infer<
 export type ContractSearch = z.infer<typeof contractSearchSchema>;
 export type ContractContractMethods = z.infer<typeof contractContractMethodsSchema>;
 export type ContractMethodTestResult = z.infer<typeof contractMethodTestResultSchema>;
+export type ContractMethodEncodeResult = z.infer<typeof contractMethodEncodeResultSchema>;
 export type ERC7702Authorization = z.infer<typeof erc7702AuthorizationSchema>;

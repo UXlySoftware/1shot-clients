@@ -7,6 +7,7 @@ import {
   ContractMethodList,
   ContractMethodEstimate,
   ContractMethodTestResult,
+  ContractMethodEncodeResult,
   ContractMethodParams,
   ContractMethodStateMutability,
   ERC7702Authorization,
@@ -20,6 +21,7 @@ import {
   testContractMethodSchema,
   getContractMethodSchema,
   estimateContractMethodSchema,
+  encodeContractMethodSchema,
   readContractMethodSchema,
   createContractMethodSchema,
   importFromABISchema,
@@ -28,6 +30,7 @@ import {
   contractSearchSchema,
   fullPromptSchema,
   contractMethodTestResultSchema,
+  contractMethodEncodeResultSchema,
   assureContractMethodsFromPromptSchema,
 } from '../validation/contractMethod.js';
 import { Transaction } from '../types/transaction.js';
@@ -40,24 +43,25 @@ export class ContractMethods {
    * Execute a contractMethod
    * @param contractMethodId The ID of the contractMethod to execute
    * @param params Configuration parameters for the contractMethod
-   * @param walletId Optional ID of the wallet to use
-   * @param memo Optional memo for the contractMethod
-   * @returns Promise<ContractMethod>
+   * @param options Optional execution options
+   * @returns Promise<Transaction>
    * @throws {ZodError} If the parameters are invalid
    */
   async execute(
     contractMethodId: string,
     params: ContractMethodParams,
-    walletId?: string,
-    memo?: string,
-    authorizationList?: ERC7702Authorization[]
+    options?: {
+      walletId?: string;
+      memo?: string;
+      authorizationList?: ERC7702Authorization[];
+      value?: string;
+      contractAddress?: string;
+    }
   ): Promise<Transaction> {
     const validatedParams = executeContractMethodSchema.parse({
       contractMethodId,
       params,
-      walletId,
-      memo,
-      authorizationList,
+      ...options,
     });
 
     const response = await this.client.request<ContractMethod>(
@@ -68,6 +72,8 @@ export class ContractMethods {
         walletId: validatedParams.walletId,
         memo: validatedParams.memo,
         authorizationList: validatedParams.authorizationList,
+        value: validatedParams.value,
+        contractAddress: validatedParams.contractAddress,
       }
     );
 
@@ -78,22 +84,34 @@ export class ContractMethods {
    * Test a contractMethod without actually executing it
    * @param contractMethodId The ID of the contractMethod to test
    * @param params Configuration parameters for the contractMethod
+   * @param options Optional test options
    * @returns Promise<ContractMethodTestResult>
    * @throws {ZodError} If the parameters are invalid
    */
   async test(
     contractMethodId: string,
-    params: ContractMethodParams
+    params: ContractMethodParams,
+    options?: {
+      authorizationList?: ERC7702Authorization[];
+      value?: string;
+      contractAddress?: string;
+    }
   ): Promise<ContractMethodTestResult> {
     const validatedParams = testContractMethodSchema.parse({
       contractMethodId,
-      ...params,
+      params,
+      ...options,
     });
 
     const response = await this.client.request<ContractMethodTestResult>(
       'POST',
       `/methods/${validatedParams.contractMethodId}/test`,
-      { params: validatedParams.params }
+      {
+        params: validatedParams.params,
+        authorizationList: validatedParams.authorizationList,
+        value: validatedParams.value,
+        contractAddress: validatedParams.contractAddress,
+      }
     );
 
     return contractMethodTestResultSchema.parse(response);
@@ -162,19 +180,22 @@ export class ContractMethods {
    * Estimate the cost of executing a contractMethod
    * @param contractMethodId The ID of the contractMethod to estimate
    * @param params Configuration parameters for the contractMethod
-   * @param walletId Optional ID of the escrow wallet to use
+   * @param options Optional estimation options
    * @returns Promise<ContractMethodEstimate>
    * @throws {ZodError} If the parameters are invalid
    */
   async estimate(
     contractMethodId: string,
     params: ContractMethodParams,
-    walletId?: string
+    options?: {
+      authorizationList?: ERC7702Authorization[];
+      value?: string;
+    }
   ): Promise<ContractMethodEstimate> {
     const validatedParams = estimateContractMethodSchema.parse({
       contractMethodId,
       params,
-      walletId,
+      ...options,
     });
 
     const response = await this.client.request<ContractMethodEstimate>(
@@ -182,11 +203,47 @@ export class ContractMethods {
       `/methods/${validatedParams.contractMethodId}/estimate`,
       {
         params: validatedParams.params,
-        walletId: validatedParams.walletId,
+        authorizationList: validatedParams.authorizationList,
+        value: validatedParams.value,
       }
     );
 
     return contractMethodEstimateSchema.parse(response);
+  }
+
+  /**
+   * Encode a contractMethod to get the transaction data
+   * @param contractMethodId The ID of the contractMethod to encode
+   * @param params Configuration parameters for the contractMethod
+   * @param options Optional encoding options
+   * @returns Promise<ContractMethodEncodeResult>
+   * @throws {ZodError} If the parameters are invalid
+   */
+  async encode(
+    contractMethodId: string,
+    params: ContractMethodParams,
+    options?: {
+      authorizationList?: ERC7702Authorization[];
+      value?: string;
+    }
+  ): Promise<ContractMethodEncodeResult> {
+    const validatedParams = encodeContractMethodSchema.parse({
+      contractMethodId,
+      params,
+      ...options,
+    });
+
+    const response = await this.client.request<ContractMethodEncodeResult>(
+      'POST',
+      `/methods/${validatedParams.contractMethodId}/encode`,
+      {
+        params: validatedParams.params,
+        authorizationList: validatedParams.authorizationList,
+        value: validatedParams.value,
+      }
+    );
+
+    return contractMethodEncodeResultSchema.parse(response);
   }
 
   /**
