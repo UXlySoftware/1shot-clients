@@ -76,6 +76,11 @@ export const transactionSchema = z
       .describe(
         'Unix timestamp when the execution completed, if applicable. Used for tracking execution duration and timing'
       ),
+    walletId: z.string().uuid().describe('ID of the wallet that executed the transaction'),
+    failureReason: z
+      .string()
+      .nullable()
+      .describe('The reason the transaction failed. This is only set if the transaction failed'),
     updated: z
       .number()
       .describe('Unix timestamp of the last update to this execution. Used for tracking changes'),
@@ -173,7 +178,7 @@ export const listTransactionsSchema = z
       .uuid()
       .optional()
       .describe(
-        'Filter executions by transaction ID. Optional parameter to get executions of a specific transaction'
+        'Filter executions by contract method ID. Optional parameter to get executions of a specific contract method'
       ),
     apiCredentialId: z
       .string()
@@ -188,6 +193,22 @@ export const listTransactionsSchema = z
       .optional()
       .describe(
         'Filter executions by user ID. Optional parameter to get executions made by a specific user'
+      ),
+    memo: z
+      .string()
+      .optional()
+      .describe('Filter executions by memo text. Optional parameter to search for specific memos'),
+    createdAfter: z
+      .number()
+      .optional()
+      .describe(
+        'Filter executions created after this timestamp. Optional parameter for time-based filtering'
+      ),
+    createdBefore: z
+      .number()
+      .optional()
+      .describe(
+        'Filter executions created before this timestamp. Optional parameter for time-based filtering'
       ),
   })
   .describe(

@@ -302,6 +302,12 @@ export const listContractMethodsSchema = z
       .describe(
         'Filter by contract description ID. If provided, only contractMethods created from this Contract Description will be returned'
       ),
+    methodType: z
+      .enum(['read', 'write'])
+      .optional()
+      .describe(
+        'Which type of contract method you want to filter by - read or write methods. If not provided, all contract methods will be returned'
+      ),
   })
   .describe(
     'Parameters for listing contractMethods. Used to filter and paginate contractMethod lists'
@@ -361,9 +367,19 @@ export const executeContractMethodSchema = z
       .describe(
         'A list of authorizations for the contractMethod. If you are using ERC-7702, you must provide at least one authorization'
       ),
+    value: z
+      .string()
+      .optional()
+      .describe(
+        'The amount of native token to send along with the contractMethod. This is only applicable for contractMethods that are payable. Including this value for a nonpayable method will result in an error'
+      ),
+    contractAddress: z
+      .string()
+      .optional()
+      .describe('The address of the smart contract. Can be overridden for this specific execution'),
   })
   .describe(
-    'Parameters required to execute a contractMethod. Includes the function parameters, optional escrow wallet override, and optional memo'
+    'Parameters required to execute a contractMethod. Includes the function parameters, optional escrow wallet override, optional memo, optional value for payable methods, and optional contract address override'
   );
 
 // Validation for testing a contractMethod
@@ -376,6 +392,22 @@ export const testContractMethodSchema = z
         'The ID of the contractMethod to test. Identifies which contractMethod to simulate'
       ),
     params: contractMethodParamsSchema,
+    authorizationList: z
+      .array(erc7702AuthorizationSchema)
+      .optional()
+      .describe(
+        'A list of authorizations for the contractMethod. If you are using ERC-7702, you must provide at least one authorization'
+      ),
+    value: z
+      .string()
+      .optional()
+      .describe(
+        'The amount of native token to send along with the contractMethod. This is only applicable for contractMethods that are payable. Including this value for a nonpayable method will result in an error'
+      ),
+    contractAddress: z
+      .string()
+      .optional()
+      .describe('The address of the smart contract. Can be overridden for this specific test'),
   })
   .describe(
     'Parameters for testing a contractMethod - simulates execution without spending gas or changing on-chainId state. Used for validating contractMethod parameters before actual execution'
@@ -403,16 +435,48 @@ export const estimateContractMethodSchema = z
         'The ID of the contractMethod to estimate. Identifies which contractMethod to analyze'
       ),
     params: contractMethodParamsSchema,
-    walletId: z
-      .string()
-      .uuid()
+    authorizationList: z
+      .array(erc7702AuthorizationSchema)
       .optional()
       .describe(
-        'Optional ID of the escrow wallet to use. Overrides the default escrow wallet if specified'
+        'A list of authorizations for the contractMethod. If you are using ERC-7702, you must provide at least one authorization'
+      ),
+    value: z
+      .string()
+      .optional()
+      .describe(
+        'The amount of native token to send along with the contractMethod. This is only applicable for contractMethods that are payable. Including this value for a nonpayable method will result in an error'
       ),
   })
   .describe(
     'Parameters for estimating a contractMethod - returns data about fees and gas amount. Used to calculate contractMethod costs before execution'
+  );
+
+// Validation for encoding a contractMethod
+export const encodeContractMethodSchema = z
+  .object({
+    contractMethodId: z
+      .string()
+      .uuid()
+      .describe(
+        'The ID of the contractMethod to encode. Identifies which contractMethod to encode'
+      ),
+    params: contractMethodParamsSchema,
+    authorizationList: z
+      .array(erc7702AuthorizationSchema)
+      .optional()
+      .describe(
+        'A list of authorizations for the contractMethod. If you are using ERC-7702, you must provide at least one authorization'
+      ),
+    value: z
+      .string()
+      .optional()
+      .describe(
+        'The amount of native token to send along with the contractMethod. This is only applicable for contractMethods that are payable. Including this value for a nonpayable method will result in an error'
+      ),
+  })
+  .describe(
+    'Parameters for encoding a contractMethod - returns hex string of encoded data. Used to call the contractMethod directly on the blockchain'
   );
 
 // Validation for reading a contractMethod
@@ -727,6 +791,16 @@ export const contractMethodTestResultSchema = z
       .describe('The error that occurred, if the contractMethod was not successful'),
   })
   .describe('The result of running /test on a contractMethod');
+
+// Validation for contractMethod encode result
+export const contractMethodEncodeResultSchema = z
+  .object({
+    data: z
+      .string()
+      .regex(/^0x[a-fA-F0-9]+$/)
+      .describe('The hex string of the encoded data'),
+  })
+  .describe('The result of running /encode on a contractMethod');
 
 // Validation for assure contract methods from prompt parameters
 export const assureContractMethodsFromPromptSchema = z

@@ -3,7 +3,13 @@ import { z } from 'zod';
 // Validation for account balance details
 export const accountBalanceDetailsSchema = z
   .object({
-    type: z.number().int().describe('Type of the token (0 for native currency, 1 for ERC20)'),
+    type: z
+      .number()
+      .int()
+      .refine((val) => val === 0, {
+        message: 'Type must be 0 (EVM)',
+      })
+      .describe('The technology of the chain. 1Shot currently only supports EVM (0) chains'),
     ticker: z.string().describe('Symbol of the token'),
     chainId: z.number().int().positive().describe('ID of the blockchain network'),
     tokenAddress: z.string().describe('Address of the token contract (empty for native currency)'),
@@ -37,7 +43,6 @@ export const walletSchema = z
       .describe('Current balance details of the wallet'),
     updated: z.number().describe('Unix timestamp of the last update to this wallet'),
     created: z.number().describe('Unix timestamp when this wallet was created'),
-    deleted: z.boolean().describe('Whether this wallet has been deleted'),
   })
   .describe('A wallet that can hold and manage funds');
 
