@@ -146,6 +146,7 @@ paths:
                   type: string
                   format: big-number-string
                   description: The amount of native token to send along with the Contract Method. This is only applicable for Contract Methods that are payable. Including this value for a nonpayable method will result in an error.
+                  example: "123400000000000000000"
                 contractAddress:
                   $ref: "#/components/schemas/ContractAddress"
       responses:
@@ -192,6 +193,7 @@ paths:
                   type: string
                   format: big-number-string
                   description: The amount of native token to send along with the Contract Method. This is only applicable for Contract Methods that are payable. Including this value for a nonpayable method will result in an error.
+                  example: "123400000000000000000"
       responses:
         200:
           description: "Success"
@@ -234,6 +236,7 @@ paths:
                   type: string
                   format: big-number-string
                   description: The amount of native token to send along with the Contract Method. This is only applicable for Contract Methods that are payable. Including this value for a nonpayable method will result in an error.
+                  example: "123400000000000000000"
       responses:
         200:
           description: "Success"
@@ -283,6 +286,7 @@ paths:
                   type: string
                   format: big-number-string
                   description: The amount of native token to send along with the Contract Method. This is only applicable for Contract Methods that are payable. Including this value for a nonpayable method will result in an error.
+                  example: "123400000000000000000"
                 contractAddress:
                   $ref: "#/components/schemas/ContractAddress"
       responses:
@@ -1030,6 +1034,51 @@ paths:
                 $ref: "#/components/schemas/Wallet"
         403:
           $ref: "#/components/responses/PermissionError"
+          
+  /wallets/{walletId}/transfer:
+    post:
+      tags:
+        - Wallets
+      description: Initiates a tranfer of the chains' native token from the Wallet. This is almost the same as executing a Contract Method except there is no contract involved.
+      parameters:
+        - name: walletId
+          in: path
+          description: The internal uuid of the Wallet you are transfering funds from
+          required: true
+          schema:
+            $ref: "#/components/schemas/WalletId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                destinationAccountAddress:
+                  $ref: "#/components/schemas/AccountAddress"
+                transferAmount:
+                  type: string
+                  format: big-number-string
+                  description: the amount of native token to transfer. This is the "value" parameter in the actual transaction. If you omit this parameter, 1Shot API will calculate the maximum amount of token that you can transfer, getting as close to zeroing out the Wallet as possible.
+                  example: "123400000000000000000"
+                memo:
+                  type: string
+                  description: An optional memo for the transfer
+              required:
+                - destinationAccountAddress
+      security:
+        - OAuth2ClientCredentials:
+          - read:api
+      responses:
+        200:
+          description: Returns a Transaction object, which will not be mined yet. You'll need to poll to see when the Transaction completes, because there are no available webhook notifications for native transfers.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transaction"
+
+        500:
+          $ref: "#/components/responses/DatabaseError"
   
   /structs/{structId}:
     put:
@@ -1400,11 +1449,13 @@ components:
     ContractAddress:
       type: string
       description: string address of contract
+      format: evm-address
       example: "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9"
       
-    WalletAddress:
+    AccountAddress:
       type: string
-      description: string address of a wallet insight platform holds keys for
+      description: An EVM address that designates an Externally Owned Account (EOA). Wallets are an example of an EOA.
+      format: evm-address
       example: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
       
     Wallet:
@@ -1415,7 +1466,7 @@ components:
             id:
               $ref: "#/components/schemas/WalletId"
             accountAddress:
-              $ref: "#/components/schemas/WalletAddress"
+              $ref: "#/components/schemas/AccountAddress"
             businessId:
               allOf:
                 - $ref: "#/components/schemas/BusinessId"
@@ -1467,12 +1518,12 @@ components:
         tokenAddress:
           $ref: "#/components/schemas/ContractAddress"
         accountAddress:
-          $ref: "#/components/schemas/WalletAddress"
+          $ref: "#/components/schemas/AccountAddress"
         balance:
           type: string
           format: big-number-string
           description: The balance of the token as a Big Number String
-          example: 123400000000000000000
+          example: "123400000000000000000"
         decimals:
           type: integer
           description: The number of decimals in the balance. Determined by the token type.
@@ -1736,6 +1787,36 @@ components:
               nullable: true
               description: The reason the transaction failed. This is only set if the transaction failed.
               example: "Transaction reverted"
+            from:
+              type: string
+              format: evm-address
+              description: The address of the account that sent the transaction.
+              example: "0x1234567890123456789012345678901234567890"
+            to:
+              type: string
+              format: evm-address
+              description: The address of the account that received the transaction.
+              example: "0x1234567890123456789012345678901234567890"
+            gasPrice:
+              type: string
+              format: big-number-string
+              description: The gas price of the transaction.
+              example: "123400000000000000000"
+            gasLimit:
+              type: string
+              format: big-number-string
+              description: The gas limit of the transaction.
+              example: "123400000000000000000"
+            maxFeePerGas:
+              type: string
+              format: big-number-string
+              description: The max fee per gas of the transaction.
+              example: "123400000000000000000"
+            maxPriorityFeePerGas:
+              type: string
+              format: big-number-string
+              description: The max priority fee per gas of the transaction.
+              example: "123400000000000000000"
           required:
             - id
             - contractMethodId
@@ -1751,6 +1832,12 @@ components:
             - memo
             - completed
             - walletId
+            - from
+            - to
+            - gasPrice
+            - gasLimit
+            - maxFeePerGas
+            - maxPriorityFeePerGas
         - $ref: "#/components/schemas/EntityBookKeeping"
         
     JSONValue:
@@ -1779,17 +1866,21 @@ components:
           type: string
           format: big-number-string
           description: The amount of gas units it will use. This is a stringified bigint.
+          example: "123400000000000000000"
         maxFeePerGas:
           type: string
           format: big-number-string
+          example: "123400000000000000000"
           nullable: true
         maxPriorityFeePerGas:
           type: string
           format: big-number-string
+          example: "123400000000000000000"
           nullable: true
         gasPrice:
           type: string
           format: big-number-string
+          example: "123400000000000000000"
           nullable: true
       required:
         - chainId
@@ -2074,6 +2165,7 @@ components:
           type: string
           format: hex-string
           description: The hex string of the encoded data.
+          example: "0x1234567890abcdef"
 
     ERC7702Authorization:
       description: A single authorization for an ERC-7702 transaction. It represents a single potential delegation from an EOA to a contract. The EOA must sign a message with the contract address, the chain ID, and a nonce. Authorizations are sticky, once a Contract Method has been executed with an authorization, future Contract Methods may be executed for the EOA using the authorized contract without a new authorization being submitted.
@@ -2085,6 +2177,7 @@ components:
           type: string
           format: big-number-string
           description: The delegation nonce. This starts at 0 and must be positive. The EOA must keep track of this nonce itself.
+          example: "123400000000000000000"
         chainId:
           $ref: "#/components/schemas/EChain"
         signature:

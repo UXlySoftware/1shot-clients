@@ -49,6 +49,9 @@ export const transactionSchema = z
       .describe(
         'Hash of the transaction on the blockchain, if available. The actual blockchain transaction hash. Only available after status is Submitted'
       ),
+    contractAddress: z
+      .string()
+      .describe('The address of the smart contract that was called in this transaction'),
     name: z
       .string()
       .describe(
@@ -81,6 +84,12 @@ export const transactionSchema = z
       .string()
       .nullable()
       .describe('The reason the transaction failed. This is only set if the transaction failed'),
+    from: z.string().describe('The address of the account that sent the transaction'),
+    to: z.string().describe('The address of the account that received the transaction'),
+    gasPrice: z.string().describe('The gas price of the transaction'),
+    gasLimit: z.string().describe('The gas limit of the transaction'),
+    maxFeePerGas: z.string().describe('The max fee per gas of the transaction'),
+    maxPriorityFeePerGas: z.string().describe('The max priority fee per gas of the transaction'),
     updated: z
       .number()
       .describe('Unix timestamp of the last update to this execution. Used for tracking changes'),
