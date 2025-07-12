@@ -137,3 +137,18 @@ export const deleteWalletSchema = z
     walletId: z.string().uuid().describe('ID of the wallet to delete'),
   })
   .describe('Parameters for deleting a wallet');
+
+// Validation for wallet transfer parameters
+export const transferWalletSchema = z
+  .object({
+    walletId: z.string().uuid().describe('ID of the wallet to transfer funds from'),
+    destinationAccountAddress: z.string().describe('The destination address to transfer funds to'),
+    transferAmount: z
+      .string()
+      .optional()
+      .describe(
+        'The amount of native token to transfer. If omitted, 1Shot API will calculate the maximum amount that can be transferred, getting as close to zeroing out the wallet as possible'
+      ),
+    memo: z.string().optional().describe('An optional memo for the transfer'),
+  })
+  .describe('Parameters for transferring native tokens from a wallet');

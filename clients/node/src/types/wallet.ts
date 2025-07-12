@@ -10,6 +10,7 @@ import {
   getWalletSchema,
   updateWalletSchema,
   deleteWalletSchema,
+  transferWalletSchema,
 } from '../validation/wallet.js';
 
 /**
@@ -31,3 +32,4 @@ export type CreateWallet = z.infer<typeof createWalletSchema>;
 export type GetWallet = z.infer<typeof getWalletSchema>;
 export type UpdateWallet = z.infer<typeof updateWalletSchema>;
 export type DeleteWallet = z.infer<typeof deleteWalletSchema>;
+export type TransferWallet = z.infer<typeof transferWalletSchema>;

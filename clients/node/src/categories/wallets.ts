@@ -1,5 +1,6 @@
 import { IOneShotClient } from '../types/client.js';
 import { Wallet } from '../types/wallet.js';
+import { Transaction } from '../types/transaction.js';
 import { PagedResponse } from '../types/common.js';
 import {
   walletSchema,
@@ -9,6 +10,7 @@ import {
   getWalletSchema,
   updateWalletSchema,
   deleteWalletSchema,
+  transferWalletSchema,
 } from '../validation/wallet.js';
 
 export class Wallets {
@@ -168,5 +170,40 @@ export class Wallets {
       'DELETE',
       `/wallets/${validatedParams.walletId}`
     );
+  }
+
+  /**
+   * Transfer native tokens from a wallet
+   * @param walletId The ID of the wallet to transfer funds from
+   * @param params Transfer parameters including destination address, optional amount, and optional memo
+   * @returns Promise<Transaction>
+   * @throws {ZodError} If the parameters are invalid
+   */
+  async transfer(
+    walletId: string,
+    params: {
+      destinationAccountAddress: string;
+      transferAmount?: string;
+      memo?: string;
+    }
+  ): Promise<Transaction> {
+    // Validate all parameters using the schema
+    const validatedParams = transferWalletSchema.parse({
+      walletId,
+      ...params,
+    });
+
+    const response = await this.client.request<Transaction>(
+      'POST',
+      `/wallets/${validatedParams.walletId}/transfer`,
+      {
+        destinationAccountAddress: validatedParams.destinationAccountAddress,
+        transferAmount: validatedParams.transferAmount,
+        memo: validatedParams.memo,
+      }
+    );
+
+    // Return the response (Transaction type is already validated by the API)
+    return response;
   }
 }
