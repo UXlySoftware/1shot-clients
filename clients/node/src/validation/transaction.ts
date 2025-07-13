@@ -85,11 +85,14 @@ export const transactionSchema = z
       .nullable()
       .describe('The reason the transaction failed. This is only set if the transaction failed'),
     from: z.string().describe('The address of the account that sent the transaction'),
-    to: z.string().describe('The address of the account that received the transaction'),
-    gasPrice: z.string().describe('The gas price of the transaction'),
-    gasLimit: z.string().describe('The gas limit of the transaction'),
-    maxFeePerGas: z.string().describe('The max fee per gas of the transaction'),
-    maxPriorityFeePerGas: z.string().describe('The max priority fee per gas of the transaction'),
+    to: z.string().nullable().describe('The address of the account that received the transaction'),
+    gasPrice: z.string().nullable().describe('The gas price of the transaction'),
+    gasLimit: z.string().nullable().describe('The gas limit of the transaction'),
+    maxFeePerGas: z.string().nullable().describe('The max fee per gas of the transaction'),
+    maxPriorityFeePerGas: z
+      .string()
+      .nullable()
+      .describe('The max priority fee per gas of the transaction'),
     updated: z
       .number()
       .describe('Unix timestamp of the last update to this execution. Used for tracking changes'),
