@@ -9,10 +9,10 @@
  */
 package swagger
 
-// EChainTechnology The technology of the chain. 1Shot currently only supports EVM (0) chains
+// EChainTechnology : The technology of the chain. 1Shot currently only supports EVM (0) chains
 type EChainTechnology int32
 
 // List of EChainTechnology
 const (
-	EChainTechnology_EVM EChainTechnology = 0
+	EVM EChainTechnology = 0
 )

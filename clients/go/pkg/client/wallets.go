@@ -9,13 +9,13 @@ import (
 
 // Wallets handles all wallet-related operations
 type Wallets struct {
-	api        *swagger.EscrowWalletsApiService
+	api        *swagger.WalletsApiService
 	businessId string
 }
 
-// List lists escrow wallets for a business
-func (w *Wallets) List(ctx context.Context, chainId *swagger.EChain, pageSize, page *int32, name *string) ([]swagger.EscrowWallet, error) {
-	opts := &swagger.EscrowWalletsApiBusinessBusinessIdWalletsGetOpts{}
+// List lists wallets for a business
+func (w *Wallets) List(ctx context.Context, chainId *swagger.EChain, pageSize, page *int32, name *string) ([]swagger.Wallet, error) {
+	opts := &swagger.WalletsApiBusinessBusinessIdWalletsGetOpts{}
 	if chainId != nil {
 		opts.ChainId = optional.NewInterface(*chainId)
 	}
@@ -36,11 +36,11 @@ func (w *Wallets) List(ctx context.Context, chainId *swagger.EChain, pageSize, p
 	return resp.Response, nil
 }
 
-// Create creates a new escrow wallet for a business
-func (w *Wallets) Create(ctx context.Context, chain swagger.EChain, name string, description *string) (*swagger.EscrowWallet, error) {
+// Create creates a new wallet for a business
+func (w *Wallets) Create(ctx context.Context, chain swagger.EChain, name string, description *string) (*swagger.Wallet, error) {
 	body := swagger.BusinessIdWalletsBody{
-		Chain: &chain,
-		Name:  name,
+		ChainId: &chain,
+		Name:    name,
 	}
 	if description != nil {
 		body.Description = *description
@@ -53,23 +53,23 @@ func (w *Wallets) Create(ctx context.Context, chain swagger.EChain, name string,
 	return &resp, nil
 }
 
-// Get gets an escrow wallet by ID
-func (w *Wallets) Get(ctx context.Context, escrowWalletId string, includeBalances *bool) (*swagger.EscrowWallet, error) {
-	opts := &swagger.EscrowWalletsApiWalletsEscrowWalletIdGetOpts{}
+// Get gets an wallet by ID
+func (w *Wallets) Get(ctx context.Context, walletId string, includeBalances *bool) (*swagger.Wallet, error) {
+	opts := &swagger.WalletsApiWalletsWalletIdGetOpts{}
 	if includeBalances != nil {
 		opts.IncludeBalances = optional.NewBool(*includeBalances)
 	}
 
-	resp, _, err := w.api.WalletsEscrowWalletIdGet(ctx, escrowWalletId, opts)
+	resp, _, err := w.api.WalletsWalletIdGet(ctx, walletId, opts)
 	if err != nil {
 		return nil, err
 	}
 	return &resp, nil
 }
 
-// Update updates an escrow wallet
-func (w *Wallets) Update(ctx context.Context, escrowWalletId string, name, description *string) (*swagger.EscrowWallet, error) {
-	body := swagger.WalletsEscrowWalletIdBody{}
+// Update updates an wallet
+func (w *Wallets) Update(ctx context.Context, walletId string, name, description *string) (*swagger.Wallet, error) {
+	body := swagger.WalletsWalletIdBody{}
 	if name != nil {
 		body.Name = *name
 	}
@@ -77,15 +77,15 @@ func (w *Wallets) Update(ctx context.Context, escrowWalletId string, name, descr
 		body.Description = *description
 	}
 
-	resp, _, err := w.api.WalletsEscrowWalletIdPut(ctx, body, escrowWalletId)
+	resp, _, err := w.api.WalletsWalletIdPut(ctx, body, walletId)
 	if err != nil {
 		return nil, err
 	}
 	return &resp, nil
 }
 
-// Delete deletes an escrow wallet
-func (w *Wallets) Delete(ctx context.Context, escrowWalletId string) error {
-	_, _, err := w.api.WalletsEscrowWalletIdDelete(ctx, escrowWalletId)
+// Delete deletes an wallet
+func (w *Wallets) Delete(ctx context.Context, walletId string) error {
+	_, _, err := w.api.WalletsWalletIdDelete(ctx, walletId)
 	return err
 }

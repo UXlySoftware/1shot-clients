@@ -9,7 +9,7 @@
  */
 package swagger
 
-// A single authorization for an ERC-7702 transaction. It represents a single potential delegation from an EOA to a contract. The EOA must sign a message with the contract address, the chain ID, and a nonce. Authorizations are sticky, once a transaction has been executed with an authorization, future transactions may be submitted for the EOA using the authorized contract without a new authorization being submitted.
+// A single authorization for an ERC-7702 transaction. It represents a single potential delegation from an EOA to a contract. The EOA must sign a message with the contract address, the chain ID, and a nonce. Authorizations are sticky, once a Contract Method has been executed with an authorization, future Contract Methods may be executed for the EOA using the authorized contract without a new authorization being submitted.
 type Erc7702Authorization struct {
 	Address string `json:"address"`
 	// The delegation nonce. This starts at 0 and must be positive. The EOA must keep track of this nonce itself.

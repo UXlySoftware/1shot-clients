@@ -30,11 +30,10 @@ SolidityStructsApiService
 Adds a param to an existing struct. Because of the way the indexes work, you can only add params to the end of a struct. You can use /structs/{structId}/params to later rearrange all the indexes of the params if required.
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param body
- * @param businessId The ID of the business that owns the struct. You must have permissions in the business to add a param.
  * @param structId The ID of the existing Solidity Struct
 @return SolidityStruct
 */
-func (a *SolidityStructsApiService) BusinessBusinessIdStructsStructIdParamsPost(ctx context.Context, body NewSolidityStructParam, businessId string, structId string) (SolidityStruct, *http.Response, error) {
+func (a *SolidityStructsApiService) StructsStructIdParamsPost(ctx context.Context, body NewSolidityStructParam, structId string) (SolidityStruct, *http.Response, error) {
 	var (
 		localVarHttpMethod = strings.ToUpper("Post")
 		localVarPostBody   interface{}
@@ -44,8 +43,7 @@ func (a *SolidityStructsApiService) BusinessBusinessIdStructsStructIdParamsPost(
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/business/{businessId}/structs/{structId}/params"
-	localVarPath = strings.Replace(localVarPath, "{"+"businessId"+"}", fmt.Sprintf("%v", businessId), -1)
+	localVarPath := a.client.cfg.BasePath + "/structs/{structId}/params"
 	localVarPath = strings.Replace(localVarPath, "{"+"structId"+"}", fmt.Sprintf("%v", structId), -1)
 
 	localVarHeaderParams := make(map[string]string)
@@ -120,11 +118,10 @@ SolidityStructsApiService
 Update the params of an existing struct. Normally, you would do updates one at a time, but since the parameter indexes must be kept in order, you can update multiple params at once with this call.
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param body
- * @param businessId The ID of the business that owns the struct. You must have permissions in the business to add a param.
  * @param structId The ID of the existing Solidity Struct
 @return SolidityStruct
 */
-func (a *SolidityStructsApiService) BusinessBusinessIdStructsStructIdParamsPut(ctx context.Context, body StructIdParamsBody, businessId string, structId string) (SolidityStruct, *http.Response, error) {
+func (a *SolidityStructsApiService) StructsStructIdParamsPut(ctx context.Context, body StructIdParamsBody, structId string) (SolidityStruct, *http.Response, error) {
 	var (
 		localVarHttpMethod = strings.ToUpper("Put")
 		localVarPostBody   interface{}
@@ -134,8 +131,7 @@ func (a *SolidityStructsApiService) BusinessBusinessIdStructsStructIdParamsPut(c
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/business/{businessId}/structs/{structId}/params"
-	localVarPath = strings.Replace(localVarPath, "{"+"businessId"+"}", fmt.Sprintf("%v", businessId), -1)
+	localVarPath := a.client.cfg.BasePath + "/structs/{structId}/params"
 	localVarPath = strings.Replace(localVarPath, "{"+"structId"+"}", fmt.Sprintf("%v", structId), -1)
 
 	localVarHeaderParams := make(map[string]string)
@@ -294,7 +290,7 @@ func (a *SolidityStructsApiService) StructsStructIdParamsStructParamIdDelete(ctx
 }
 /*
 SolidityStructsApiService
-Updates an existing solidity struct. You can get the structId from the SolidityStructParam.typeStructId, which are either input or output params of a Transaction.
+Updates an existing solidity struct. You can get the structId from the SolidityStructParam.typeStructId, which are either input or output params of a Contract Method.
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param body
  * @param structId The ID of the existing Solidity Struct

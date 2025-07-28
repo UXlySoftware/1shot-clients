@@ -10,6 +10,8 @@
 package swagger
 
 type InlineResponse2004 struct {
-	// Whether or not the delete was successful
-	Success bool `json:"success,omitempty"`
+	Response []Wallet `json:"response,omitempty"`
+	Page int32 `json:"page"`
+	PageSize int32 `json:"pageSize"`
+	TotalResults int32 `json:"totalResults"`
 }

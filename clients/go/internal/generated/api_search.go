@@ -26,22 +26,22 @@ var (
 type SearchApiService service
 /*
 SearchApiService
-Performs a semantic search on contract descriptions to find the most relevant contracts.
+Performs a semantic search on prompts to find the most relevant contracts.
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param body
-@return []FullContractDescription
+@return []FullPrompt
 */
-func (a *SearchApiService) ContractsDescriptionsSearchPost(ctx context.Context, body DescriptionsSearchBody) ([]FullContractDescription, *http.Response, error) {
+func (a *SearchApiService) PromptsSearchPost(ctx context.Context, body PromptsSearchBody) ([]FullPrompt, *http.Response, error) {
 	var (
 		localVarHttpMethod = strings.ToUpper("Post")
 		localVarPostBody   interface{}
 		localVarFileName   string
 		localVarFileBytes  []byte
-		localVarReturnValue []FullContractDescription
+		localVarReturnValue []FullPrompt
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/contracts/descriptions/search"
+	localVarPath := a.client.cfg.BasePath + "/prompts/search"
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -96,7 +96,7 @@ func (a *SearchApiService) ContractsDescriptionsSearchPost(ctx context.Context, 
 			error: localVarHttpResponse.Status,
 		}
 		if localVarHttpResponse.StatusCode == 200 {
-			var v []FullContractDescription
+			var v []FullPrompt
 			err = a.client.decode(&v, localVarBody, localVarHttpResponse.Header.Get("Content-Type"));
 				if err != nil {
 					newErr.error = err.Error()

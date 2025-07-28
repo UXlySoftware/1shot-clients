@@ -10,9 +10,9 @@
 package swagger
 
 type BusinessIdWalletsBody struct {
-	Chain *EChain `json:"chain"`
-	// The name of the escrow wallet.
+	ChainId *EChain `json:"chainId"`
+	// The name of the wallet.
 	Name string `json:"name"`
-	// A description of the escrow wallet, such as it's intended use. This is for reference only.
+	// A description of the wallet, such as it's intended use. This is for reference only.
 	Description string `json:"description,omitempty"`
 }

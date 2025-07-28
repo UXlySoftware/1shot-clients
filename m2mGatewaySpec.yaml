@@ -299,6 +299,55 @@ paths:
         500:
           $ref: "#/components/responses/DatabaseError"
 
+  /methods/{contractMethodId}/executeAsDelegator:  
+    post:
+      tags:
+        - Contract Methods
+      description: Starts the execution of the Contract Method as a delegator, and returns a Transaction. You can only execute Contract Methods that are payable or nonpayable. Use /read for view and pure Contract Methods. This method executes the transaction on behalf of the specified delegator address.
+      parameters:
+        - name: contractMethodId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/ContractMethodId"
+      security:
+        - OAuth2ClientCredentials:
+          - read:api
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: You need to provide a value for every parameter in the Contract Method via the name of the parameter
+              properties:
+                params:
+                  $ref: '#/components/schemas/JSONValue'
+                walletId:
+                  $ref: "#/components/schemas/WalletId"
+                memo:
+                  type: string
+                  description: You may include any text you like when you execute a Contract Method, as a note to yourself about why it was done. This text can be JSON or similar if you want to store formatted data.
+                delegatorAddress:
+                  $ref: "#/components/schemas/AccountAddress"
+                  description: The address of the delegator on whose behalf the transaction will be executed.
+                value:
+                  type: string
+                  format: big-number-string
+                  description: The amount of native token to send along with the Contract Method. This is only applicable for Contract Methods that are payable. Including this value for a nonpayable method will result in an error.
+                  example: "123400000000000000000"
+              required:
+                - delegatorAddress
+      responses:
+        200:
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transaction"
+        500:
+          $ref: "#/components/responses/DatabaseError"
+
   /methods/{contractMethodId}/read:  
     post:
       tags:
@@ -1077,6 +1126,111 @@ paths:
               schema:
                 $ref: "#/components/schemas/Transaction"
 
+        500:
+          $ref: "#/components/responses/DatabaseError"
+
+  /wallets/{walletId}/delegations:
+    get:
+      tags:
+        - Wallets
+        - Delegations
+        - List
+      description: Lists delegations for a wallet. Returns a paged response of delegations associated with the specified wallet.
+      parameters:
+        - name: walletId
+          in: path
+          description: The internal uuid of the Wallet to list delegations for
+          required: true
+          schema:
+            $ref: "#/components/schemas/WalletId"
+        - name: pageSize
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/PageSize"
+        - name: page
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/Page"
+      security:
+        - OAuth2ClientCredentials:
+          - read:api
+      responses:
+        200:
+          description: Returns a paged response of delegation objects.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      response:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Delegation"
+                  - $ref: "#/components/schemas/PagedResponse"
+        500:
+          $ref: "#/components/responses/DatabaseError"
+
+    post:
+      tags:
+        - Wallets
+        - Delegations
+      description: Creates a new delegation for a wallet. A delegation allows the wallet to execute transactions on behalf of specified contract addresses and methods.
+      parameters:
+        - name: walletId
+          in: path
+          description: The internal uuid of the Wallet to create the delegation for
+          required: true
+          schema:
+            $ref: "#/components/schemas/WalletId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                startTime:
+                  type: number
+                  format: unix-timestamp
+                  description: The start time for the delegation. If not provided, the delegation starts immediately.
+                  example: 1659485172
+                endTime:
+                  type: number
+                  format: unix-timestamp
+                  description: The end time for the delegation. If not provided, the delegation has no expiration.
+                  example: 1659485172
+                contractAddresses:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/ContractAddress"
+                  description: Array of contract addresses that the wallet can execute transactions for.
+                  example: ["0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9"]
+                methods:
+                  type: array
+                  items:
+                    type: string
+                  description: Array of method names that the wallet can execute. If empty, all methods are allowed.
+                  example: ["mint", "transfer"]
+                delegationData:
+                  type: string
+                  format: json-string
+                  description: The actual Delegation object serialized as a JSON string. BigInts must be encoded as strings.
+                  example: {"authority":"0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff","caveats":[],"delegate":"0x74847c451c3745fcdf4fd447a9fa5eef8a6791a9","delegator":"0x3e6a2f0CBA03d293B54c9fCF354948903007a798","salt":"0x","signature":"0x000007dc509f5f440bd07e2a51cb8dd135f170bc8886ccf24c35652d256d4f06501537e663fbb3b6e51ca640ad4791fb605ba7434d4d8a0a0a24bfd4d841e88f1c"}
+              required:
+                - delegationData
+      security:
+        - OAuth2ClientCredentials:
+          - read:api
+      responses:
+        200:
+          description: Returns the created delegation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Delegation"
         500:
           $ref: "#/components/responses/DatabaseError"
   
@@ -2190,6 +2344,65 @@ components:
         - nonce
         - chainId
         - signature
+
+    Delegation:
+      description: A delegation allows a wallet to execute transactions on behalf of specified contract addresses and methods.
+      allOf:
+        - type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+              description: Internal ID of the delegation
+              example: 8a6e0804-2bd0-4672-b79d-d97027f90720
+            businessId:
+              $ref: "#/components/schemas/BusinessId"
+            escrowWalletId:
+              $ref: "#/components/schemas/WalletId"
+            delegatorAddress:
+              type: string
+              format: evm-address
+              description: The address of the delegator account.
+              example: "0x3e6a2f0CBA03d293B54c9fCF354948903007a798"
+            startTime:
+              type: number
+              format: unix-timestamp
+              description: The start time for the delegation. If null, the delegation starts immediately.
+              example: 1659485172
+              nullable: true
+            endTime:
+              type: number
+              format: unix-timestamp
+              description: The end time for the delegation. If null, the delegation has no expiration.
+              example: 1659485172
+              nullable: true
+            contractAddresses:
+              type: array
+              items:
+                $ref: "#/components/schemas/ContractAddress"
+              description: Array of contract addresses that the wallet can execute transactions for.
+              example: ["0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9"]
+            methods:
+              type: array
+              items:
+                type: string
+              description: Array of method names that the wallet can execute. If empty, all methods are allowed.
+              example: ["mint", "transfer"]
+            delegationData:
+              type: string
+              format: json-string
+              description: The actual Delegation object serialized as a JSON string. BigInts must be encoded as strings.
+              example: {"authority":"0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff","caveats":[],"delegate":"0x74847c451c3745fcdf4fd447a9fa5eef8a6791a9","delegator":"0x3e6a2f0CBA03d293B54c9fCF354948903007a798","salt":"0x","signature":"0x000007dc509f5f440bd07e2a51cb8dd135f170bc8886ccf24c35652d256d4f06501537e663fbb3b6e51ca640ad4791fb605ba7434d4d8a0a0a24bfd4d841e88f1c"}
+          required:
+            - id
+            - businessId
+            - escrowWalletId
+            - startTime
+            - endTime
+            - contractAddresses
+            - methods
+            - delegationData
+        - $ref: "#/components/schemas/EntityBookKeepingWithoutDeleted"
 
     ChainInfo:
       description: Information about a chain supported by 1Shot API

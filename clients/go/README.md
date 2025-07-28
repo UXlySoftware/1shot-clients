@@ -218,6 +218,26 @@ Run tests for a specific package:
 go test ./pkg/client
 ```
 
+Update the package cache on pkg.go.dev:
+
+**Important**: Run these commands from within a Go module (a directory with a `go.mod` file):
+
+```bash
+# For the latest version
+go get github.com/UXlySoftware/1shot-clients/clients/go@latest
+
+# For a specific version (e.g., v0.2.0)
+go get github.com/UXlySoftware/1shot-clients/clients/go@v0.2.0
+
+# Or for a specific commit/branch
+go get github.com/UXlySoftware/1shot-clients/clients/go@main
+```
+
+If you're not in a Go module, first initialize one:
+```bash
+go mod init your-module-name
+```
+
 ### Running the Example Application
 
 The example application in `cmd/1shot/main.go` demonstrates basic usage of the client. To run it:

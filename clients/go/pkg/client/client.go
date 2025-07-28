@@ -9,14 +9,14 @@ import (
 
 // Client represents a 1Shot API client
 type Client struct {
-	api          *swagger.APIClient
-	businessId   string
-	accessToken  string
-	baseURL      string
-	transactions *Transactions
-	wallets      *Wallets
-	executions   *Executions
-	structs      *Structs
+	api             *swagger.APIClient
+	businessId      string
+	accessToken     string
+	baseURL         string
+	contractMethods *ContractMethods
+	wallets         *Wallets
+	transactions    *Transactions
+	structs         *Structs
 }
 
 // ClientConfig holds the configuration for creating a new client
@@ -46,16 +46,16 @@ func NewClient(cfg ClientConfig) (*Client, error) {
 	}
 
 	// Initialize categories first
-	c.transactions = &Transactions{
-		api:        apiClient.TransactionApi,
+	c.contractMethods = &ContractMethods{
+		api:        apiClient.ContractMethodsApi,
 		businessId: cfg.BusinessID,
 	}
 	c.wallets = &Wallets{
-		api:        apiClient.EscrowWalletsApi,
+		api:        apiClient.WalletsApi,
 		businessId: cfg.BusinessID,
 	}
-	c.executions = &Executions{
-		api:        apiClient.TransactionExecutionApi,
+	c.transactions = &Transactions{
+		api:        apiClient.TransactionsApi,
 		businessId: cfg.BusinessID,
 	}
 	c.structs = &Structs{
@@ -98,17 +98,17 @@ func (c *Client) refreshToken(clientID, clientSecret string) error {
 	c.api = swagger.NewAPIClient(apiCfg)
 
 	// Update category clients
-	c.transactions.api = c.api.TransactionApi
-	c.wallets.api = c.api.EscrowWalletsApi
-	c.executions.api = c.api.TransactionExecutionApi
+	c.contractMethods.api = c.api.ContractMethodsApi
+	c.wallets.api = c.api.WalletsApi
+	c.transactions.api = c.api.TransactionsApi
 	c.structs.api = c.api.SolidityStructsApi
 
 	return nil
 }
 
-// Transactions returns the transactions category client
-func (c *Client) Transactions() *Transactions {
-	return c.transactions
+// ContractMethods returns the transactions category client
+func (c *Client) ContractMethods() *ContractMethods {
+	return c.contractMethods
 }
 
 // Wallets returns the wallets category client
@@ -116,9 +116,9 @@ func (c *Client) Wallets() *Wallets {
 	return c.wallets
 }
 
-// Executions returns the executions category client
-func (c *Client) Executions() *Executions {
-	return c.executions
+// Transactions returns the executions category client
+func (c *Client) Transactions() *Transactions {
+	return c.transactions
 }
 
 // Structs returns the structs category client

@@ -45,15 +45,19 @@ type APIClient struct {
 
 	// API Services
 
+	AssureApi *AssureApiService
+
 	AuthenticationApi *AuthenticationApiService
 
-	ContractDescriptionsApi *ContractDescriptionsApiService
+	ChainsApi *ChainsApiService
+
+	ContractMethodsApi *ContractMethodsApiService
 
 	CreateApi *CreateApiService
 
-	DeleteApi *DeleteApiService
+	DelegationsApi *DelegationsApiService
 
-	EscrowWalletsApi *EscrowWalletsApiService
+	DeleteApi *DeleteApiService
 
 	GetApi *GetApiService
 
@@ -61,17 +65,17 @@ type APIClient struct {
 
 	OAuth2Api *OAuth2ApiService
 
-	RestoreApi *RestoreApiService
+	PromptsApi *PromptsApiService
 
 	SearchApi *SearchApiService
 
 	SolidityStructsApi *SolidityStructsApiService
 
-	TransactionApi *TransactionApiService
-
-	TransactionExecutionApi *TransactionExecutionApiService
+	TransactionsApi *TransactionsApiService
 
 	UpdateApi *UpdateApiService
+
+	WalletsApi *WalletsApiService
 }
 
 type service struct {
@@ -90,20 +94,22 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.common.client = c
 
 	// API Services
+	c.AssureApi = (*AssureApiService)(&c.common)
 	c.AuthenticationApi = (*AuthenticationApiService)(&c.common)
-	c.ContractDescriptionsApi = (*ContractDescriptionsApiService)(&c.common)
+	c.ChainsApi = (*ChainsApiService)(&c.common)
+	c.ContractMethodsApi = (*ContractMethodsApiService)(&c.common)
 	c.CreateApi = (*CreateApiService)(&c.common)
+	c.DelegationsApi = (*DelegationsApiService)(&c.common)
 	c.DeleteApi = (*DeleteApiService)(&c.common)
-	c.EscrowWalletsApi = (*EscrowWalletsApiService)(&c.common)
 	c.GetApi = (*GetApiService)(&c.common)
 	c.ListApi = (*ListApiService)(&c.common)
 	c.OAuth2Api = (*OAuth2ApiService)(&c.common)
-	c.RestoreApi = (*RestoreApiService)(&c.common)
+	c.PromptsApi = (*PromptsApiService)(&c.common)
 	c.SearchApi = (*SearchApiService)(&c.common)
 	c.SolidityStructsApi = (*SolidityStructsApiService)(&c.common)
-	c.TransactionApi = (*TransactionApiService)(&c.common)
-	c.TransactionExecutionApi = (*TransactionExecutionApiService)(&c.common)
+	c.TransactionsApi = (*TransactionsApiService)(&c.common)
 	c.UpdateApi = (*UpdateApiService)(&c.common)
+	c.WalletsApi = (*WalletsApiService)(&c.common)
 
 	return c
 }

@@ -13,6 +13,6 @@ type EEventName string
 
 // List of EEventName
 const (
-	TRANSACTION_EXECUTION_FAILURE_EEventName EEventName = "TransactionExecutionFailure"
-	TRANSACTION_EXECUTION_SUCCESS_EEventName EEventName = "TransactionExecutionSuccess"
+	TRANSACTION_FAILURE_EEventName EEventName = "TransactionFailure"
+	TRANSACTION_SUCCESS_EEventName EEventName = "TransactionSuccess"
 )
