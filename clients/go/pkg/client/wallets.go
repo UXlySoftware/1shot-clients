@@ -89,3 +89,64 @@ func (w *Wallets) Delete(ctx context.Context, walletId string) error {
 	_, _, err := w.api.WalletsWalletIdDelete(ctx, walletId)
 	return err
 }
+
+// Transfer initiates a transfer of native tokens from the wallet
+func (w *Wallets) Transfer(ctx context.Context, walletId, destinationAddress string, transferAmount, memo *string) (*swagger.Transaction, error) {
+	body := swagger.WalletIdTransferBody{
+		DestinationAccountAddress: destinationAddress,
+	}
+	if transferAmount != nil {
+		body.TransferAmount = *transferAmount
+	}
+	if memo != nil {
+		body.Memo = *memo
+	}
+
+	resp, _, err := w.api.WalletsWalletIdTransferPost(ctx, body, walletId)
+	if err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
+// ListDelegations lists delegations for a wallet
+func (w *Wallets) ListDelegations(ctx context.Context, walletId string, pageSize, page *int32) ([]swagger.Delegation, error) {
+	opts := &swagger.WalletsApiWalletsWalletIdDelegationsGetOpts{}
+	if pageSize != nil {
+		opts.PageSize = optional.NewInterface(*pageSize)
+	}
+	if page != nil {
+		opts.Page = optional.NewInterface(*page)
+	}
+
+	resp, _, err := w.api.WalletsWalletIdDelegationsGet(ctx, walletId, opts)
+	if err != nil {
+		return nil, err
+	}
+	return resp.Response, nil
+}
+
+// CreateDelegation creates a new delegation for a wallet
+func (w *Wallets) CreateDelegation(ctx context.Context, walletId, delegationData string, startTime, endTime *int64, contractAddresses []string, methods []string) (*swagger.Delegation, error) {
+	body := swagger.WalletIdDelegationsBody{
+		DelegationData: delegationData,
+	}
+	if startTime != nil {
+		body.StartTime = float64(*startTime)
+	}
+	if endTime != nil {
+		body.EndTime = float64(*endTime)
+	}
+	if contractAddresses != nil {
+		body.ContractAddresses = contractAddresses
+	}
+	if methods != nil {
+		body.Methods = methods
+	}
+
+	resp, _, err := w.api.WalletsWalletIdDelegationsPost(ctx, body, walletId)
+	if err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
