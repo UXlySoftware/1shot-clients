@@ -1,4 +1,3 @@
-
 /*
  * M2M Gateway API
  *
@@ -12,11 +11,12 @@ package swagger
 
 import (
 	"context"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
-	"fmt"
+
 	"github.com/antihax/optional"
 )
 
@@ -26,25 +26,27 @@ var (
 )
 
 type GetApiService service
+
 /*
 GetApiService
-Gets a specific transaction execution
- * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param transactionExecutionId The transaction execution that you want to
-@return TransactionExecution
+Gets a single Contract Method via its ContractMethodId
+  - @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+  - @param contractMethodId The Contract Method that you want to retrieve
+
+@return ContractMethod
 */
-func (a *GetApiService) ExecutionsTransactionExecutionIdGet(ctx context.Context, transactionExecutionId string) (TransactionExecution, *http.Response, error) {
+func (a *GetApiService) MethodsContractMethodIdGet(ctx context.Context, contractMethodId string) (ContractMethod, *http.Response, error) {
 	var (
-		localVarHttpMethod = strings.ToUpper("Get")
-		localVarPostBody   interface{}
-		localVarFileName   string
-		localVarFileBytes  []byte
-		localVarReturnValue TransactionExecution
+		localVarHttpMethod  = strings.ToUpper("Get")
+		localVarPostBody    interface{}
+		localVarFileName    string
+		localVarFileBytes   []byte
+		localVarReturnValue ContractMethod
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/executions/{transactionExecutionId}"
-	localVarPath = strings.Replace(localVarPath, "{"+"transactionExecutionId"+"}", fmt.Sprintf("%v", transactionExecutionId), -1)
+	localVarPath := a.client.cfg.BasePath + "/methods/{contractMethodId}"
+	localVarPath = strings.Replace(localVarPath, "{"+"contractMethodId"+"}", fmt.Sprintf("%v", contractMethodId), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -85,45 +87,47 @@ func (a *GetApiService) ExecutionsTransactionExecutionIdGet(ctx context.Context,
 
 	if localVarHttpResponse.StatusCode < 300 {
 		// If we succeed, return the data, otherwise pass on to decode error.
-		err = a.client.decode(&localVarReturnValue, localVarBody, localVarHttpResponse.Header.Get("Content-Type"));
-		if err == nil { 
+		err = a.client.decode(&localVarReturnValue, localVarBody, localVarHttpResponse.Header.Get("Content-Type"))
+		if err == nil {
 			return localVarReturnValue, localVarHttpResponse, err
 		}
 	}
 
 	if localVarHttpResponse.StatusCode >= 300 {
 		newErr := GenericSwaggerError{
-			body: localVarBody,
+			body:  localVarBody,
 			error: localVarHttpResponse.Status,
 		}
 		if localVarHttpResponse.StatusCode == 200 {
-			var v TransactionExecution
-			err = a.client.decode(&v, localVarBody, localVarHttpResponse.Header.Get("Content-Type"));
-				if err != nil {
-					newErr.error = err.Error()
-					return localVarReturnValue, localVarHttpResponse, newErr
-				}
-				newErr.model = v
+			var v ContractMethod
+			err = a.client.decode(&v, localVarBody, localVarHttpResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
 				return localVarReturnValue, localVarHttpResponse, newErr
+			}
+			newErr.model = v
+			return localVarReturnValue, localVarHttpResponse, newErr
 		}
 		return localVarReturnValue, localVarHttpResponse, newErr
 	}
 
 	return localVarReturnValue, localVarHttpResponse, nil
 }
+
 /*
 GetApiService
-Gets a single Transaction via its TransactionId
- * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param transactionId The transaction that you want to retrieve
+Gets a specific Transaction
+  - @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+  - @param transactionId The Transaction that you want to retrieve
+
 @return Transaction
 */
-func (a *GetApiService) TransactionsTransactionIdGet(ctx context.Context, transactionId string) (Transaction, *http.Response, error) {
+func (a *GetApiService) TransactionsContractMethodIdGet(ctx context.Context, transactionId string) (Transaction, *http.Response, error) {
 	var (
-		localVarHttpMethod = strings.ToUpper("Get")
-		localVarPostBody   interface{}
-		localVarFileName   string
-		localVarFileBytes  []byte
+		localVarHttpMethod  = strings.ToUpper("Get")
+		localVarPostBody    interface{}
+		localVarFileName    string
+		localVarFileBytes   []byte
 		localVarReturnValue Transaction
 	)
 
@@ -170,58 +174,59 @@ func (a *GetApiService) TransactionsTransactionIdGet(ctx context.Context, transa
 
 	if localVarHttpResponse.StatusCode < 300 {
 		// If we succeed, return the data, otherwise pass on to decode error.
-		err = a.client.decode(&localVarReturnValue, localVarBody, localVarHttpResponse.Header.Get("Content-Type"));
-		if err == nil { 
+		err = a.client.decode(&localVarReturnValue, localVarBody, localVarHttpResponse.Header.Get("Content-Type"))
+		if err == nil {
 			return localVarReturnValue, localVarHttpResponse, err
 		}
 	}
 
 	if localVarHttpResponse.StatusCode >= 300 {
 		newErr := GenericSwaggerError{
-			body: localVarBody,
+			body:  localVarBody,
 			error: localVarHttpResponse.Status,
 		}
 		if localVarHttpResponse.StatusCode == 200 {
 			var v Transaction
-			err = a.client.decode(&v, localVarBody, localVarHttpResponse.Header.Get("Content-Type"));
-				if err != nil {
-					newErr.error = err.Error()
-					return localVarReturnValue, localVarHttpResponse, newErr
-				}
-				newErr.model = v
+			err = a.client.decode(&v, localVarBody, localVarHttpResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
 				return localVarReturnValue, localVarHttpResponse, newErr
+			}
+			newErr.model = v
+			return localVarReturnValue, localVarHttpResponse, newErr
 		}
 		return localVarReturnValue, localVarHttpResponse, newErr
 	}
 
 	return localVarReturnValue, localVarHttpResponse, nil
 }
+
 /*
 GetApiService
-Gets an escrow wallet by the ID. Doesn&#x27;t matter what chain it&#x27;s on.
+Gets n Wallet by the ID. Doesn&#x27;t matter what chain it&#x27;s on.
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param escrowWalletId The ID of the escrow wallet
- * @param optional nil or *GetApiWalletsEscrowWalletIdGetOpts - Optional Parameters:
-     * @param "IncludeBalances" (optional.Bool) -  Set to \&quot;true\&quot; to return the balance information for the escrow wallet. Includes only the native token balance.
-@return EscrowWallet
+ * @param walletId The ID of the wallet
+ * @param optional nil or *GetApiWalletsWalletIdGetOpts - Optional Parameters:
+     * @param "IncludeBalances" (optional.Bool) -  Set to \&quot;true\&quot; to return the balance information for the wallet. Includes only the native token balance.
+@return Wallet
 */
 
-type GetApiWalletsEscrowWalletIdGetOpts struct {
-    IncludeBalances optional.Bool
+type GetApiWalletsWalletIdGetOpts struct {
+	IncludeBalances optional.Bool
 }
 
-func (a *GetApiService) WalletsEscrowWalletIdGet(ctx context.Context, escrowWalletId string, localVarOptionals *GetApiWalletsEscrowWalletIdGetOpts) (EscrowWallet, *http.Response, error) {
+func (a *GetApiService) WalletsWalletIdGet(ctx context.Context, walletId string, localVarOptionals *GetApiWalletsWalletIdGetOpts) (Wallet, *http.Response, error) {
 	var (
-		localVarHttpMethod = strings.ToUpper("Get")
-		localVarPostBody   interface{}
-		localVarFileName   string
-		localVarFileBytes  []byte
-		localVarReturnValue EscrowWallet
+		localVarHttpMethod  = strings.ToUpper("Get")
+		localVarPostBody    interface{}
+		localVarFileName    string
+		localVarFileBytes   []byte
+		localVarReturnValue Wallet
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/wallets/{escrowWalletId}"
-	localVarPath = strings.Replace(localVarPath, "{"+"escrowWalletId"+"}", fmt.Sprintf("%v", escrowWalletId), -1)
+	localVarPath := a.client.cfg.BasePath + "/wallets/{walletId}"
+	localVarPath = strings.Replace(localVarPath, "{"+"walletId"+"}", fmt.Sprintf("%v", walletId), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -265,26 +270,26 @@ func (a *GetApiService) WalletsEscrowWalletIdGet(ctx context.Context, escrowWall
 
 	if localVarHttpResponse.StatusCode < 300 {
 		// If we succeed, return the data, otherwise pass on to decode error.
-		err = a.client.decode(&localVarReturnValue, localVarBody, localVarHttpResponse.Header.Get("Content-Type"));
-		if err == nil { 
+		err = a.client.decode(&localVarReturnValue, localVarBody, localVarHttpResponse.Header.Get("Content-Type"))
+		if err == nil {
 			return localVarReturnValue, localVarHttpResponse, err
 		}
 	}
 
 	if localVarHttpResponse.StatusCode >= 300 {
 		newErr := GenericSwaggerError{
-			body: localVarBody,
+			body:  localVarBody,
 			error: localVarHttpResponse.Status,
 		}
 		if localVarHttpResponse.StatusCode == 200 {
-			var v EscrowWallet
-			err = a.client.decode(&v, localVarBody, localVarHttpResponse.Header.Get("Content-Type"));
-				if err != nil {
-					newErr.error = err.Error()
-					return localVarReturnValue, localVarHttpResponse, newErr
-				}
-				newErr.model = v
+			var v Wallet
+			err = a.client.decode(&v, localVarBody, localVarHttpResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
 				return localVarReturnValue, localVarHttpResponse, newErr
+			}
+			newErr.model = v
+			return localVarReturnValue, localVarHttpResponse, newErr
 		}
 		return localVarReturnValue, localVarHttpResponse, newErr
 	}

@@ -22,57 +22,61 @@ All URIs are relative to *https://api.1shotapi.dev/v0*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
+*AssureApi* | [**BusinessBusinessIdMethodsPromptPost**](docs/AssureApi.md#businessbusinessidmethodspromptpost) | **Post** /business/{businessId}/methods/prompt | 
 *AuthenticationApi* | [**GetAccessToken**](docs/AuthenticationApi.md#getaccesstoken) | **Post** /token | Obtain an OAuth2 access token
-*ContractDescriptionsApi* | [**ContractsDescriptionsSearchPost**](docs/ContractDescriptionsApi.md#contractsdescriptionssearchpost) | **Post** /contracts/descriptions/search | 
-*CreateApi* | [**BusinessBusinessIdStructsStructIdParamsPost**](docs/CreateApi.md#businessbusinessidstructsstructidparamspost) | **Post** /business/{businessId}/structs/{structId}/params | 
-*CreateApi* | [**BusinessBusinessIdTransactionsAbiPost**](docs/CreateApi.md#businessbusinessidtransactionsabipost) | **Post** /business/{businessId}/transactions/abi | 
-*CreateApi* | [**BusinessBusinessIdTransactionsContractPost**](docs/CreateApi.md#businessbusinessidtransactionscontractpost) | **Post** /business/{businessId}/transactions/contract | 
-*CreateApi* | [**BusinessBusinessIdTransactionsPost**](docs/CreateApi.md#businessbusinessidtransactionspost) | **Post** /business/{businessId}/transactions | 
+*ChainsApi* | [**ChainsGet**](docs/ChainsApi.md#chainsget) | **Get** /chains | 
+*ContractMethodsApi* | [**BusinessBusinessIdMethodsAbiPost**](docs/ContractMethodsApi.md#businessbusinessidmethodsabipost) | **Post** /business/{businessId}/methods/abi | 
+*ContractMethodsApi* | [**BusinessBusinessIdMethodsGet**](docs/ContractMethodsApi.md#businessbusinessidmethodsget) | **Get** /business/{businessId}/methods | 
+*ContractMethodsApi* | [**BusinessBusinessIdMethodsPost**](docs/ContractMethodsApi.md#businessbusinessidmethodspost) | **Post** /business/{businessId}/methods | 
+*ContractMethodsApi* | [**BusinessBusinessIdMethodsPromptPost**](docs/ContractMethodsApi.md#businessbusinessidmethodspromptpost) | **Post** /business/{businessId}/methods/prompt | 
+*ContractMethodsApi* | [**MethodsContractMethodIdDelete**](docs/ContractMethodsApi.md#methodscontractmethodiddelete) | **Delete** /methods/{contractMethodId} | 
+*ContractMethodsApi* | [**MethodsContractMethodIdEncodePost**](docs/ContractMethodsApi.md#methodscontractmethodidencodepost) | **Post** /methods/{contractMethodId}/encode | 
+*ContractMethodsApi* | [**MethodsContractMethodIdEstimatePost**](docs/ContractMethodsApi.md#methodscontractmethodidestimatepost) | **Post** /methods/{contractMethodId}/estimate | 
+*ContractMethodsApi* | [**MethodsContractMethodIdEstimatePost_0**](docs/ContractMethodsApi.md#methodscontractmethodidestimatepost_0) | **Post** /methods/{contractMethodId}/estimate | 
+*ContractMethodsApi* | [**MethodsContractMethodIdExecuteAsDelegatorPost**](docs/ContractMethodsApi.md#methodscontractmethodidexecuteasdelegatorpost) | **Post** /methods/{contractMethodId}/executeAsDelegator | 
+*ContractMethodsApi* | [**MethodsContractMethodIdExecutePost**](docs/ContractMethodsApi.md#methodscontractmethodidexecutepost) | **Post** /methods/{contractMethodId}/execute | 
+*ContractMethodsApi* | [**MethodsContractMethodIdGet**](docs/ContractMethodsApi.md#methodscontractmethodidget) | **Get** /methods/{contractMethodId} | 
+*ContractMethodsApi* | [**MethodsContractMethodIdPut**](docs/ContractMethodsApi.md#methodscontractmethodidput) | **Put** /methods/{contractMethodId} | 
+*ContractMethodsApi* | [**MethodsContractMethodIdReadPost**](docs/ContractMethodsApi.md#methodscontractmethodidreadpost) | **Post** /methods/{contractMethodId}/read | 
+*ContractMethodsApi* | [**MethodsContractMethodIdTestPost**](docs/ContractMethodsApi.md#methodscontractmethodidtestpost) | **Post** /methods/{contractMethodId}/test | 
+*CreateApi* | [**BusinessBusinessIdMethodsAbiPost**](docs/CreateApi.md#businessbusinessidmethodsabipost) | **Post** /business/{businessId}/methods/abi | 
+*CreateApi* | [**BusinessBusinessIdMethodsPost**](docs/CreateApi.md#businessbusinessidmethodspost) | **Post** /business/{businessId}/methods | 
 *CreateApi* | [**BusinessBusinessIdWalletsPost**](docs/CreateApi.md#businessbusinessidwalletspost) | **Post** /business/{businessId}/wallets | 
+*CreateApi* | [**StructsStructIdParamsPost**](docs/CreateApi.md#structsstructidparamspost) | **Post** /structs/{structId}/params | 
+*DelegationsApi* | [**WalletsWalletIdDelegationsGet**](docs/DelegationsApi.md#walletswalletiddelegationsget) | **Get** /wallets/{walletId}/delegations | 
+*DelegationsApi* | [**WalletsWalletIdDelegationsPost**](docs/DelegationsApi.md#walletswalletiddelegationspost) | **Post** /wallets/{walletId}/delegations | 
+*DeleteApi* | [**MethodsContractMethodIdDelete**](docs/DeleteApi.md#methodscontractmethodiddelete) | **Delete** /methods/{contractMethodId} | 
 *DeleteApi* | [**StructsStructIdParamsStructParamIdDelete**](docs/DeleteApi.md#structsstructidparamsstructparamiddelete) | **Delete** /structs/{structId}/params/{structParamId} | 
-*DeleteApi* | [**TransactionsTransactionIdDelete**](docs/DeleteApi.md#transactionstransactioniddelete) | **Delete** /transactions/{transactionId} | 
-*DeleteApi* | [**WalletsEscrowWalletIdDelete**](docs/DeleteApi.md#walletsescrowwalletiddelete) | **Delete** /wallets/{escrowWalletId} | 
-*EscrowWalletsApi* | [**BusinessBusinessIdWalletsGet**](docs/EscrowWalletsApi.md#businessbusinessidwalletsget) | **Get** /business/{businessId}/wallets | 
-*EscrowWalletsApi* | [**BusinessBusinessIdWalletsPost**](docs/EscrowWalletsApi.md#businessbusinessidwalletspost) | **Post** /business/{businessId}/wallets | 
-*EscrowWalletsApi* | [**WalletsEscrowWalletIdDelete**](docs/EscrowWalletsApi.md#walletsescrowwalletiddelete) | **Delete** /wallets/{escrowWalletId} | 
-*EscrowWalletsApi* | [**WalletsEscrowWalletIdGet**](docs/EscrowWalletsApi.md#walletsescrowwalletidget) | **Get** /wallets/{escrowWalletId} | 
-*EscrowWalletsApi* | [**WalletsEscrowWalletIdPut**](docs/EscrowWalletsApi.md#walletsescrowwalletidput) | **Put** /wallets/{escrowWalletId} | 
-*GetApi* | [**ExecutionsTransactionExecutionIdGet**](docs/GetApi.md#executionstransactionexecutionidget) | **Get** /executions/{transactionExecutionId} | 
+*DeleteApi* | [**WalletsWalletIdDelete**](docs/DeleteApi.md#walletswalletiddelete) | **Delete** /wallets/{walletId} | 
+*GetApi* | [**MethodsContractMethodIdGet**](docs/GetApi.md#methodscontractmethodidget) | **Get** /methods/{contractMethodId} | 
 *GetApi* | [**TransactionsTransactionIdGet**](docs/GetApi.md#transactionstransactionidget) | **Get** /transactions/{transactionId} | 
-*GetApi* | [**WalletsEscrowWalletIdGet**](docs/GetApi.md#walletsescrowwalletidget) | **Get** /wallets/{escrowWalletId} | 
-*ListApi* | [**BusinessBusinessIdTransactionsExecutionsGet**](docs/ListApi.md#businessbusinessidtransactionsexecutionsget) | **Get** /business/{businessId}/transactions/executions | 
+*GetApi* | [**WalletsWalletIdGet**](docs/GetApi.md#walletswalletidget) | **Get** /wallets/{walletId} | 
+*ListApi* | [**BusinessBusinessIdMethodsGet**](docs/ListApi.md#businessbusinessidmethodsget) | **Get** /business/{businessId}/methods | 
 *ListApi* | [**BusinessBusinessIdTransactionsGet**](docs/ListApi.md#businessbusinessidtransactionsget) | **Get** /business/{businessId}/transactions | 
 *ListApi* | [**BusinessBusinessIdWalletsGet**](docs/ListApi.md#businessbusinessidwalletsget) | **Get** /business/{businessId}/wallets | 
+*ListApi* | [**ChainsGet**](docs/ListApi.md#chainsget) | **Get** /chains | 
+*ListApi* | [**WalletsWalletIdDelegationsGet**](docs/ListApi.md#walletswalletiddelegationsget) | **Get** /wallets/{walletId}/delegations | 
 *OAuth2Api* | [**GetAccessToken**](docs/OAuth2Api.md#getaccesstoken) | **Post** /token | Obtain an OAuth2 access token
-*RestoreApi* | [**TransactionsTransactionIdRestorePut**](docs/RestoreApi.md#transactionstransactionidrestoreput) | **Put** /transactions/{transactionId}/restore | 
-*SearchApi* | [**ContractsDescriptionsSearchPost**](docs/SearchApi.md#contractsdescriptionssearchpost) | **Post** /contracts/descriptions/search | 
-*SolidityStructsApi* | [**BusinessBusinessIdStructsStructIdParamsPost**](docs/SolidityStructsApi.md#businessbusinessidstructsstructidparamspost) | **Post** /business/{businessId}/structs/{structId}/params | 
-*SolidityStructsApi* | [**BusinessBusinessIdStructsStructIdParamsPut**](docs/SolidityStructsApi.md#businessbusinessidstructsstructidparamsput) | **Put** /business/{businessId}/structs/{structId}/params | 
+*PromptsApi* | [**PromptsSearchPost**](docs/PromptsApi.md#promptssearchpost) | **Post** /prompts/search | 
+*SearchApi* | [**PromptsSearchPost**](docs/SearchApi.md#promptssearchpost) | **Post** /prompts/search | 
+*SolidityStructsApi* | [**StructsStructIdParamsPost**](docs/SolidityStructsApi.md#structsstructidparamspost) | **Post** /structs/{structId}/params | 
+*SolidityStructsApi* | [**StructsStructIdParamsPut**](docs/SolidityStructsApi.md#structsstructidparamsput) | **Put** /structs/{structId}/params | 
 *SolidityStructsApi* | [**StructsStructIdParamsStructParamIdDelete**](docs/SolidityStructsApi.md#structsstructidparamsstructparamiddelete) | **Delete** /structs/{structId}/params/{structParamId} | 
 *SolidityStructsApi* | [**StructsStructIdPut**](docs/SolidityStructsApi.md#structsstructidput) | **Put** /structs/{structId} | 
-*TransactionApi* | [**BusinessBusinessIdTransactionsAbiPost**](docs/TransactionApi.md#businessbusinessidtransactionsabipost) | **Post** /business/{businessId}/transactions/abi | 
-*TransactionApi* | [**BusinessBusinessIdTransactionsContractPost**](docs/TransactionApi.md#businessbusinessidtransactionscontractpost) | **Post** /business/{businessId}/transactions/contract | 
-*TransactionApi* | [**BusinessBusinessIdTransactionsExecutionsGet**](docs/TransactionApi.md#businessbusinessidtransactionsexecutionsget) | **Get** /business/{businessId}/transactions/executions | 
-*TransactionApi* | [**BusinessBusinessIdTransactionsGet**](docs/TransactionApi.md#businessbusinessidtransactionsget) | **Get** /business/{businessId}/transactions | 
-*TransactionApi* | [**BusinessBusinessIdTransactionsPost**](docs/TransactionApi.md#businessbusinessidtransactionspost) | **Post** /business/{businessId}/transactions | 
-*TransactionApi* | [**TransactionsTransactionIdDelete**](docs/TransactionApi.md#transactionstransactioniddelete) | **Delete** /transactions/{transactionId} | 
-*TransactionApi* | [**TransactionsTransactionIdEstimatePost**](docs/TransactionApi.md#transactionstransactionidestimatepost) | **Post** /transactions/{transactionId}/estimate | 
-*TransactionApi* | [**TransactionsTransactionIdExecutePost**](docs/TransactionApi.md#transactionstransactionidexecutepost) | **Post** /transactions/{transactionId}/execute | 
-*TransactionApi* | [**TransactionsTransactionIdGet**](docs/TransactionApi.md#transactionstransactionidget) | **Get** /transactions/{transactionId} | 
-*TransactionApi* | [**TransactionsTransactionIdPut**](docs/TransactionApi.md#transactionstransactionidput) | **Put** /transactions/{transactionId} | 
-*TransactionApi* | [**TransactionsTransactionIdReadPost**](docs/TransactionApi.md#transactionstransactionidreadpost) | **Post** /transactions/{transactionId}/read | 
-*TransactionApi* | [**TransactionsTransactionIdRestorePut**](docs/TransactionApi.md#transactionstransactionidrestoreput) | **Put** /transactions/{transactionId}/restore | 
-*TransactionApi* | [**TransactionsTransactionIdTestPost**](docs/TransactionApi.md#transactionstransactionidtestpost) | **Post** /transactions/{transactionId}/test | 
-*TransactionExecutionApi* | [**BusinessBusinessIdTransactionsExecutionsGet**](docs/TransactionExecutionApi.md#businessbusinessidtransactionsexecutionsget) | **Get** /business/{businessId}/transactions/executions | 
-*TransactionExecutionApi* | [**ExecutionsTransactionExecutionIdGet**](docs/TransactionExecutionApi.md#executionstransactionexecutionidget) | **Get** /executions/{transactionExecutionId} | 
-*TransactionExecutionApi* | [**TransactionsTransactionIdEstimatePost**](docs/TransactionExecutionApi.md#transactionstransactionidestimatepost) | **Post** /transactions/{transactionId}/estimate | 
-*TransactionExecutionApi* | [**TransactionsTransactionIdExecutePost**](docs/TransactionExecutionApi.md#transactionstransactionidexecutepost) | **Post** /transactions/{transactionId}/execute | 
-*TransactionExecutionApi* | [**TransactionsTransactionIdReadPost**](docs/TransactionExecutionApi.md#transactionstransactionidreadpost) | **Post** /transactions/{transactionId}/read | 
-*TransactionExecutionApi* | [**TransactionsTransactionIdTestPost**](docs/TransactionExecutionApi.md#transactionstransactionidtestpost) | **Post** /transactions/{transactionId}/test | 
-*UpdateApi* | [**BusinessBusinessIdStructsStructIdParamsPut**](docs/UpdateApi.md#businessbusinessidstructsstructidparamsput) | **Put** /business/{businessId}/structs/{structId}/params | 
+*TransactionsApi* | [**BusinessBusinessIdTransactionsGet**](docs/TransactionsApi.md#businessbusinessidtransactionsget) | **Get** /business/{businessId}/transactions | 
+*TransactionsApi* | [**TransactionsTransactionIdGet**](docs/TransactionsApi.md#transactionstransactionidget) | **Get** /transactions/{transactionId} | 
+*UpdateApi* | [**MethodsContractMethodIdPut**](docs/UpdateApi.md#methodscontractmethodidput) | **Put** /methods/{contractMethodId} | 
+*UpdateApi* | [**StructsStructIdParamsPut**](docs/UpdateApi.md#structsstructidparamsput) | **Put** /structs/{structId}/params | 
 *UpdateApi* | [**StructsStructIdPut**](docs/UpdateApi.md#structsstructidput) | **Put** /structs/{structId} | 
-*UpdateApi* | [**TransactionsTransactionIdPut**](docs/UpdateApi.md#transactionstransactionidput) | **Put** /transactions/{transactionId} | 
-*UpdateApi* | [**WalletsEscrowWalletIdPut**](docs/UpdateApi.md#walletsescrowwalletidput) | **Put** /wallets/{escrowWalletId} | 
+*UpdateApi* | [**WalletsWalletIdPut**](docs/UpdateApi.md#walletswalletidput) | **Put** /wallets/{walletId} | 
+*WalletsApi* | [**BusinessBusinessIdWalletsGet**](docs/WalletsApi.md#businessbusinessidwalletsget) | **Get** /business/{businessId}/wallets | 
+*WalletsApi* | [**BusinessBusinessIdWalletsPost**](docs/WalletsApi.md#businessbusinessidwalletspost) | **Post** /business/{businessId}/wallets | 
+*WalletsApi* | [**WalletsWalletIdDelegationsGet**](docs/WalletsApi.md#walletswalletiddelegationsget) | **Get** /wallets/{walletId}/delegations | 
+*WalletsApi* | [**WalletsWalletIdDelegationsPost**](docs/WalletsApi.md#walletswalletiddelegationspost) | **Post** /wallets/{walletId}/delegations | 
+*WalletsApi* | [**WalletsWalletIdDelete**](docs/WalletsApi.md#walletswalletiddelete) | **Delete** /wallets/{walletId} | 
+*WalletsApi* | [**WalletsWalletIdGet**](docs/WalletsApi.md#walletswalletidget) | **Get** /wallets/{walletId} | 
+*WalletsApi* | [**WalletsWalletIdPut**](docs/WalletsApi.md#walletswalletidput) | **Put** /wallets/{walletId} | 
+*WalletsApi* | [**WalletsWalletIdTransferPost**](docs/WalletsApi.md#walletswalletidtransferpost) | **Post** /wallets/{walletId}/transfer | 
 
 ## Documentation For Models
 
@@ -84,35 +88,53 @@ Class | Method | HTTP request | Description
  - [AccountBalanceDetails](docs/AccountBalanceDetails.md)
  - [AllOfSolidityStructParamUpdateTypeStruct](docs/AllOfSolidityStructParamUpdateTypeStruct.md)
  - [AllOfstructIdParamsBodyUpdatesItems](docs/AllOfstructIdParamsBodyUpdatesItems.md)
- - [BusinessIdTransactionsBody](docs/BusinessIdTransactionsBody.md)
+ - [BusinessIdMethodsBody](docs/BusinessIdMethodsBody.md)
  - [BusinessIdWalletsBody](docs/BusinessIdWalletsBody.md)
- - [ContractDescription](docs/ContractDescription.md)
- - [ContractFunctionDescription](docs/ContractFunctionDescription.md)
- - [ContractFunctionParamDescription](docs/ContractFunctionParamDescription.md)
- - [DescriptionsSearchBody](docs/DescriptionsSearchBody.md)
+ - [ChainInfo](docs/ChainInfo.md)
+ - [ContractFunctionParamPrompt](docs/ContractFunctionParamPrompt.md)
+ - [ContractFunctionPrompt](docs/ContractFunctionPrompt.md)
+ - [ContractMethod](docs/ContractMethod.md)
+ - [ContractMethodEncodeResult](docs/ContractMethodEncodeResult.md)
+ - [ContractMethodEstimate](docs/ContractMethodEstimate.md)
+ - [ContractMethodIdEncodeBody](docs/ContractMethodIdEncodeBody.md)
+ - [ContractMethodIdEstimateBody](docs/ContractMethodIdEstimateBody.md)
+ - [ContractMethodIdExecuteAsDelegatorBody](docs/ContractMethodIdExecuteAsDelegatorBody.md)
+ - [ContractMethodIdExecuteBody](docs/ContractMethodIdExecuteBody.md)
+ - [ContractMethodIdReadBody](docs/ContractMethodIdReadBody.md)
+ - [ContractMethodIdTestBody](docs/ContractMethodIdTestBody.md)
+ - [ContractMethodTestResult](docs/ContractMethodTestResult.md)
+ - [Delegation](docs/Delegation.md)
  - [EChain](docs/EChain.md)
  - [EChainTechnology](docs/EChainTechnology.md)
+ - [EChainType](docs/EChainType.md)
  - [EDeletedStatusSelector](docs/EDeletedStatusSelector.md)
  - [EEventName](docs/EEventName.md)
  - [ESolidityAbiParameterType](docs/ESolidityAbiParameterType.md)
  - [ESolidityStateMutability](docs/ESolidityStateMutability.md)
- - [ETransactionExecutionStatus](docs/ETransactionExecutionStatus.md)
+ - [ETransactionStatus](docs/ETransactionStatus.md)
  - [EWebhookStatus](docs/EWebhookStatus.md)
  - [EntityBookKeeping](docs/EntityBookKeeping.md)
  - [EntityBookKeepingWithoutDeleted](docs/EntityBookKeepingWithoutDeleted.md)
  - [Erc7702Authorization](docs/Erc7702Authorization.md)
- - [EscrowWallet](docs/EscrowWallet.md)
- - [FullContractDescription](docs/FullContractDescription.md)
+ - [FullPrompt](docs/FullPrompt.md)
  - [InlineResponse200](docs/InlineResponse200.md)
  - [InlineResponse2001](docs/InlineResponse2001.md)
  - [InlineResponse2002](docs/InlineResponse2002.md)
  - [InlineResponse2003](docs/InlineResponse2003.md)
  - [InlineResponse2004](docs/InlineResponse2004.md)
+ - [InlineResponse2005](docs/InlineResponse2005.md)
+ - [InlineResponse2006](docs/InlineResponse2006.md)
  - [JsonValue](docs/JsonValue.md)
+ - [MethodsAbiBody](docs/MethodsAbiBody.md)
+ - [MethodsContractMethodIdBody](docs/MethodsContractMethodIdBody.md)
+ - [MethodsPromptBody](docs/MethodsPromptBody.md)
+ - [NativeCurrencyInformation](docs/NativeCurrencyInformation.md)
  - [NewSolidityStruct](docs/NewSolidityStruct.md)
  - [NewSolidityStructParam](docs/NewSolidityStructParam.md)
  - [OneOfEthereumAbiItems](docs/OneOfEthereumAbiItems.md)
  - [PagedResponse](docs/PagedResponse.md)
+ - [Prompt](docs/Prompt.md)
+ - [PromptsSearchBody](docs/PromptsSearchBody.md)
  - [SolidityStruct](docs/SolidityStruct.md)
  - [SolidityStructParam](docs/SolidityStructParam.md)
  - [SolidityStructParamUpdate](docs/SolidityStructParamUpdate.md)
@@ -120,17 +142,10 @@ Class | Method | HTTP request | Description
  - [StructsStructIdBody](docs/StructsStructIdBody.md)
  - [TokenBody](docs/TokenBody.md)
  - [Transaction](docs/Transaction.md)
- - [TransactionEstimate](docs/TransactionEstimate.md)
- - [TransactionExecution](docs/TransactionExecution.md)
- - [TransactionIdEstimateBody](docs/TransactionIdEstimateBody.md)
- - [TransactionIdExecuteBody](docs/TransactionIdExecuteBody.md)
- - [TransactionIdReadBody](docs/TransactionIdReadBody.md)
- - [TransactionIdTestBody](docs/TransactionIdTestBody.md)
- - [TransactionTestResult](docs/TransactionTestResult.md)
- - [TransactionsAbiBody](docs/TransactionsAbiBody.md)
- - [TransactionsContractBody](docs/TransactionsContractBody.md)
- - [TransactionsTransactionIdBody](docs/TransactionsTransactionIdBody.md)
- - [WalletsEscrowWalletIdBody](docs/WalletsEscrowWalletIdBody.md)
+ - [Wallet](docs/Wallet.md)
+ - [WalletIdDelegationsBody](docs/WalletIdDelegationsBody.md)
+ - [WalletIdTransferBody](docs/WalletIdTransferBody.md)
+ - [WalletsWalletIdBody](docs/WalletsWalletIdBody.md)
 
 ## Documentation For Authorization
 

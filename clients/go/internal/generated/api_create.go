@@ -27,113 +27,23 @@ var (
 type CreateApiService service
 /*
 CreateApiService
-Adds a param to an existing struct. Because of the way the indexes work, you can only add params to the end of a struct. You can use /structs/{structId}/params to later rearrange all the indexes of the params if required.
- * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param body
- * @param businessId The ID of the business that owns the struct. You must have permissions in the business to add a param.
- * @param structId The ID of the existing Solidity Struct
-@return SolidityStruct
-*/
-func (a *CreateApiService) BusinessBusinessIdStructsStructIdParamsPost(ctx context.Context, body NewSolidityStructParam, businessId string, structId string) (SolidityStruct, *http.Response, error) {
-	var (
-		localVarHttpMethod = strings.ToUpper("Post")
-		localVarPostBody   interface{}
-		localVarFileName   string
-		localVarFileBytes  []byte
-		localVarReturnValue SolidityStruct
-	)
-
-	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/business/{businessId}/structs/{structId}/params"
-	localVarPath = strings.Replace(localVarPath, "{"+"businessId"+"}", fmt.Sprintf("%v", businessId), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"structId"+"}", fmt.Sprintf("%v", structId), -1)
-
-	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := url.Values{}
-	localVarFormParams := url.Values{}
-
-	// to determine the Content-Type header
-	localVarHttpContentTypes := []string{"application/json"}
-
-	// set Content-Type header
-	localVarHttpContentType := selectHeaderContentType(localVarHttpContentTypes)
-	if localVarHttpContentType != "" {
-		localVarHeaderParams["Content-Type"] = localVarHttpContentType
-	}
-
-	// to determine the Accept header
-	localVarHttpHeaderAccepts := []string{"application/json"}
-
-	// set Accept header
-	localVarHttpHeaderAccept := selectHeaderAccept(localVarHttpHeaderAccepts)
-	if localVarHttpHeaderAccept != "" {
-		localVarHeaderParams["Accept"] = localVarHttpHeaderAccept
-	}
-	// body params
-	localVarPostBody = &body
-	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHttpMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFileName, localVarFileBytes)
-	if err != nil {
-		return localVarReturnValue, nil, err
-	}
-
-	localVarHttpResponse, err := a.client.callAPI(r)
-	if err != nil || localVarHttpResponse == nil {
-		return localVarReturnValue, localVarHttpResponse, err
-	}
-
-	localVarBody, err := ioutil.ReadAll(localVarHttpResponse.Body)
-	localVarHttpResponse.Body.Close()
-	if err != nil {
-		return localVarReturnValue, localVarHttpResponse, err
-	}
-
-	if localVarHttpResponse.StatusCode < 300 {
-		// If we succeed, return the data, otherwise pass on to decode error.
-		err = a.client.decode(&localVarReturnValue, localVarBody, localVarHttpResponse.Header.Get("Content-Type"));
-		if err == nil { 
-			return localVarReturnValue, localVarHttpResponse, err
-		}
-	}
-
-	if localVarHttpResponse.StatusCode >= 300 {
-		newErr := GenericSwaggerError{
-			body: localVarBody,
-			error: localVarHttpResponse.Status,
-		}
-		if localVarHttpResponse.StatusCode == 200 {
-			var v SolidityStruct
-			err = a.client.decode(&v, localVarBody, localVarHttpResponse.Header.Get("Content-Type"));
-				if err != nil {
-					newErr.error = err.Error()
-					return localVarReturnValue, localVarHttpResponse, newErr
-				}
-				newErr.model = v
-				return localVarReturnValue, localVarHttpResponse, newErr
-		}
-		return localVarReturnValue, localVarHttpResponse, newErr
-	}
-
-	return localVarReturnValue, localVarHttpResponse, nil
-}
-/*
-CreateApiService
-Imports a complete ethereum ABI and creates Transactions for each \&quot;function\&quot; type entry. Every transaction will be associated with the same Escrow Wallet
+Imports a complete ethereum ABI and creates Contract Methods for each \&quot;function\&quot; type entry. Every Contract Method will be associated with the same Wallet
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param body
  * @param businessId The internal uuid of the Business you are interested in
-@return []Transaction
+@return []ContractMethod
 */
-func (a *CreateApiService) BusinessBusinessIdTransactionsAbiPost(ctx context.Context, body TransactionsAbiBody, businessId string) ([]Transaction, *http.Response, error) {
+func (a *CreateApiService) BusinessBusinessIdMethodsAbiPost(ctx context.Context, body MethodsAbiBody, businessId string) ([]ContractMethod, *http.Response, error) {
 	var (
 		localVarHttpMethod = strings.ToUpper("Post")
 		localVarPostBody   interface{}
 		localVarFileName   string
 		localVarFileBytes  []byte
-		localVarReturnValue []Transaction
+		localVarReturnValue []ContractMethod
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/business/{businessId}/transactions/abi"
+	localVarPath := a.client.cfg.BasePath + "/business/{businessId}/methods/abi"
 	localVarPath = strings.Replace(localVarPath, "{"+"businessId"+"}", fmt.Sprintf("%v", businessId), -1)
 
 	localVarHeaderParams := make(map[string]string)
@@ -189,7 +99,7 @@ func (a *CreateApiService) BusinessBusinessIdTransactionsAbiPost(ctx context.Con
 			error: localVarHttpResponse.Status,
 		}
 		if localVarHttpResponse.StatusCode == 200 {
-			var v []Transaction
+			var v []ContractMethod
 			err = a.client.decode(&v, localVarBody, localVarHttpResponse.Header.Get("Content-Type"));
 				if err != nil {
 					newErr.error = err.Error()
@@ -205,23 +115,23 @@ func (a *CreateApiService) BusinessBusinessIdTransactionsAbiPost(ctx context.Con
 }
 /*
 CreateApiService
-Assures that Transactions exist for a given Contract Description. This is based on the verified contract ABI and either the highest-ranked Contract Description or the contractDescriptionId provided. If Transactions already exist, they are not modified. If they do not exist, any methods that are in the Contract Description will be created with the details from the Contract Description. We return every Transaction for methods defined in the Contract Description.
+Create a new Contract Method. A Contract Method is sometimes referred to as an Endpoint. A Contract Method corresponds to a single method on a smart contract, and most of the required information to create one can be pulled from an Ethereum EBI. Contract Methods can be configured with static values for input parameters, which is useful for controlling how the Contract Method is called. For instance, you may set the \&quot;amount\&quot; parameter to a constant value on a \&quot;mint\&quot; call so that you always mint the same amount of tokens and can&#x27;t cheat. You can have multiple Contract Methods for the same underlying method on a smart contract, if you want to configure them with different static parameters.
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param body
  * @param businessId The internal uuid of the Business you are interested in
-@return []Transaction
+@return ContractMethod
 */
-func (a *CreateApiService) BusinessBusinessIdTransactionsContractPost(ctx context.Context, body TransactionsContractBody, businessId string) ([]Transaction, *http.Response, error) {
+func (a *CreateApiService) BusinessBusinessIdMethodsPost(ctx context.Context, body BusinessIdMethodsBody, businessId string) (ContractMethod, *http.Response, error) {
 	var (
 		localVarHttpMethod = strings.ToUpper("Post")
 		localVarPostBody   interface{}
 		localVarFileName   string
 		localVarFileBytes  []byte
-		localVarReturnValue []Transaction
+		localVarReturnValue ContractMethod
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/business/{businessId}/transactions/contract"
+	localVarPath := a.client.cfg.BasePath + "/business/{businessId}/methods"
 	localVarPath = strings.Replace(localVarPath, "{"+"businessId"+"}", fmt.Sprintf("%v", businessId), -1)
 
 	localVarHeaderParams := make(map[string]string)
@@ -277,7 +187,7 @@ func (a *CreateApiService) BusinessBusinessIdTransactionsContractPost(ctx contex
 			error: localVarHttpResponse.Status,
 		}
 		if localVarHttpResponse.StatusCode == 200 {
-			var v []Transaction
+			var v ContractMethod
 			err = a.client.decode(&v, localVarBody, localVarHttpResponse.Header.Get("Content-Type"));
 				if err != nil {
 					newErr.error = err.Error()
@@ -293,107 +203,19 @@ func (a *CreateApiService) BusinessBusinessIdTransactionsContractPost(ctx contex
 }
 /*
 CreateApiService
-Create a new Transaction. A Transaction is sometimes referred to as an Endpoint. A Transaction corresponds to a single method on a smart contract, and most of the required information to create one can be pulled from an Ethereum EBI. Transactions can be configured with static values for input parameters, which is useful for controlling how the transaction is called. For instance, you may set the \&quot;amount\&quot; parameter to a constant value on a \&quot;mint\&quot; call so that you always mint the same amount of tokens and can&#x27;t cheat. You can have multiple Transactions for the same smart contract method, if you want to configure them with different static parameters.
+Creates a new Wallet. Wallets are owned by a single Business and are linked a single Chain.
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param body
  * @param businessId The internal uuid of the Business you are interested in
-@return Transaction
+@return Wallet
 */
-func (a *CreateApiService) BusinessBusinessIdTransactionsPost(ctx context.Context, body BusinessIdTransactionsBody, businessId string) (Transaction, *http.Response, error) {
+func (a *CreateApiService) BusinessBusinessIdWalletsPost(ctx context.Context, body BusinessIdWalletsBody, businessId string) (Wallet, *http.Response, error) {
 	var (
 		localVarHttpMethod = strings.ToUpper("Post")
 		localVarPostBody   interface{}
 		localVarFileName   string
 		localVarFileBytes  []byte
-		localVarReturnValue Transaction
-	)
-
-	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/business/{businessId}/transactions"
-	localVarPath = strings.Replace(localVarPath, "{"+"businessId"+"}", fmt.Sprintf("%v", businessId), -1)
-
-	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := url.Values{}
-	localVarFormParams := url.Values{}
-
-	// to determine the Content-Type header
-	localVarHttpContentTypes := []string{"application/json"}
-
-	// set Content-Type header
-	localVarHttpContentType := selectHeaderContentType(localVarHttpContentTypes)
-	if localVarHttpContentType != "" {
-		localVarHeaderParams["Content-Type"] = localVarHttpContentType
-	}
-
-	// to determine the Accept header
-	localVarHttpHeaderAccepts := []string{"application/json"}
-
-	// set Accept header
-	localVarHttpHeaderAccept := selectHeaderAccept(localVarHttpHeaderAccepts)
-	if localVarHttpHeaderAccept != "" {
-		localVarHeaderParams["Accept"] = localVarHttpHeaderAccept
-	}
-	// body params
-	localVarPostBody = &body
-	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHttpMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFileName, localVarFileBytes)
-	if err != nil {
-		return localVarReturnValue, nil, err
-	}
-
-	localVarHttpResponse, err := a.client.callAPI(r)
-	if err != nil || localVarHttpResponse == nil {
-		return localVarReturnValue, localVarHttpResponse, err
-	}
-
-	localVarBody, err := ioutil.ReadAll(localVarHttpResponse.Body)
-	localVarHttpResponse.Body.Close()
-	if err != nil {
-		return localVarReturnValue, localVarHttpResponse, err
-	}
-
-	if localVarHttpResponse.StatusCode < 300 {
-		// If we succeed, return the data, otherwise pass on to decode error.
-		err = a.client.decode(&localVarReturnValue, localVarBody, localVarHttpResponse.Header.Get("Content-Type"));
-		if err == nil { 
-			return localVarReturnValue, localVarHttpResponse, err
-		}
-	}
-
-	if localVarHttpResponse.StatusCode >= 300 {
-		newErr := GenericSwaggerError{
-			body: localVarBody,
-			error: localVarHttpResponse.Status,
-		}
-		if localVarHttpResponse.StatusCode == 200 {
-			var v Transaction
-			err = a.client.decode(&v, localVarBody, localVarHttpResponse.Header.Get("Content-Type"));
-				if err != nil {
-					newErr.error = err.Error()
-					return localVarReturnValue, localVarHttpResponse, newErr
-				}
-				newErr.model = v
-				return localVarReturnValue, localVarHttpResponse, newErr
-		}
-		return localVarReturnValue, localVarHttpResponse, newErr
-	}
-
-	return localVarReturnValue, localVarHttpResponse, nil
-}
-/*
-CreateApiService
-Creates a new Escrow Wallet. Escrow Wallets are owned by a single Business and are linked a single Chain.
- * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param body
- * @param businessId The internal uuid of the Business you are interested in
-@return EscrowWallet
-*/
-func (a *CreateApiService) BusinessBusinessIdWalletsPost(ctx context.Context, body BusinessIdWalletsBody, businessId string) (EscrowWallet, *http.Response, error) {
-	var (
-		localVarHttpMethod = strings.ToUpper("Post")
-		localVarPostBody   interface{}
-		localVarFileName   string
-		localVarFileBytes  []byte
-		localVarReturnValue EscrowWallet
+		localVarReturnValue Wallet
 	)
 
 	// create path and map variables
@@ -453,7 +275,95 @@ func (a *CreateApiService) BusinessBusinessIdWalletsPost(ctx context.Context, bo
 			error: localVarHttpResponse.Status,
 		}
 		if localVarHttpResponse.StatusCode == 200 {
-			var v EscrowWallet
+			var v Wallet
+			err = a.client.decode(&v, localVarBody, localVarHttpResponse.Header.Get("Content-Type"));
+				if err != nil {
+					newErr.error = err.Error()
+					return localVarReturnValue, localVarHttpResponse, newErr
+				}
+				newErr.model = v
+				return localVarReturnValue, localVarHttpResponse, newErr
+		}
+		return localVarReturnValue, localVarHttpResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHttpResponse, nil
+}
+/*
+CreateApiService
+Adds a param to an existing struct. Because of the way the indexes work, you can only add params to the end of a struct. You can use /structs/{structId}/params to later rearrange all the indexes of the params if required.
+ * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ * @param body
+ * @param structId The ID of the existing Solidity Struct
+@return SolidityStruct
+*/
+func (a *CreateApiService) StructsStructIdParamsPost(ctx context.Context, body NewSolidityStructParam, structId string) (SolidityStruct, *http.Response, error) {
+	var (
+		localVarHttpMethod = strings.ToUpper("Post")
+		localVarPostBody   interface{}
+		localVarFileName   string
+		localVarFileBytes  []byte
+		localVarReturnValue SolidityStruct
+	)
+
+	// create path and map variables
+	localVarPath := a.client.cfg.BasePath + "/structs/{structId}/params"
+	localVarPath = strings.Replace(localVarPath, "{"+"structId"+"}", fmt.Sprintf("%v", structId), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHttpContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHttpContentType := selectHeaderContentType(localVarHttpContentTypes)
+	if localVarHttpContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHttpContentType
+	}
+
+	// to determine the Accept header
+	localVarHttpHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHttpHeaderAccept := selectHeaderAccept(localVarHttpHeaderAccepts)
+	if localVarHttpHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHttpHeaderAccept
+	}
+	// body params
+	localVarPostBody = &body
+	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHttpMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFileName, localVarFileBytes)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHttpResponse, err := a.client.callAPI(r)
+	if err != nil || localVarHttpResponse == nil {
+		return localVarReturnValue, localVarHttpResponse, err
+	}
+
+	localVarBody, err := ioutil.ReadAll(localVarHttpResponse.Body)
+	localVarHttpResponse.Body.Close()
+	if err != nil {
+		return localVarReturnValue, localVarHttpResponse, err
+	}
+
+	if localVarHttpResponse.StatusCode < 300 {
+		// If we succeed, return the data, otherwise pass on to decode error.
+		err = a.client.decode(&localVarReturnValue, localVarBody, localVarHttpResponse.Header.Get("Content-Type"));
+		if err == nil { 
+			return localVarReturnValue, localVarHttpResponse, err
+		}
+	}
+
+	if localVarHttpResponse.StatusCode >= 300 {
+		newErr := GenericSwaggerError{
+			body: localVarBody,
+			error: localVarHttpResponse.Status,
+		}
+		if localVarHttpResponse.StatusCode == 200 {
+			var v SolidityStruct
 			err = a.client.decode(&v, localVarBody, localVarHttpResponse.Header.Get("Content-Type"));
 				if err != nil {
 					newErr.error = err.Error()

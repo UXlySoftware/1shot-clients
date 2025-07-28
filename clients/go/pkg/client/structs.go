@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+	"fmt"
 
 	swagger "github.com/UXlySoftware/1shot-clients/clients/go/internal/generated"
 )
@@ -23,8 +24,8 @@ func (s *Structs) Update(ctx context.Context, structId string, name string) (*sw
 }
 
 // AddParam adds a parameter to an existing struct
-func (s *Structs) AddParam(ctx context.Context, businessId, structId string, param swagger.NewSolidityStructParam) (*swagger.SolidityStruct, error) {
-	resp, _, err := s.api.BusinessBusinessIdStructsStructIdParamsPost(ctx, param, businessId, structId)
+func (s *Structs) AddParam(ctx context.Context, structId string, param swagger.NewSolidityStructParam) (*swagger.SolidityStruct, error) {
+	resp, _, err := s.api.StructsStructIdParamsPost(ctx, param, structId)
 	if err != nil {
 		return nil, err
 	}
@@ -32,24 +33,27 @@ func (s *Structs) AddParam(ctx context.Context, businessId, structId string, par
 }
 
 // UpdateParams updates multiple parameters of a struct
-func (s *Structs) UpdateParams(ctx context.Context, businessId, structId string, updates []swagger.SolidityStructParamUpdate) (*swagger.SolidityStruct, error) {
+func (s *Structs) UpdateParams(ctx context.Context, businessId, structId string, updates []swagger.SolidityStructParamUpdate, paramIds []string) (*swagger.SolidityStruct, error) {
+	if len(updates) != len(paramIds) {
+		return nil, fmt.Errorf("number of updates (%d) must match number of parameter IDs (%d)", len(updates), len(paramIds))
+	}
+
 	converted := make([]swagger.AllOfstructIdParamsBodyUpdatesItems, len(updates))
 	for i, u := range updates {
-		var typeStruct *swagger.Object
+		var typeStruct *swagger.AllOfSolidityStructParamUpdateTypeStruct
 		if u.TypeStruct != nil {
-			obj := swagger.Object{
-				"name":   u.TypeStruct.Name,
-				"params": u.TypeStruct.Params,
+			typeStruct = &swagger.AllOfSolidityStructParamUpdateTypeStruct{
+				Name:   u.TypeStruct.Name,
+				Params: u.TypeStruct.Params,
 			}
-			typeStruct = &obj
 		}
 		converted[i] = swagger.AllOfstructIdParamsBodyUpdatesItems{
-			Id:           u.TypeStructId, // You may need to map the correct ID field here
+			Id:           paramIds[i],
 			Name:         u.Name,
 			Description:  u.Description,
 			Type_:        u.Type_,
 			Index:        u.Index,
-			Value:        u.Value,
+			StaticValue:  u.StaticValue,
 			TypeSize:     u.TypeSize,
 			TypeSize2:    u.TypeSize2,
 			IsArray:      u.IsArray,
@@ -59,7 +63,7 @@ func (s *Structs) UpdateParams(ctx context.Context, businessId, structId string,
 		}
 	}
 	body := swagger.StructIdParamsBody{Updates: converted}
-	resp, _, err := s.api.BusinessBusinessIdStructsStructIdParamsPut(ctx, body, businessId, structId)
+	resp, _, err := s.api.StructsStructIdParamsPut(ctx, body, structId)
 	if err != nil {
 		return nil, err
 	}

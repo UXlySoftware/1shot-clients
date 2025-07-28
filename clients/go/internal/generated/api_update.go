@@ -27,14 +27,101 @@ var (
 type UpdateApiService service
 /*
 UpdateApiService
+Updates a Contract Method. You can update most of the properties of a Contract Method via this method, but you can&#x27;t change the inputs or outputs. Use the Struct API calls for that instead.
+ * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ * @param body
+ * @param contractMethodId The Contract Method that you want to update
+@return ContractMethod
+*/
+func (a *UpdateApiService) MethodsContractMethodIdPut(ctx context.Context, body MethodsContractMethodIdBody, contractMethodId string) (ContractMethod, *http.Response, error) {
+	var (
+		localVarHttpMethod = strings.ToUpper("Put")
+		localVarPostBody   interface{}
+		localVarFileName   string
+		localVarFileBytes  []byte
+		localVarReturnValue ContractMethod
+	)
+
+	// create path and map variables
+	localVarPath := a.client.cfg.BasePath + "/methods/{contractMethodId}"
+	localVarPath = strings.Replace(localVarPath, "{"+"contractMethodId"+"}", fmt.Sprintf("%v", contractMethodId), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHttpContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHttpContentType := selectHeaderContentType(localVarHttpContentTypes)
+	if localVarHttpContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHttpContentType
+	}
+
+	// to determine the Accept header
+	localVarHttpHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHttpHeaderAccept := selectHeaderAccept(localVarHttpHeaderAccepts)
+	if localVarHttpHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHttpHeaderAccept
+	}
+	// body params
+	localVarPostBody = &body
+	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHttpMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFileName, localVarFileBytes)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHttpResponse, err := a.client.callAPI(r)
+	if err != nil || localVarHttpResponse == nil {
+		return localVarReturnValue, localVarHttpResponse, err
+	}
+
+	localVarBody, err := ioutil.ReadAll(localVarHttpResponse.Body)
+	localVarHttpResponse.Body.Close()
+	if err != nil {
+		return localVarReturnValue, localVarHttpResponse, err
+	}
+
+	if localVarHttpResponse.StatusCode < 300 {
+		// If we succeed, return the data, otherwise pass on to decode error.
+		err = a.client.decode(&localVarReturnValue, localVarBody, localVarHttpResponse.Header.Get("Content-Type"));
+		if err == nil { 
+			return localVarReturnValue, localVarHttpResponse, err
+		}
+	}
+
+	if localVarHttpResponse.StatusCode >= 300 {
+		newErr := GenericSwaggerError{
+			body: localVarBody,
+			error: localVarHttpResponse.Status,
+		}
+		if localVarHttpResponse.StatusCode == 200 {
+			var v ContractMethod
+			err = a.client.decode(&v, localVarBody, localVarHttpResponse.Header.Get("Content-Type"));
+				if err != nil {
+					newErr.error = err.Error()
+					return localVarReturnValue, localVarHttpResponse, newErr
+				}
+				newErr.model = v
+				return localVarReturnValue, localVarHttpResponse, newErr
+		}
+		return localVarReturnValue, localVarHttpResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHttpResponse, nil
+}
+/*
+UpdateApiService
 Update the params of an existing struct. Normally, you would do updates one at a time, but since the parameter indexes must be kept in order, you can update multiple params at once with this call.
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param body
- * @param businessId The ID of the business that owns the struct. You must have permissions in the business to add a param.
  * @param structId The ID of the existing Solidity Struct
 @return SolidityStruct
 */
-func (a *UpdateApiService) BusinessBusinessIdStructsStructIdParamsPut(ctx context.Context, body StructIdParamsBody, businessId string, structId string) (SolidityStruct, *http.Response, error) {
+func (a *UpdateApiService) StructsStructIdParamsPut(ctx context.Context, body StructIdParamsBody, structId string) (SolidityStruct, *http.Response, error) {
 	var (
 		localVarHttpMethod = strings.ToUpper("Put")
 		localVarPostBody   interface{}
@@ -44,8 +131,7 @@ func (a *UpdateApiService) BusinessBusinessIdStructsStructIdParamsPut(ctx contex
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/business/{businessId}/structs/{structId}/params"
-	localVarPath = strings.Replace(localVarPath, "{"+"businessId"+"}", fmt.Sprintf("%v", businessId), -1)
+	localVarPath := a.client.cfg.BasePath + "/structs/{structId}/params"
 	localVarPath = strings.Replace(localVarPath, "{"+"structId"+"}", fmt.Sprintf("%v", structId), -1)
 
 	localVarHeaderParams := make(map[string]string)
@@ -117,7 +203,7 @@ func (a *UpdateApiService) BusinessBusinessIdStructsStructIdParamsPut(ctx contex
 }
 /*
 UpdateApiService
-Updates an existing solidity struct. You can get the structId from the SolidityStructParam.typeStructId, which are either input or output params of a Transaction.
+Updates an existing solidity struct. You can get the structId from the SolidityStructParam.typeStructId, which are either input or output params of a Contract Method.
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param body
  * @param structId The ID of the existing Solidity Struct
@@ -205,24 +291,24 @@ func (a *UpdateApiService) StructsStructIdPut(ctx context.Context, body StructsS
 }
 /*
 UpdateApiService
-Updates a Transaction. You can update most of the properties of a transaction via this method, but you can&#x27;t change the inputs or outputs. Use the Struct API calls for that instead.
+Updates a Wallet. Will only update properties that are not null
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param body
- * @param transactionId The transaction that you want to update
-@return Transaction
+ * @param walletId The ID of the wallet
+@return Wallet
 */
-func (a *UpdateApiService) TransactionsTransactionIdPut(ctx context.Context, body TransactionsTransactionIdBody, transactionId string) (Transaction, *http.Response, error) {
+func (a *UpdateApiService) WalletsWalletIdPut(ctx context.Context, body WalletsWalletIdBody, walletId string) (Wallet, *http.Response, error) {
 	var (
 		localVarHttpMethod = strings.ToUpper("Put")
 		localVarPostBody   interface{}
 		localVarFileName   string
 		localVarFileBytes  []byte
-		localVarReturnValue Transaction
+		localVarReturnValue Wallet
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/transactions/{transactionId}"
-	localVarPath = strings.Replace(localVarPath, "{"+"transactionId"+"}", fmt.Sprintf("%v", transactionId), -1)
+	localVarPath := a.client.cfg.BasePath + "/wallets/{walletId}"
+	localVarPath = strings.Replace(localVarPath, "{"+"walletId"+"}", fmt.Sprintf("%v", walletId), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -277,95 +363,7 @@ func (a *UpdateApiService) TransactionsTransactionIdPut(ctx context.Context, bod
 			error: localVarHttpResponse.Status,
 		}
 		if localVarHttpResponse.StatusCode == 200 {
-			var v Transaction
-			err = a.client.decode(&v, localVarBody, localVarHttpResponse.Header.Get("Content-Type"));
-				if err != nil {
-					newErr.error = err.Error()
-					return localVarReturnValue, localVarHttpResponse, newErr
-				}
-				newErr.model = v
-				return localVarReturnValue, localVarHttpResponse, newErr
-		}
-		return localVarReturnValue, localVarHttpResponse, newErr
-	}
-
-	return localVarReturnValue, localVarHttpResponse, nil
-}
-/*
-UpdateApiService
-Updates an escrow wallet. Will only update properties that are not null
- * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param body
- * @param escrowWalletId The ID of the escrow wallet
-@return EscrowWallet
-*/
-func (a *UpdateApiService) WalletsEscrowWalletIdPut(ctx context.Context, body WalletsEscrowWalletIdBody, escrowWalletId string) (EscrowWallet, *http.Response, error) {
-	var (
-		localVarHttpMethod = strings.ToUpper("Put")
-		localVarPostBody   interface{}
-		localVarFileName   string
-		localVarFileBytes  []byte
-		localVarReturnValue EscrowWallet
-	)
-
-	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/wallets/{escrowWalletId}"
-	localVarPath = strings.Replace(localVarPath, "{"+"escrowWalletId"+"}", fmt.Sprintf("%v", escrowWalletId), -1)
-
-	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := url.Values{}
-	localVarFormParams := url.Values{}
-
-	// to determine the Content-Type header
-	localVarHttpContentTypes := []string{"application/json"}
-
-	// set Content-Type header
-	localVarHttpContentType := selectHeaderContentType(localVarHttpContentTypes)
-	if localVarHttpContentType != "" {
-		localVarHeaderParams["Content-Type"] = localVarHttpContentType
-	}
-
-	// to determine the Accept header
-	localVarHttpHeaderAccepts := []string{"application/json"}
-
-	// set Accept header
-	localVarHttpHeaderAccept := selectHeaderAccept(localVarHttpHeaderAccepts)
-	if localVarHttpHeaderAccept != "" {
-		localVarHeaderParams["Accept"] = localVarHttpHeaderAccept
-	}
-	// body params
-	localVarPostBody = &body
-	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHttpMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFileName, localVarFileBytes)
-	if err != nil {
-		return localVarReturnValue, nil, err
-	}
-
-	localVarHttpResponse, err := a.client.callAPI(r)
-	if err != nil || localVarHttpResponse == nil {
-		return localVarReturnValue, localVarHttpResponse, err
-	}
-
-	localVarBody, err := ioutil.ReadAll(localVarHttpResponse.Body)
-	localVarHttpResponse.Body.Close()
-	if err != nil {
-		return localVarReturnValue, localVarHttpResponse, err
-	}
-
-	if localVarHttpResponse.StatusCode < 300 {
-		// If we succeed, return the data, otherwise pass on to decode error.
-		err = a.client.decode(&localVarReturnValue, localVarBody, localVarHttpResponse.Header.Get("Content-Type"));
-		if err == nil { 
-			return localVarReturnValue, localVarHttpResponse, err
-		}
-	}
-
-	if localVarHttpResponse.StatusCode >= 300 {
-		newErr := GenericSwaggerError{
-			body: localVarBody,
-			error: localVarHttpResponse.Status,
-		}
-		if localVarHttpResponse.StatusCode == 200 {
-			var v EscrowWallet
+			var v Wallet
 			err = a.client.decode(&v, localVarBody, localVarHttpResponse.Header.Get("Content-Type"));
 				if err != nil {
 					newErr.error = err.Error()

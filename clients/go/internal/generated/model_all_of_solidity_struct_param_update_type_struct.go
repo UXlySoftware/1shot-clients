@@ -10,7 +10,7 @@
 package swagger
 
 type AllOfSolidityStructParamUpdateTypeStruct struct {
-	// The name of the struct. Structs are used to define the parameters of a transaction, but these structs don't have names.
+	// The name of the struct. Structs are used to define the parameters of a Contract Method, but these structs don't have names.
 	Name string `json:"name,omitempty"`
 	Params []NewSolidityStructParam `json:"params"`
 }

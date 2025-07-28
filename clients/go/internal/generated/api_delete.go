@@ -27,6 +27,74 @@ var (
 type DeleteApiService service
 /*
 DeleteApiService
+Deletes a Contract Method
+ * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ * @param contractMethodId
+
+*/
+func (a *DeleteApiService) MethodsContractMethodIdDelete(ctx context.Context, contractMethodId string) (*http.Response, error) {
+	var (
+		localVarHttpMethod = strings.ToUpper("Delete")
+		localVarPostBody   interface{}
+		localVarFileName   string
+		localVarFileBytes  []byte
+		
+	)
+
+	// create path and map variables
+	localVarPath := a.client.cfg.BasePath + "/methods/{contractMethodId}"
+	localVarPath = strings.Replace(localVarPath, "{"+"contractMethodId"+"}", fmt.Sprintf("%v", contractMethodId), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHttpContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHttpContentType := selectHeaderContentType(localVarHttpContentTypes)
+	if localVarHttpContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHttpContentType
+	}
+
+	// to determine the Accept header
+	localVarHttpHeaderAccepts := []string{}
+
+	// set Accept header
+	localVarHttpHeaderAccept := selectHeaderAccept(localVarHttpHeaderAccepts)
+	if localVarHttpHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHttpHeaderAccept
+	}
+	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHttpMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFileName, localVarFileBytes)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHttpResponse, err := a.client.callAPI(r)
+	if err != nil || localVarHttpResponse == nil {
+		return localVarHttpResponse, err
+	}
+
+	localVarBody, err := ioutil.ReadAll(localVarHttpResponse.Body)
+	localVarHttpResponse.Body.Close()
+	if err != nil {
+		return localVarHttpResponse, err
+	}
+
+
+	if localVarHttpResponse.StatusCode >= 300 {
+		newErr := GenericSwaggerError{
+			body: localVarBody,
+			error: localVarHttpResponse.Status,
+		}
+		return localVarHttpResponse, newErr
+	}
+
+	return localVarHttpResponse, nil
+}
+/*
+DeleteApiService
 Removes a param from an existing solidity struct. Because the indexes must be kept valid at all times, you can only practically remove the last param from the struct. If you need to remove a param in the middle, call PUT /structs/{structId}/params and rearrange the param indexes first.
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param structId The ID of the existing Solidity Struct
@@ -114,91 +182,23 @@ func (a *DeleteApiService) StructsStructIdParamsStructParamIdDelete(ctx context.
 }
 /*
 DeleteApiService
-Deletes transaction
+Deletes a Wallet with the provided ID. The API Credential must have Admin level permissions on the Business that owns this Wallet, and the Wallet must be near empty.
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param transactionId
-
+ * @param walletId The ID of the wallet
+@return InlineResponse2005
 */
-func (a *DeleteApiService) TransactionsTransactionIdDelete(ctx context.Context, transactionId string) (*http.Response, error) {
+func (a *DeleteApiService) WalletsWalletIdDelete(ctx context.Context, walletId string) (InlineResponse2005, *http.Response, error) {
 	var (
 		localVarHttpMethod = strings.ToUpper("Delete")
 		localVarPostBody   interface{}
 		localVarFileName   string
 		localVarFileBytes  []byte
-		
+		localVarReturnValue InlineResponse2005
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/transactions/{transactionId}"
-	localVarPath = strings.Replace(localVarPath, "{"+"transactionId"+"}", fmt.Sprintf("%v", transactionId), -1)
-
-	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := url.Values{}
-	localVarFormParams := url.Values{}
-
-	// to determine the Content-Type header
-	localVarHttpContentTypes := []string{}
-
-	// set Content-Type header
-	localVarHttpContentType := selectHeaderContentType(localVarHttpContentTypes)
-	if localVarHttpContentType != "" {
-		localVarHeaderParams["Content-Type"] = localVarHttpContentType
-	}
-
-	// to determine the Accept header
-	localVarHttpHeaderAccepts := []string{}
-
-	// set Accept header
-	localVarHttpHeaderAccept := selectHeaderAccept(localVarHttpHeaderAccepts)
-	if localVarHttpHeaderAccept != "" {
-		localVarHeaderParams["Accept"] = localVarHttpHeaderAccept
-	}
-	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHttpMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFileName, localVarFileBytes)
-	if err != nil {
-		return nil, err
-	}
-
-	localVarHttpResponse, err := a.client.callAPI(r)
-	if err != nil || localVarHttpResponse == nil {
-		return localVarHttpResponse, err
-	}
-
-	localVarBody, err := ioutil.ReadAll(localVarHttpResponse.Body)
-	localVarHttpResponse.Body.Close()
-	if err != nil {
-		return localVarHttpResponse, err
-	}
-
-
-	if localVarHttpResponse.StatusCode >= 300 {
-		newErr := GenericSwaggerError{
-			body: localVarBody,
-			error: localVarHttpResponse.Status,
-		}
-		return localVarHttpResponse, newErr
-	}
-
-	return localVarHttpResponse, nil
-}
-/*
-DeleteApiService
-Deletes an escrow wallet with the provided ID. The API Credential must have Admin level permissions on the Business that owns this Escrow Wallet, and the wallet must be near empty.
- * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param escrowWalletId The ID of the escrow wallet
-@return InlineResponse2004
-*/
-func (a *DeleteApiService) WalletsEscrowWalletIdDelete(ctx context.Context, escrowWalletId string) (InlineResponse2004, *http.Response, error) {
-	var (
-		localVarHttpMethod = strings.ToUpper("Delete")
-		localVarPostBody   interface{}
-		localVarFileName   string
-		localVarFileBytes  []byte
-		localVarReturnValue InlineResponse2004
-	)
-
-	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/wallets/{escrowWalletId}"
-	localVarPath = strings.Replace(localVarPath, "{"+"escrowWalletId"+"}", fmt.Sprintf("%v", escrowWalletId), -1)
+	localVarPath := a.client.cfg.BasePath + "/wallets/{walletId}"
+	localVarPath = strings.Replace(localVarPath, "{"+"walletId"+"}", fmt.Sprintf("%v", walletId), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -251,7 +251,7 @@ func (a *DeleteApiService) WalletsEscrowWalletIdDelete(ctx context.Context, escr
 			error: localVarHttpResponse.Status,
 		}
 		if localVarHttpResponse.StatusCode == 200 {
-			var v InlineResponse2004
+			var v InlineResponse2005
 			err = a.client.decode(&v, localVarBody, localVarHttpResponse.Header.Get("Content-Type"));
 				if err != nil {
 					newErr.error = err.Error()

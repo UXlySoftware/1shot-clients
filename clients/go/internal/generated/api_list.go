@@ -28,33 +28,33 @@ var (
 type ListApiService service
 /*
 ListApiService
-Gets a paged list of Transaction Executions, which are records of individual transactions on a blockchain.
+Lists Contract Methods for a business
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param businessId The business that you want Transactions from
- * @param optional nil or *ListApiBusinessBusinessIdTransactionsExecutionsGetOpts - Optional Parameters:
+ * @param businessId The business that you want Contract Methods from
+ * @param optional nil or *ListApiBusinessBusinessIdMethodsGetOpts - Optional Parameters:
      * @param "PageSize" (optional.Interface of int32) - 
      * @param "Page" (optional.Interface of int32) - 
      * @param "ChainId" (optional.Interface of EChain) - 
-     * @param "Status" (optional.Int32) - 
-     * @param "EscrowWalletId" (optional.Interface of string) -  Will filter the results to Transactions using this Escrow Wallet Id only.
-     * @param "TransactionId" (optional.Interface of string) -  Will filter the results to only those Transaction Executions for this particular Transaction Id
-     * @param "ApiCredentialId" (optional.Interface of string) - 
-     * @param "UserId" (optional.Interface of string) - 
+     * @param "Name" (optional.String) - 
+     * @param "Status" (optional.Interface of EDeletedStatusSelector) - 
+     * @param "ContractAddress" (optional.Interface of string) - 
+     * @param "PromptId" (optional.Interface of string) -  The ID of the Prompt you want to filter by. If provided, only Contract Methods created from this Prompt will be returned.
+     * @param "MethodType" (optional.String) -  Which type of Contract Method you want to filter by- read or write methods. If not provided, all Contract Methods will be returned.
 @return InlineResponse2002
 */
 
-type ListApiBusinessBusinessIdTransactionsExecutionsGetOpts struct {
+type ListApiBusinessBusinessIdMethodsGetOpts struct {
     PageSize optional.Interface
     Page optional.Interface
     ChainId optional.Interface
-    Status optional.Int32
-    EscrowWalletId optional.Interface
-    TransactionId optional.Interface
-    ApiCredentialId optional.Interface
-    UserId optional.Interface
+    Name optional.String
+    Status optional.Interface
+    ContractAddress optional.Interface
+    PromptId optional.Interface
+    MethodType optional.String
 }
 
-func (a *ListApiService) BusinessBusinessIdTransactionsExecutionsGet(ctx context.Context, businessId string, localVarOptionals *ListApiBusinessBusinessIdTransactionsExecutionsGetOpts) (InlineResponse2002, *http.Response, error) {
+func (a *ListApiService) BusinessBusinessIdMethodsGet(ctx context.Context, businessId string, localVarOptionals *ListApiBusinessBusinessIdMethodsGetOpts) (InlineResponse2002, *http.Response, error) {
 	var (
 		localVarHttpMethod = strings.ToUpper("Get")
 		localVarPostBody   interface{}
@@ -64,7 +64,7 @@ func (a *ListApiService) BusinessBusinessIdTransactionsExecutionsGet(ctx context
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/business/{businessId}/transactions/executions"
+	localVarPath := a.client.cfg.BasePath + "/business/{businessId}/methods"
 	localVarPath = strings.Replace(localVarPath, "{"+"businessId"+"}", fmt.Sprintf("%v", businessId), -1)
 
 	localVarHeaderParams := make(map[string]string)
@@ -80,20 +80,20 @@ func (a *ListApiService) BusinessBusinessIdTransactionsExecutionsGet(ctx context
 	if localVarOptionals != nil && localVarOptionals.ChainId.IsSet() {
 		localVarQueryParams.Add("chainId", parameterToString(localVarOptionals.ChainId.Value(), ""))
 	}
+	if localVarOptionals != nil && localVarOptionals.Name.IsSet() {
+		localVarQueryParams.Add("name", parameterToString(localVarOptionals.Name.Value(), ""))
+	}
 	if localVarOptionals != nil && localVarOptionals.Status.IsSet() {
 		localVarQueryParams.Add("status", parameterToString(localVarOptionals.Status.Value(), ""))
 	}
-	if localVarOptionals != nil && localVarOptionals.EscrowWalletId.IsSet() {
-		localVarQueryParams.Add("escrowWalletId", parameterToString(localVarOptionals.EscrowWalletId.Value(), ""))
+	if localVarOptionals != nil && localVarOptionals.ContractAddress.IsSet() {
+		localVarQueryParams.Add("contractAddress", parameterToString(localVarOptionals.ContractAddress.Value(), ""))
 	}
-	if localVarOptionals != nil && localVarOptionals.TransactionId.IsSet() {
-		localVarQueryParams.Add("transactionId", parameterToString(localVarOptionals.TransactionId.Value(), ""))
+	if localVarOptionals != nil && localVarOptionals.PromptId.IsSet() {
+		localVarQueryParams.Add("promptId", parameterToString(localVarOptionals.PromptId.Value(), ""))
 	}
-	if localVarOptionals != nil && localVarOptionals.ApiCredentialId.IsSet() {
-		localVarQueryParams.Add("apiCredentialId", parameterToString(localVarOptionals.ApiCredentialId.Value(), ""))
-	}
-	if localVarOptionals != nil && localVarOptionals.UserId.IsSet() {
-		localVarQueryParams.Add("userId", parameterToString(localVarOptionals.UserId.Value(), ""))
+	if localVarOptionals != nil && localVarOptionals.MethodType.IsSet() {
+		localVarQueryParams.Add("methodType", parameterToString(localVarOptionals.MethodType.Value(), ""))
 	}
 	// to determine the Content-Type header
 	localVarHttpContentTypes := []string{}
@@ -158,37 +158,45 @@ func (a *ListApiService) BusinessBusinessIdTransactionsExecutionsGet(ctx context
 }
 /*
 ListApiService
-Lists transactions for a business
+Gets a paged list of Transactions, which are records of changes made to the blockchain from executing a Contract Method. You can see the status of the Transaction and your history.
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param businessId The business that you want transactions from
+ * @param businessId The business that you want Transactions from
  * @param optional nil or *ListApiBusinessBusinessIdTransactionsGetOpts - Optional Parameters:
      * @param "PageSize" (optional.Interface of int32) - 
      * @param "Page" (optional.Interface of int32) - 
      * @param "ChainId" (optional.Interface of EChain) - 
-     * @param "Name" (optional.String) - 
-     * @param "Status" (optional.Interface of EDeletedStatusSelector) - 
-     * @param "ContractAddress" (optional.Interface of string) - 
-     * @param "ContractDescriptionId" (optional.Interface of string) -  The ID of the Contract Description you want to filter by. If provided, only transactions created from this Contract Description will be returned.
-@return InlineResponse2001
+     * @param "Status" (optional.String) - 
+     * @param "WalletId" (optional.Interface of string) -  Will filter the results to Transactions using this Wallet Id only.
+     * @param "ContractMethodId" (optional.Interface of string) -  Will filter the results to only those Transactions for this particular Contract Method.
+     * @param "ApiCredentialId" (optional.Interface of string) - 
+     * @param "UserId" (optional.Interface of string) - 
+     * @param "Memo" (optional.String) - 
+     * @param "CreatedAfter" (optional.Float64) - 
+     * @param "CreatedBefore" (optional.Float64) - 
+@return InlineResponse2003
 */
 
 type ListApiBusinessBusinessIdTransactionsGetOpts struct {
     PageSize optional.Interface
     Page optional.Interface
     ChainId optional.Interface
-    Name optional.String
-    Status optional.Interface
-    ContractAddress optional.Interface
-    ContractDescriptionId optional.Interface
+    Status optional.String
+    WalletId optional.Interface
+    ContractMethodId optional.Interface
+    ApiCredentialId optional.Interface
+    UserId optional.Interface
+    Memo optional.String
+    CreatedAfter optional.Float64
+    CreatedBefore optional.Float64
 }
 
-func (a *ListApiService) BusinessBusinessIdTransactionsGet(ctx context.Context, businessId string, localVarOptionals *ListApiBusinessBusinessIdTransactionsGetOpts) (InlineResponse2001, *http.Response, error) {
+func (a *ListApiService) BusinessBusinessIdTransactionsGet(ctx context.Context, businessId string, localVarOptionals *ListApiBusinessBusinessIdTransactionsGetOpts) (InlineResponse2003, *http.Response, error) {
 	var (
 		localVarHttpMethod = strings.ToUpper("Get")
 		localVarPostBody   interface{}
 		localVarFileName   string
 		localVarFileBytes  []byte
-		localVarReturnValue InlineResponse2001
+		localVarReturnValue InlineResponse2003
 	)
 
 	// create path and map variables
@@ -208,17 +216,29 @@ func (a *ListApiService) BusinessBusinessIdTransactionsGet(ctx context.Context, 
 	if localVarOptionals != nil && localVarOptionals.ChainId.IsSet() {
 		localVarQueryParams.Add("chainId", parameterToString(localVarOptionals.ChainId.Value(), ""))
 	}
-	if localVarOptionals != nil && localVarOptionals.Name.IsSet() {
-		localVarQueryParams.Add("name", parameterToString(localVarOptionals.Name.Value(), ""))
-	}
 	if localVarOptionals != nil && localVarOptionals.Status.IsSet() {
 		localVarQueryParams.Add("status", parameterToString(localVarOptionals.Status.Value(), ""))
 	}
-	if localVarOptionals != nil && localVarOptionals.ContractAddress.IsSet() {
-		localVarQueryParams.Add("contractAddress", parameterToString(localVarOptionals.ContractAddress.Value(), ""))
+	if localVarOptionals != nil && localVarOptionals.WalletId.IsSet() {
+		localVarQueryParams.Add("walletId", parameterToString(localVarOptionals.WalletId.Value(), ""))
 	}
-	if localVarOptionals != nil && localVarOptionals.ContractDescriptionId.IsSet() {
-		localVarQueryParams.Add("contractDescriptionId", parameterToString(localVarOptionals.ContractDescriptionId.Value(), ""))
+	if localVarOptionals != nil && localVarOptionals.ContractMethodId.IsSet() {
+		localVarQueryParams.Add("contractMethodId", parameterToString(localVarOptionals.ContractMethodId.Value(), ""))
+	}
+	if localVarOptionals != nil && localVarOptionals.ApiCredentialId.IsSet() {
+		localVarQueryParams.Add("apiCredentialId", parameterToString(localVarOptionals.ApiCredentialId.Value(), ""))
+	}
+	if localVarOptionals != nil && localVarOptionals.UserId.IsSet() {
+		localVarQueryParams.Add("userId", parameterToString(localVarOptionals.UserId.Value(), ""))
+	}
+	if localVarOptionals != nil && localVarOptionals.Memo.IsSet() {
+		localVarQueryParams.Add("memo", parameterToString(localVarOptionals.Memo.Value(), ""))
+	}
+	if localVarOptionals != nil && localVarOptionals.CreatedAfter.IsSet() {
+		localVarQueryParams.Add("createdAfter", parameterToString(localVarOptionals.CreatedAfter.Value(), ""))
+	}
+	if localVarOptionals != nil && localVarOptionals.CreatedBefore.IsSet() {
+		localVarQueryParams.Add("createdBefore", parameterToString(localVarOptionals.CreatedBefore.Value(), ""))
 	}
 	// to determine the Content-Type header
 	localVarHttpContentTypes := []string{}
@@ -267,7 +287,7 @@ func (a *ListApiService) BusinessBusinessIdTransactionsGet(ctx context.Context, 
 			error: localVarHttpResponse.Status,
 		}
 		if localVarHttpResponse.StatusCode == 200 {
-			var v InlineResponse2001
+			var v InlineResponse2003
 			err = a.client.decode(&v, localVarBody, localVarHttpResponse.Header.Get("Content-Type"));
 				if err != nil {
 					newErr.error = err.Error()
@@ -283,15 +303,15 @@ func (a *ListApiService) BusinessBusinessIdTransactionsGet(ctx context.Context, 
 }
 /*
 ListApiService
-Lists escrow wallets for the business- NOT BusinessEscrowWallets. These are almost identical but EscrowWallet has more stuff.
+Lists wallets for the business- NOT BusinessWallets. These are almost identical but Wallet has more stuff.
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param businessId The internal uuid of the Business you are interested in
  * @param optional nil or *ListApiBusinessBusinessIdWalletsGetOpts - Optional Parameters:
      * @param "ChainId" (optional.Interface of EChain) -  The specific chain to get the wallets for
      * @param "PageSize" (optional.Interface of int32) - 
      * @param "Page" (optional.Interface of int32) - 
-     * @param "Name" (optional.String) -  Filters on the name of the escrow wallet.
-@return InlineResponse2003
+     * @param "Name" (optional.String) -  Filters on the name of the wallet.
+@return InlineResponse2004
 */
 
 type ListApiBusinessBusinessIdWalletsGetOpts struct {
@@ -301,13 +321,13 @@ type ListApiBusinessBusinessIdWalletsGetOpts struct {
     Name optional.String
 }
 
-func (a *ListApiService) BusinessBusinessIdWalletsGet(ctx context.Context, businessId string, localVarOptionals *ListApiBusinessBusinessIdWalletsGetOpts) (InlineResponse2003, *http.Response, error) {
+func (a *ListApiService) BusinessBusinessIdWalletsGet(ctx context.Context, businessId string, localVarOptionals *ListApiBusinessBusinessIdWalletsGetOpts) (InlineResponse2004, *http.Response, error) {
 	var (
 		localVarHttpMethod = strings.ToUpper("Get")
 		localVarPostBody   interface{}
 		localVarFileName   string
 		localVarFileBytes  []byte
-		localVarReturnValue InlineResponse2003
+		localVarReturnValue InlineResponse2004
 	)
 
 	// create path and map variables
@@ -377,7 +397,205 @@ func (a *ListApiService) BusinessBusinessIdWalletsGet(ctx context.Context, busin
 			error: localVarHttpResponse.Status,
 		}
 		if localVarHttpResponse.StatusCode == 200 {
-			var v InlineResponse2003
+			var v InlineResponse2004
+			err = a.client.decode(&v, localVarBody, localVarHttpResponse.Header.Get("Content-Type"));
+				if err != nil {
+					newErr.error = err.Error()
+					return localVarReturnValue, localVarHttpResponse, newErr
+				}
+				newErr.model = v
+				return localVarReturnValue, localVarHttpResponse, newErr
+		}
+		return localVarReturnValue, localVarHttpResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHttpResponse, nil
+}
+/*
+ListApiService
+Returns a listing of all chains supported by 1Shot API
+ * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ * @param optional nil or *ListApiChainsGetOpts - Optional Parameters:
+     * @param "PageSize" (optional.Interface of int32) - 
+     * @param "Page" (optional.Interface of int32) - 
+@return InlineResponse2001
+*/
+
+type ListApiChainsGetOpts struct {
+    PageSize optional.Interface
+    Page optional.Interface
+}
+
+func (a *ListApiService) ChainsGet(ctx context.Context, localVarOptionals *ListApiChainsGetOpts) (InlineResponse2001, *http.Response, error) {
+	var (
+		localVarHttpMethod = strings.ToUpper("Get")
+		localVarPostBody   interface{}
+		localVarFileName   string
+		localVarFileBytes  []byte
+		localVarReturnValue InlineResponse2001
+	)
+
+	// create path and map variables
+	localVarPath := a.client.cfg.BasePath + "/chains"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if localVarOptionals != nil && localVarOptionals.PageSize.IsSet() {
+		localVarQueryParams.Add("pageSize", parameterToString(localVarOptionals.PageSize.Value(), ""))
+	}
+	if localVarOptionals != nil && localVarOptionals.Page.IsSet() {
+		localVarQueryParams.Add("page", parameterToString(localVarOptionals.Page.Value(), ""))
+	}
+	// to determine the Content-Type header
+	localVarHttpContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHttpContentType := selectHeaderContentType(localVarHttpContentTypes)
+	if localVarHttpContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHttpContentType
+	}
+
+	// to determine the Accept header
+	localVarHttpHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHttpHeaderAccept := selectHeaderAccept(localVarHttpHeaderAccepts)
+	if localVarHttpHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHttpHeaderAccept
+	}
+	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHttpMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFileName, localVarFileBytes)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHttpResponse, err := a.client.callAPI(r)
+	if err != nil || localVarHttpResponse == nil {
+		return localVarReturnValue, localVarHttpResponse, err
+	}
+
+	localVarBody, err := ioutil.ReadAll(localVarHttpResponse.Body)
+	localVarHttpResponse.Body.Close()
+	if err != nil {
+		return localVarReturnValue, localVarHttpResponse, err
+	}
+
+	if localVarHttpResponse.StatusCode < 300 {
+		// If we succeed, return the data, otherwise pass on to decode error.
+		err = a.client.decode(&localVarReturnValue, localVarBody, localVarHttpResponse.Header.Get("Content-Type"));
+		if err == nil { 
+			return localVarReturnValue, localVarHttpResponse, err
+		}
+	}
+
+	if localVarHttpResponse.StatusCode >= 300 {
+		newErr := GenericSwaggerError{
+			body: localVarBody,
+			error: localVarHttpResponse.Status,
+		}
+		if localVarHttpResponse.StatusCode == 200 {
+			var v InlineResponse2001
+			err = a.client.decode(&v, localVarBody, localVarHttpResponse.Header.Get("Content-Type"));
+				if err != nil {
+					newErr.error = err.Error()
+					return localVarReturnValue, localVarHttpResponse, newErr
+				}
+				newErr.model = v
+				return localVarReturnValue, localVarHttpResponse, newErr
+		}
+		return localVarReturnValue, localVarHttpResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHttpResponse, nil
+}
+/*
+ListApiService
+Lists delegations for a wallet. Returns a paged response of delegations associated with the specified wallet.
+ * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ * @param walletId The internal uuid of the Wallet to list delegations for
+ * @param optional nil or *ListApiWalletsWalletIdDelegationsGetOpts - Optional Parameters:
+     * @param "PageSize" (optional.Interface of int32) - 
+     * @param "Page" (optional.Interface of int32) - 
+@return InlineResponse2006
+*/
+
+type ListApiWalletsWalletIdDelegationsGetOpts struct {
+    PageSize optional.Interface
+    Page optional.Interface
+}
+
+func (a *ListApiService) WalletsWalletIdDelegationsGet(ctx context.Context, walletId string, localVarOptionals *ListApiWalletsWalletIdDelegationsGetOpts) (InlineResponse2006, *http.Response, error) {
+	var (
+		localVarHttpMethod = strings.ToUpper("Get")
+		localVarPostBody   interface{}
+		localVarFileName   string
+		localVarFileBytes  []byte
+		localVarReturnValue InlineResponse2006
+	)
+
+	// create path and map variables
+	localVarPath := a.client.cfg.BasePath + "/wallets/{walletId}/delegations"
+	localVarPath = strings.Replace(localVarPath, "{"+"walletId"+"}", fmt.Sprintf("%v", walletId), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if localVarOptionals != nil && localVarOptionals.PageSize.IsSet() {
+		localVarQueryParams.Add("pageSize", parameterToString(localVarOptionals.PageSize.Value(), ""))
+	}
+	if localVarOptionals != nil && localVarOptionals.Page.IsSet() {
+		localVarQueryParams.Add("page", parameterToString(localVarOptionals.Page.Value(), ""))
+	}
+	// to determine the Content-Type header
+	localVarHttpContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHttpContentType := selectHeaderContentType(localVarHttpContentTypes)
+	if localVarHttpContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHttpContentType
+	}
+
+	// to determine the Accept header
+	localVarHttpHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHttpHeaderAccept := selectHeaderAccept(localVarHttpHeaderAccepts)
+	if localVarHttpHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHttpHeaderAccept
+	}
+	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHttpMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFileName, localVarFileBytes)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHttpResponse, err := a.client.callAPI(r)
+	if err != nil || localVarHttpResponse == nil {
+		return localVarReturnValue, localVarHttpResponse, err
+	}
+
+	localVarBody, err := ioutil.ReadAll(localVarHttpResponse.Body)
+	localVarHttpResponse.Body.Close()
+	if err != nil {
+		return localVarReturnValue, localVarHttpResponse, err
+	}
+
+	if localVarHttpResponse.StatusCode < 300 {
+		// If we succeed, return the data, otherwise pass on to decode error.
+		err = a.client.decode(&localVarReturnValue, localVarBody, localVarHttpResponse.Header.Get("Content-Type"));
+		if err == nil { 
+			return localVarReturnValue, localVarHttpResponse, err
+		}
+	}
+
+	if localVarHttpResponse.StatusCode >= 300 {
+		newErr := GenericSwaggerError{
+			body: localVarBody,
+			error: localVarHttpResponse.Status,
+		}
+		if localVarHttpResponse.StatusCode == 200 {
+			var v InlineResponse2006
 			err = a.client.decode(&v, localVarBody, localVarHttpResponse.Header.Get("Content-Type"));
 				if err != nil {
 					newErr.error = err.Error()

@@ -10,7 +10,7 @@
 package swagger
 
 type InlineResponse2003 struct {
-	Response []EscrowWallet `json:"response,omitempty"`
+	Response []Transaction `json:"response,omitempty"`
 	Page int32 `json:"page"`
 	PageSize int32 `json:"pageSize"`
 	TotalResults int32 `json:"totalResults"`

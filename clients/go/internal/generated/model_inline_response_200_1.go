@@ -10,7 +10,7 @@
 package swagger
 
 type InlineResponse2001 struct {
-	Response []Transaction `json:"response,omitempty"`
+	Response []ChainInfo `json:"response,omitempty"`
 	Page int32 `json:"page"`
 	PageSize int32 `json:"pageSize"`
 	TotalResults int32 `json:"totalResults"`

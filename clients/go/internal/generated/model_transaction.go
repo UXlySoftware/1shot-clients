@@ -9,28 +9,44 @@
  */
 package swagger
 
-// A single defined transaction, corresponding a method call on a smart contract on a chain. You can have multiple Transactions defined for the same method in the contract if you want to use different setups for static parameters. Transactions are sometimes referred to as Endpoints.
+// A single execution of a Contract Method. This is a record of your execution history. Transactions are updated as they move forward on the blockchain.
 type Transaction struct {
 	Id string `json:"id"`
-	BusinessId string `json:"businessId"`
-	Chain *EChain `json:"chain"`
+	ContractMethodId string `json:"contractMethodId"`
+	// ID of the API Credential used to execute the Contract Method and create this Transaction. Note, this is not the API Key itself. This will be null if a user initiated the execution and not an API Credential
+	ApiCredentialId string `json:"apiCredentialId"`
+	// The actual API key used
+	ApiKey string `json:"apiKey"`
+	// The User ID that executed the Contract Method and created this Transaction. This will be null if an API key was used instead of a user token.
+	UserId string `json:"userId"`
+	Status *ETransactionStatus `json:"status"`
+	// The hash of the Transaction. Only calculated once the status is Submitted. This is an immutable value and can be looked up on the appropriate block scanner.
+	TransactionHash string `json:"transactionHash"`
 	ContractAddress string `json:"contractAddress"`
-	EscrowWalletId string `json:"escrowWalletId"`
-	// Name of transaction
+	// the name of the associated Contract Method. Included as a convienience.
 	Name string `json:"name"`
-	// Description of transaction
-	Description string `json:"description"`
-	// Name of the function on the contract to call for this transaction
+	// The functionName of the associated Contract Method. Included as a convienience.
 	FunctionName string `json:"functionName"`
-	Inputs []SolidityStructParam `json:"inputs"`
-	Outputs []SolidityStructParam `json:"outputs"`
-	StateMutability *ESolidityStateMutability `json:"stateMutability"`
-	// The ID of the contract description that this transaction was created from. This is optional, and a Transaction can drift from the original Contract Description but retain this association.
-	ContractDescriptionId string `json:"contractDescriptionId"`
-	// The current destination for webhooks to be sent when this transaction is executed. Will be null if no webhook is assigned.
-	CallbackUrl string `json:"callbackUrl"`
-	// The current public key for verifying the integrity of the webhook when this transaction is executed. 1Shot will sign its webhooks with a private key and provide a signature for the webhook that can be validated with this key. It will be null if there is no webhook destination specified.
-	PublicKey string `json:"publicKey"`
+	ChainId *EChain `json:"chainId"`
+	// Optional text supplied when the transaction is executed. This can be a note to the user about why the execution was done, or formatted information such as JSON that can be used by the user's system.
+	Memo string `json:"memo"`
+	// This is the timestamp for when 1Shot determined the Transaction to have settled. It will be null until the Transaction is in it's final state, hopefully \"Completed\".
+	Completed float64 `json:"completed"`
+	WalletId string `json:"walletId"`
+	// The reason the transaction failed. This is only set if the transaction failed.
+	FailureReason string `json:"failureReason,omitempty"`
+	// The address of the account that sent the transaction.
+	From string `json:"from"`
+	// The address of the account that received the transaction.
+	To string `json:"to"`
+	// The gas price of the transaction.
+	GasPrice string `json:"gasPrice"`
+	// The gas limit of the transaction.
+	GasLimit string `json:"gasLimit"`
+	// The max fee per gas of the transaction.
+	MaxFeePerGas string `json:"maxFeePerGas"`
+	// The max priority fee per gas of the transaction.
+	MaxPriorityFeePerGas string `json:"maxPriorityFeePerGas"`
 	Updated float64 `json:"updated"`
 	Created float64 `json:"created"`
 }

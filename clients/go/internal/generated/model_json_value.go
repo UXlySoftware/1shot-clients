@@ -9,6 +9,6 @@
  */
 package swagger
 
-// A JSON-compatible value
+// A JSON-compatible value. This could be a single primitive value such as a string, or it could be an Array or another Object.
 type JsonValue struct {
 }
