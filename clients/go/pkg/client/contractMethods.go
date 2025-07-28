@@ -8,13 +8,13 @@ import (
 	"github.com/antihax/optional"
 )
 
-// ContractMethods handles all transaction-related operations
+// ContractMethods handles all contract method-related operations
 type ContractMethods struct {
 	api        *swagger.ContractMethodsApiService
 	businessId string
 }
 
-// Execute executes a transaction
+// Execute executes a contract method
 func (t *ContractMethods) Execute(
 	ctx context.Context,
 	contractMethodId string,
@@ -50,7 +50,42 @@ func (t *ContractMethods) Execute(
 	return &resp, nil
 }
 
-// Test tests a transaction without executing it
+// ExecuteAsDelegator executes a contract method as a delegator
+func (t *ContractMethods) ExecuteAsDelegator(
+	ctx context.Context,
+	contractMethodId string,
+	params map[string]interface{},
+	walletId, memo *string,
+	delegatorAddress string,
+) (*swagger.Transaction, error) {
+	body := swagger.ContractMethodIdExecuteAsDelegatorBody{
+		DelegatorAddress: delegatorAddress,
+	}
+	if params != nil {
+		jsonBytes, err := json.Marshal(params)
+		if err != nil {
+			return nil, err
+		}
+		var jsonValue swagger.JsonValue
+		if err := json.Unmarshal(jsonBytes, &jsonValue); err != nil {
+			return nil, err
+		}
+		body.Params = &jsonValue
+	}
+	if walletId != nil {
+		body.WalletId = *walletId
+	}
+	if memo != nil {
+		body.Memo = *memo
+	}
+	resp, _, err := t.api.MethodsContractMethodIdExecuteAsDelegatorPost(ctx, body, contractMethodId)
+	if err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
+// Test tests a contract method without executing it
 func (t *ContractMethods) Test(ctx context.Context, contractMethodId string, params map[string]interface{}) (*swagger.ContractMethodTestResult, error) {
 	body := swagger.ContractMethodIdTestBody{}
 	if params != nil {
@@ -71,7 +106,28 @@ func (t *ContractMethods) Test(ctx context.Context, contractMethodId string, par
 	return &resp, nil
 }
 
-// Get gets a transaction by ID
+// Encode encodes the transaction data for a contract method
+func (t *ContractMethods) Encode(ctx context.Context, contractMethodId string, params map[string]interface{}) (*swagger.ContractMethodEncodeResult, error) {
+	body := swagger.ContractMethodIdEncodeBody{}
+	if params != nil {
+		jsonBytes, err := json.Marshal(params)
+		if err != nil {
+			return nil, err
+		}
+		var jsonValue swagger.JsonValue
+		if err := json.Unmarshal(jsonBytes, &jsonValue); err != nil {
+			return nil, err
+		}
+		body.Params = &jsonValue
+	}
+	resp, _, err := t.api.MethodsContractMethodIdEncodePost(ctx, body, contractMethodId)
+	if err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
+// Get gets a contract method by ID
 func (t *ContractMethods) Get(ctx context.Context, id string) (*swagger.ContractMethod, error) {
 	resp, _, err := t.api.MethodsContractMethodIdGet(ctx, id)
 	if err != nil {
@@ -80,7 +136,7 @@ func (t *ContractMethods) Get(ctx context.Context, id string) (*swagger.Contract
 	return &resp, nil
 }
 
-// List lists transactions for a business
+// List lists contract methods for a business
 func (t *ContractMethods) List(
 	ctx context.Context,
 	pageSize, page *int32,
@@ -89,6 +145,7 @@ func (t *ContractMethods) List(
 	status *swagger.EDeletedStatusSelector,
 	contractAddress *string,
 	promptId *string,
+	methodType *string,
 ) ([]swagger.ContractMethod, error) {
 	opts := &swagger.ContractMethodsApiBusinessBusinessIdMethodsGetOpts{}
 	if pageSize != nil {
@@ -112,6 +169,9 @@ func (t *ContractMethods) List(
 	if promptId != nil {
 		opts.PromptId = optional.NewInterface(*promptId)
 	}
+	if methodType != nil {
+		opts.MethodType = optional.NewString(*methodType)
+	}
 
 	resp, _, err := t.api.BusinessBusinessIdMethodsGet(ctx, t.businessId, opts)
 	if err != nil {
@@ -120,7 +180,7 @@ func (t *ContractMethods) List(
 	return resp.Response, nil
 }
 
-// Estimate estimates the cost of executing a transaction
+// Estimate estimates the cost of executing a contract method
 func (t *ContractMethods) Estimate(ctx context.Context, contractMethodId string, params map[string]interface{}) (*swagger.ContractMethodEstimate, error) {
 	body := swagger.ContractMethodIdEstimateBody{}
 	if params != nil {
@@ -170,7 +230,7 @@ func (t *ContractMethods) Read(ctx context.Context, contractMethodId string, par
 	return result, nil
 }
 
-// Create creates a new Contract Method
+// Create creates a new contract method
 func (t *ContractMethods) Create(
 	ctx context.Context,
 	chain swagger.EChain,
@@ -185,7 +245,7 @@ func (t *ContractMethods) Create(
 	callbackUrl *string,
 ) (*swagger.ContractMethod, error) {
 	body := swagger.BusinessIdMethodsBody{
-		ChainId:           &chain,
+		ChainId:         &chain,
 		ContractAddress: contractAddress,
 		WalletId:        walletId,
 		Name:            name,
@@ -205,7 +265,7 @@ func (t *ContractMethods) Create(
 	return &resp, nil
 }
 
-// ImportFromABI imports transactions from an ABI
+// ImportFromABI imports contract methods from an ABI
 func (t *ContractMethods) ImportFromABI(
 	ctx context.Context,
 	chain swagger.EChain,
@@ -216,7 +276,7 @@ func (t *ContractMethods) ImportFromABI(
 	abi []swagger.OneOfEthereumAbiItems,
 ) ([]swagger.ContractMethod, error) {
 	body := swagger.MethodsAbiBody{
-		ChainId:           &chain,
+		ChainId:         &chain,
 		ContractAddress: contractAddress,
 		WalletId:        walletId,
 		Name:            name,
@@ -230,7 +290,30 @@ func (t *ContractMethods) ImportFromABI(
 	return resp, nil
 }
 
-// Update updates a transaction
+// AssureFromPrompt assures that contract methods exist for a given prompt
+func (t *ContractMethods) AssureFromPrompt(
+	ctx context.Context,
+	chain swagger.EChain,
+	contractAddress string,
+	walletId string,
+	promptId *string,
+) ([]swagger.ContractMethod, error) {
+	body := swagger.MethodsPromptBody{
+		ChainId:         &chain,
+		ContractAddress: contractAddress,
+		WalletId:        walletId,
+	}
+	if promptId != nil {
+		body.PromptId = *promptId
+	}
+	resp, _, err := t.api.BusinessBusinessIdMethodsPromptPost(ctx, body, t.businessId)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+// Update updates a contract method
 func (t *ContractMethods) Update(
 	ctx context.Context,
 	contractMethodId string,
@@ -266,7 +349,7 @@ func (t *ContractMethods) Update(
 	return &resp, nil
 }
 
-// Delete deletes a transaction
+// Delete deletes a contract method
 func (t *ContractMethods) Delete(ctx context.Context, contractMethodId string) error {
 	_, err := t.api.MethodsContractMethodIdDelete(ctx, contractMethodId)
 	return err
