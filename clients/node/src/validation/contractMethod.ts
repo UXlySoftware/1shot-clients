@@ -110,11 +110,10 @@ export const contractMethodUpdateSchema = z
       .describe(
         'The actual method name on the smart contract. Solidity names are case sensitive and must match precisely. Cannot be changed after creation'
       ),
-    payable: z
-      .boolean()
+    stateMutability: contractMethodStateMutabilitySchema
       .optional()
       .describe(
-        'Whether the contractMethod can receive native tokens. Determines if the function can accept ETH or other native tokens'
+        'The state mutability of the Solidity function. Determines if the function can modify state, receive native tokens, or only read data'
       ),
     callbackUrl: z
       .string()
@@ -380,6 +379,43 @@ export const executeContractMethodSchema = z
   })
   .describe(
     'Parameters required to execute a contractMethod. Includes the function parameters, optional escrow wallet override, optional memo, optional value for payable methods, and optional contract address override'
+  );
+
+// Validation for executing a contractMethod as a delegator
+export const executeAsDelegatorContractMethodSchema = z
+  .object({
+    contractMethodId: z
+      .string()
+      .uuid()
+      .describe(
+        'The ID of the contractMethod to execute as a delegator. Identifies which contractMethod to run'
+      ),
+    params: contractMethodParamsSchema,
+    walletId: z
+      .string()
+      .uuid()
+      .optional()
+      .describe(
+        'The ID of the escrow wallet that will execute the contractMethod. If not provided, the default escrow wallet for the contractMethod will be used'
+      ),
+    memo: z
+      .string()
+      .optional()
+      .describe(
+        "Optional text supplied when the contractMethod is executed. This can be a note to the user about why the execution was done, or formatted information such as JSON that can be used by the user's system"
+      ),
+    delegatorAddress: z
+      .string()
+      .describe('The address of the delegator on whose behalf the transaction will be executed'),
+    value: z
+      .string()
+      .optional()
+      .describe(
+        'The amount of native token to send along with the contractMethod. This is only applicable for contractMethods that are payable. Including this value for a nonpayable method will result in an error'
+      ),
+  })
+  .describe(
+    'Parameters required to execute a contractMethod as a delegator. Similar to regular execution but executes the transaction on behalf of the specified delegator address'
   );
 
 // Validation for testing a contractMethod
