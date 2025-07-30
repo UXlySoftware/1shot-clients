@@ -11,6 +11,8 @@ if TYPE_CHECKING:
 from uxly_1shot_client.models.contract_method import (
     ContractMethodEstimate,
     ContractMethodTestResult,
+    ContractMethodEncodeResult,
+    ContractMethodExecuteAsDelegatorParams,
     ContractMethod,
     ListContractMethodsParams,
     ContractMethodCreateParams,
@@ -57,6 +59,28 @@ class BaseContractMethods:
             The URL for executing a contract method
         """
         return f"/methods/{contract_method_id}/execute"
+
+    def _get_encode_url(self, contract_method_id: str) -> str:
+        """Get the URL for encoding a contract method.
+
+        Args:
+            contract_method_id: The Contract Method ID
+
+        Returns:
+            The URL for encoding a contract method
+        """
+        return f"/methods/{contract_method_id}/encode"
+
+    def _get_execute_as_delegator_url(self, contract_method_id: str) -> str:
+        """Get the URL for executing a contract method as a delegator.
+
+        Args:
+            contract_method_id: The Contract Method ID
+
+        Returns:
+            The URL for executing a contract method as a delegator
+        """
+        return f"/methods/{contract_method_id}/executeAsDelegator"
 
     def _get_read_url(self, contract_method_id: str) -> str:
         """Get the URL for reading a contract method.
@@ -265,6 +289,80 @@ class SyncContractMethods(BaseContractMethods):
         response = self._client._request(
             "POST",
             self._get_execute_url(contract_method_id),
+            data=data,
+        )
+        return Transaction.model_validate(response)
+
+    def encode(
+        self,
+        contract_method_id: str,
+        params: Dict[str, Any],
+        authorization_list: Optional[List[ERC7702Authorization]] = None,
+        value: Optional[str] = None,
+    ) -> ContractMethodEncodeResult:
+        """Encode a contract method to get the transaction data. This method encodes the transaction data for a Contract Method. It returns a hex string of the bytes of the encoded data. This can be used to call the Contract Method directly on the blockchain.
+
+        Args:
+            contract_method_id: The Contract Method ID
+            params: Parameters for the contract method
+            authorization_list: Optional list of ERC-7702 authorizations. If you are using ERC-7702, you must provide at least one authorization.
+            value: Optional amount of native token to send along with the contract method
+
+        Returns:
+            The encoded transaction data
+
+        Raises:
+            requests.exceptions.RequestException: If the request fails
+        """
+        data: Dict[str, Any] = {"params": params}
+        if authorization_list is not None:
+            data["authorizationList"] = [auth.model_dump(by_alias=True) for auth in authorization_list]
+        if value is not None:
+            data["value"] = value
+
+        response = self._client._request(
+            "POST",
+            self._get_encode_url(contract_method_id),
+            data=data,
+        )
+        return ContractMethodEncodeResult.model_validate(response)
+
+    def execute_as_delegator(
+        self,
+        contract_method_id: str,
+        params: Dict[str, Any],
+        delegator_address: str,
+        wallet_id: Optional[str] = None,
+        memo: Optional[str] = None,
+        value: Optional[str] = None,
+    ) -> Transaction:
+        """Execute a contract method as a delegator. This method executes the transaction on behalf of the specified delegator address.
+
+        Args:
+            contract_method_id: The Contract Method ID
+            params: Parameters for the contract method
+            delegator_address: The address of the delegator on whose behalf the transaction will be executed
+            wallet_id: Optional ID of the wallet to use
+            memo: Optional memo for the execution
+            value: Optional amount of native token to send along with the contract method
+
+        Returns:
+            The transaction object
+
+        Raises:
+            requests.exceptions.RequestException: If the request fails
+        """
+        data: Dict[str, Any] = {"params": params, "delegatorAddress": delegator_address}
+        if wallet_id is not None:
+            data["walletId"] = wallet_id
+        if memo is not None:
+            data["memo"] = memo
+        if value is not None:
+            data["value"] = value
+
+        response = self._client._request(
+            "POST",
+            self._get_execute_as_delegator_url(contract_method_id),
             data=data,
         )
         return Transaction.model_validate(response)
@@ -584,6 +682,80 @@ class AsyncContractMethods(BaseContractMethods):
         response = await self._client._request(
             "POST",
             self._get_execute_url(contract_method_id),
+            data=data,
+        )
+        return Transaction.model_validate(response)
+
+    async def encode(
+        self,
+        contract_method_id: str,
+        params: Dict[str, Any],
+        authorization_list: Optional[List[ERC7702Authorization]] = None,
+        value: Optional[str] = None,
+    ) -> ContractMethodEncodeResult:
+        """Encode a contract method to get the transaction data. This method encodes the transaction data for a Contract Method. It returns a hex string of the bytes of the encoded data. This can be used to call the Contract Method directly on the blockchain.
+
+        Args:
+            contract_method_id: The Contract Method ID
+            params: Parameters for the contract method
+            authorization_list: Optional list of ERC-7702 authorizations. If you are using ERC-7702, you must provide at least one authorization.
+            value: Optional amount of native token to send along with the contract method
+
+        Returns:
+            The encoded transaction data
+
+        Raises:
+            aiohttp.ClientError: If the request fails
+        """
+        data: Dict[str, Any] = {"params": params}
+        if authorization_list is not None:
+            data["authorizationList"] = [auth.model_dump(by_alias=True) for auth in authorization_list]
+        if value is not None:
+            data["value"] = value
+
+        response = await self._client._request(
+            "POST",
+            self._get_encode_url(contract_method_id),
+            data=data,
+        )
+        return ContractMethodEncodeResult.model_validate(response)
+
+    async def execute_as_delegator(
+        self,
+        contract_method_id: str,
+        params: Dict[str, Any],
+        delegator_address: str,
+        wallet_id: Optional[str] = None,
+        memo: Optional[str] = None,
+        value: Optional[str] = None,
+    ) -> Transaction:
+        """Execute a contract method as a delegator. This method executes the transaction on behalf of the specified delegator address.
+
+        Args:
+            contract_method_id: The Contract Method ID
+            params: Parameters for the contract method
+            delegator_address: The address of the delegator on whose behalf the transaction will be executed
+            wallet_id: Optional ID of the wallet to use
+            memo: Optional memo for the execution
+            value: Optional amount of native token to send along with the contract method
+
+        Returns:
+            The transaction object
+
+        Raises:
+            aiohttp.ClientError: If the request fails
+        """
+        data: Dict[str, Any] = {"params": params, "delegatorAddress": delegator_address}
+        if wallet_id is not None:
+            data["walletId"] = wallet_id
+        if memo is not None:
+            data["memo"] = memo
+        if value is not None:
+            data["value"] = value
+
+        response = await self._client._request(
+            "POST",
+            self._get_execute_as_delegator_url(contract_method_id),
             data=data,
         )
         return Transaction.model_validate(response)

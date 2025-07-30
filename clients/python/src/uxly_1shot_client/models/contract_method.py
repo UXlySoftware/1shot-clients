@@ -35,6 +35,7 @@ class ListContractMethodsParams(BaseModel):
     status: Optional[str] = Field(None, description="Filter by deletion status - 'live', 'archived', or 'both'")
     contract_address: Optional[str] = Field(None, alias="contractAddress", description="Filter by contract address")
     prompt_id: Optional[str] = Field(None, alias="promptId", description="Filter by prompt ID. If provided, only contract methods created from this Contract Description will be returned.")
+    method_type: Optional[str] = Field(None, alias="methodType", description="Which type of contract method you want to filter by - read or write methods. If not provided, all contract methods will be returned.")
 
     @validator('status')
     def validate_status(cls, v):
@@ -74,6 +75,12 @@ class ListContractMethodsParams(BaseModel):
         if v is not None:
             if not v.replace('-', '').isalnum():
                 raise ValueError('Contract description ID must be a valid UUID')
+        return v
+
+    @validator('method_type')
+    def validate_method_type(cls, v):
+        if v is not None and v not in ['read', 'write']:
+            raise ValueError('Method type must be either "read" or "write"')
         return v
 
 
@@ -165,6 +172,22 @@ class ContractMethodTestResult(BaseModel):
     success: bool = Field(..., description="Whether or not the contract method would run successfully")
     result: Optional[Dict[str, Any]] = Field(None, description="The result returned by the contract method, if it was successful. When running a test, no changes are made on the blockchain, so these results are hypothetical")
     error: Optional[Dict[str, Any]] = Field(None, description="The error that occurred, if the contract method was not successful")
+
+
+class ContractMethodEncodeResult(BaseModel):
+    """The result of running /encode on a contract method."""
+
+    data: str = Field(..., description="The hex string of the encoded data")
+
+
+class ContractMethodExecuteAsDelegatorParams(BaseModel):
+    """Parameters for executing a contract method as a delegator."""
+
+    params: Dict[str, Any] = Field(..., description="Parameters for the contract method")
+    wallet_id: Optional[str] = Field(None, alias="walletId", description="Optional ID of the wallet to use")
+    memo: Optional[str] = Field(None, description="Optional memo for the execution")
+    delegator_address: str = Field(..., alias="delegatorAddress", description="The address of the delegator on whose behalf the transaction will be executed")
+    value: Optional[str] = Field(None, description="The amount of native token to send along with the contract method")
 
 
 class ERC7702Authorization(BaseModel):
