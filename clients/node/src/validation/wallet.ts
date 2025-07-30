@@ -152,3 +152,77 @@ export const transferWalletSchema = z
     memo: z.string().optional().describe('An optional memo for the transfer'),
   })
   .describe('Parameters for transferring native tokens from a wallet');
+
+// Validation for delegation
+export const delegationSchema = z
+  .object({
+    id: z.string().uuid().describe('Internal ID of the delegation'),
+    businessId: z.string().uuid().describe('ID of the business that owns this delegation'),
+    escrowWalletId: z.string().uuid().describe('ID of the escrow wallet that can execute transactions'),
+    delegatorAddress: z.string().describe('The address of the delegator account'),
+    startTime: z
+      .number()
+      .nullable()
+      .describe('The start time for the delegation. If null, the delegation starts immediately'),
+    endTime: z
+      .number()
+      .nullable()
+      .describe('The end time for the delegation. If null, the delegation has no expiration'),
+    contractAddresses: z
+      .array(z.string())
+      .describe('Array of contract addresses that the wallet can execute transactions for'),
+    methods: z
+      .array(z.string())
+      .describe('Array of method names that the wallet can execute. If empty, all methods are allowed'),
+    delegationData: z.string().describe('The actual Delegation object serialized as a JSON string'),
+    updated: z.number().describe('Unix timestamp of the last update to this delegation'),
+    created: z.number().describe('Unix timestamp when this delegation was created'),
+  })
+  .describe('A delegation allows a wallet to execute transactions on behalf of specified contract addresses and methods');
+
+// Validation for delegation list response
+export const delegationListSchema = z
+  .object({
+    response: z.array(delegationSchema).describe('List of delegations'),
+    page: z.number().int().positive().describe('Current page number in the paginated results'),
+    pageSize: z.number().int().positive().describe('Number of items per page'),
+    totalResults: z
+      .number()
+      .int()
+      .nonnegative()
+      .describe('Total number of results across all pages'),
+  })
+  .describe('Paginated list of delegations');
+
+// Validation for list delegations parameters
+export const listDelegationsSchema = z
+  .object({
+    walletId: z.string().uuid().describe('ID of the wallet to list delegations for'),
+    pageSize: z.number().int().positive().optional().describe('Number of items per page'),
+    page: z.number().int().positive().optional().describe('Page number to retrieve'),
+  })
+  .describe('Parameters for listing delegations for a wallet');
+
+// Validation for create delegation parameters
+export const createDelegationSchema = z
+  .object({
+    walletId: z.string().uuid().describe('ID of the wallet to create the delegation for'),
+    startTime: z
+      .number()
+      .optional()
+      .describe('The start time for the delegation. If not provided, the delegation starts immediately'),
+    endTime: z
+      .number()
+      .optional()
+      .describe('The end time for the delegation. If not provided, the delegation has no expiration'),
+    contractAddresses: z
+      .array(z.string())
+      .optional()
+      .describe('Array of contract addresses that the wallet can execute transactions for'),
+    methods: z
+      .array(z.string())
+      .optional()
+      .describe('Array of method names that the wallet can execute. If empty, all methods are allowed'),
+    delegationData: z.string().describe('The actual Delegation object serialized as a JSON string. BigInts must be encoded as strings'),
+  })
+  .describe('Parameters for creating a new delegation for a wallet');

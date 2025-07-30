@@ -1,5 +1,5 @@
 import { IOneShotClient } from '../types/client.js';
-import { Wallet } from '../types/wallet.js';
+import { Wallet, Delegation } from '../types/wallet.js';
 import { Transaction } from '../types/transaction.js';
 import { PagedResponse } from '../types/common.js';
 import {
@@ -11,6 +11,10 @@ import {
   updateWalletSchema,
   deleteWalletSchema,
   transferWalletSchema,
+  delegationSchema,
+  delegationListSchema,
+  listDelegationsSchema,
+  createDelegationSchema,
 } from '../validation/wallet.js';
 
 export class Wallets {
@@ -205,5 +209,83 @@ export class Wallets {
 
     // Return the response (Transaction type is already validated by the API)
     return response;
+  }
+
+  /**
+   * List delegations for a wallet
+   * @param walletId The ID of the wallet to list delegations for
+   * @param params Optional pagination parameters
+   * @returns Promise<PagedResponse<Delegation>>
+   * @throws {ZodError} If the parameters are invalid
+   */
+  async listDelegations(
+    walletId: string,
+    params?: {
+      pageSize?: number;
+      page?: number;
+    }
+  ): Promise<PagedResponse<Delegation>> {
+    // Validate all parameters using the schema
+    const validatedParams = listDelegationsSchema.parse({
+      walletId,
+      ...params,
+    });
+
+    const queryParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined) {
+          queryParams.append(key, value.toString());
+        }
+      });
+    }
+    const queryString = queryParams.toString();
+    const path = queryString
+      ? `/wallets/${validatedParams.walletId}/delegations?${queryString}`
+      : `/wallets/${validatedParams.walletId}/delegations`;
+
+    const response = await this.client.request<PagedResponse<Delegation>>('GET', path);
+
+    // Validate the response
+    return delegationListSchema.parse(response);
+  }
+
+  /**
+   * Create a new delegation for a wallet
+   * @param walletId The ID of the wallet to create the delegation for
+   * @param params Delegation creation parameters
+   * @returns Promise<Delegation>
+   * @throws {ZodError} If the parameters are invalid
+   */
+  async createDelegation(
+    walletId: string,
+    params: {
+      delegationData: string;
+      startTime?: number;
+      endTime?: number;
+      contractAddresses?: string[];
+      methods?: string[];
+    }
+  ): Promise<Delegation> {
+    // Validate all parameters using the schema
+    const validatedParams = createDelegationSchema.parse({
+      walletId,
+      ...params,
+    });
+
+    const response = await this.client.request<Delegation>(
+      'POST',
+      `/wallets/${validatedParams.walletId}/delegations`,
+      {
+        startTime: validatedParams.startTime,
+        endTime: validatedParams.endTime,
+        contractAddresses: validatedParams.contractAddresses,
+        methods: validatedParams.methods,
+        delegationData: validatedParams.delegationData,
+      }
+    );
+
+    // Validate the response
+    return delegationSchema.parse(response);
   }
 }
