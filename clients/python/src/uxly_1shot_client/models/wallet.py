@@ -70,4 +70,57 @@ class WalletUpdateParams(BaseModel):
     """Parameters for updating a wallet."""
 
     name: Optional[str] = Field(None, description="The name of the wallet")
-    description: Optional[str] = Field(None, description="Optional description of the wallet, can be used to describe it's purpose") 
+    description: Optional[str] = Field(None, description="Optional description of the wallet, can be used to describe it's purpose")
+
+
+class Delegation(BaseModel):
+    """Delegation model."""
+
+    id: str = Field(..., description="Internal ID of the delegation")
+    business_id: str = Field(..., alias="businessId", description="ID of the business that owns this delegation")
+    escrow_wallet_id: str = Field(..., alias="escrowWalletId", description="ID of the escrow wallet that can execute transactions")
+    delegator_address: str = Field(..., alias="delegatorAddress", description="The address of the delegator account")
+    start_time: Optional[int] = Field(None, alias="startTime", description="The start time for the delegation. If null, the delegation starts immediately")
+    end_time: Optional[int] = Field(None, alias="endTime", description="The end time for the delegation. If null, the delegation has no expiration")
+    contract_addresses: List[str] = Field(..., alias="contractAddresses", description="Array of contract addresses that the wallet can execute transactions for")
+    methods: List[str] = Field(..., description="Array of method names that the wallet can execute. If empty, all methods are allowed")
+    delegation_data: str = Field(..., alias="delegationData", description="The actual Delegation object serialized as a JSON string. BigInts must be encoded as strings")
+    updated: int = Field(..., description="The last update timestamp")
+    created: int = Field(..., description="The creation timestamp")
+
+
+class DelegationListParams(BaseModel):
+    """Parameters for listing delegations."""
+
+    page_size: Optional[int] = Field(None, alias="pageSize", description="The size of the page to return. Defaults to 25")
+    page: Optional[int] = Field(None, description="Which page to return. This is 1 indexed, and default to the first page, 1")
+
+    @validator('page')
+    def validate_page(cls, v):
+        if v is not None and v < 1:
+            raise ValueError('Page number must be greater than or equal to 1')
+        return v
+
+    @validator('page_size')
+    def validate_page_size(cls, v):
+        if v is not None and v < 1:
+            raise ValueError('Page size must be greater than or equal to 1')
+        return v
+
+
+class DelegationCreateParams(BaseModel):
+    """Parameters for creating a delegation."""
+
+    start_time: Optional[int] = Field(None, alias="startTime", description="The start time for the delegation. If not provided, the delegation starts immediately")
+    end_time: Optional[int] = Field(None, alias="endTime", description="The end time for the delegation. If not provided, the delegation has no expiration")
+    contract_addresses: Optional[List[str]] = Field(None, alias="contractAddresses", description="Array of contract addresses that the wallet can execute transactions for")
+    methods: Optional[List[str]] = Field(None, description="Array of method names that the wallet can execute. If empty, all methods are allowed")
+    delegation_data: str = Field(..., alias="delegationData", description="The actual Delegation object serialized as a JSON string. BigInts must be encoded as strings")
+
+
+class WalletTransferParams(BaseModel):
+    """Parameters for transferring native tokens from a wallet."""
+
+    destination_account_address: str = Field(..., alias="destinationAccountAddress", description="The destination account address")
+    transfer_amount: Optional[str] = Field(None, alias="transferAmount", description="The amount of native token to transfer. This is the 'value' parameter in the actual transaction. If you omit this parameter, 1Shot API will calculate the maximum amount of token that you can transfer, getting as close to zeroing out the Wallet as possible")
+    memo: Optional[str] = Field(None, description="An optional memo for the transfer")
