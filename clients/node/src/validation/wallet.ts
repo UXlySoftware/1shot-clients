@@ -158,7 +158,10 @@ export const delegationSchema = z
   .object({
     id: z.string().uuid().describe('Internal ID of the delegation'),
     businessId: z.string().uuid().describe('ID of the business that owns this delegation'),
-    escrowWalletId: z.string().uuid().describe('ID of the escrow wallet that can execute transactions'),
+    escrowWalletId: z
+      .string()
+      .uuid()
+      .describe('ID of the escrow wallet that can execute transactions'),
     delegatorAddress: z.string().describe('The address of the delegator account'),
     startTime: z
       .number()
@@ -173,12 +176,16 @@ export const delegationSchema = z
       .describe('Array of contract addresses that the wallet can execute transactions for'),
     methods: z
       .array(z.string())
-      .describe('Array of method names that the wallet can execute. If empty, all methods are allowed'),
+      .describe(
+        'Array of method names that the wallet can execute. If empty, all methods are allowed'
+      ),
     delegationData: z.string().describe('The actual Delegation object serialized as a JSON string'),
     updated: z.number().describe('Unix timestamp of the last update to this delegation'),
     created: z.number().describe('Unix timestamp when this delegation was created'),
   })
-  .describe('A delegation allows a wallet to execute transactions on behalf of specified contract addresses and methods');
+  .describe(
+    'A delegation allows a wallet to execute transactions on behalf of specified contract addresses and methods'
+  );
 
 // Validation for delegation list response
 export const delegationListSchema = z
@@ -210,11 +217,15 @@ export const createDelegationSchema = z
     startTime: z
       .number()
       .optional()
-      .describe('The start time for the delegation. If not provided, the delegation starts immediately'),
+      .describe(
+        'The start time for the delegation. If not provided, the delegation starts immediately'
+      ),
     endTime: z
       .number()
       .optional()
-      .describe('The end time for the delegation. If not provided, the delegation has no expiration'),
+      .describe(
+        'The end time for the delegation. If not provided, the delegation has no expiration'
+      ),
     contractAddresses: z
       .array(z.string())
       .optional()
@@ -222,7 +233,13 @@ export const createDelegationSchema = z
     methods: z
       .array(z.string())
       .optional()
-      .describe('Array of method names that the wallet can execute. If empty, all methods are allowed'),
-    delegationData: z.string().describe('The actual Delegation object serialized as a JSON string. BigInts must be encoded as strings'),
+      .describe(
+        'Array of method names that the wallet can execute. If empty, all methods are allowed'
+      ),
+    delegationData: z
+      .string()
+      .describe(
+        'The actual Delegation object serialized as a JSON string. BigInts must be encoded as strings'
+      ),
   })
   .describe('Parameters for creating a new delegation for a wallet');
