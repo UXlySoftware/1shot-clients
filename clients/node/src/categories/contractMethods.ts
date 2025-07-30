@@ -18,6 +18,7 @@ import {
   contractMethodEstimateSchema,
   listContractMethodsSchema,
   executeContractMethodSchema,
+  executeAsDelegatorContractMethodSchema,
   testContractMethodSchema,
   getContractMethodSchema,
   estimateContractMethodSchema,
@@ -74,6 +75,46 @@ export class ContractMethods {
         authorizationList: validatedParams.authorizationList,
         value: validatedParams.value,
         contractAddress: validatedParams.contractAddress,
+      }
+    );
+
+    return transactionSchema.parse(response);
+  }
+
+  /**
+   * Execute a contractMethod as a delegator
+   * @param contractMethodId The ID of the contractMethod to execute as a delegator
+   * @param params Configuration parameters for the contractMethod
+   * @param options Optional execution options
+   * @returns Promise<Transaction>
+   * @throws {ZodError} If the parameters are invalid
+   */
+  async executeAsDelegator(
+    contractMethodId: string,
+    delegatorAddress: string,
+    params: ContractMethodParams,
+    options: {
+      walletId?: string;
+      memo?: string;
+      value?: string;
+    }
+  ): Promise<Transaction> {
+    const validatedParams = executeAsDelegatorContractMethodSchema.parse({
+      contractMethodId,
+      delegatorAddress,
+      params,
+      ...options,
+    });
+
+    const response = await this.client.request<ContractMethod>(
+      'POST',
+      `/methods/${validatedParams.contractMethodId}/executeAsDelegator`,
+      {
+        params: validatedParams.params,
+        walletId: validatedParams.walletId,
+        memo: validatedParams.memo,
+        delegatorAddress: validatedParams.delegatorAddress,
+        value: validatedParams.value,
       }
     );
 
@@ -352,7 +393,7 @@ export class ContractMethods {
       name?: string;
       description?: string;
       functionName?: string;
-      payable?: boolean;
+      stateMutability?: ContractMethodStateMutability;
       callbackUrl?: string | null;
     }
   ): Promise<ContractMethod> {

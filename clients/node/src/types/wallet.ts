@@ -11,6 +11,10 @@ import {
   updateWalletSchema,
   deleteWalletSchema,
   transferWalletSchema,
+  delegationSchema,
+  delegationListSchema,
+  listDelegationsSchema,
+  createDelegationSchema,
 } from '../validation/wallet.js';
 
 /**
@@ -33,3 +37,13 @@ export type GetWallet = z.infer<typeof getWalletSchema>;
 export type UpdateWallet = z.infer<typeof updateWalletSchema>;
 export type DeleteWallet = z.infer<typeof deleteWalletSchema>;
 export type TransferWallet = z.infer<typeof transferWalletSchema>;
+
+/**
+ * Represents a delegation in the 1Shot API.
+ * A delegation allows a wallet to execute transactions on behalf of specified contract addresses and methods.
+ */
+export type Delegation = z.infer<typeof delegationSchema>;
+
+export type DelegationList = z.infer<typeof delegationListSchema>;
+export type ListDelegations = z.infer<typeof listDelegationsSchema>;
+export type CreateDelegation = z.infer<typeof createDelegationSchema>;
