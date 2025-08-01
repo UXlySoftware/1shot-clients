@@ -32,7 +32,8 @@ import (
     "log"
     "os"
 
-    "github.com/UXlySoftware/1shot-clients/clients/go/pkg/client"
+    client "github.com/UXlySoftware/1shot-clients/clients/go"
+	swagger "github.com/UXlySoftware/1shot-clients/clients/go/gen"
 )
 
 func main() {
@@ -60,45 +61,33 @@ func main() {
 
 ```go
 // List transactions
-transactions, err := c.Transactions().List(ctx, nil, nil, nil, nil, nil, nil)
+transactions, err := c.Transactions().List(ctx, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 if err != nil {
     log.Fatalf("Failed to list transactions: %v", err)
 }
 
 // Create a new transaction
-newTx, err := c.Transactions().Create(ctx, &swagger.NewTransaction{
-    Chain:           swagger.EChain(1), // Ethereum Mainnet
-    ContractAddress: "0x123...",
-    EscrowWalletId: "wallet-id",
-    Name:           "My Transaction",
-    Description:    "Description of my transaction",
-    FunctionName:   "transfer",
-    StateMutability: "nonpayable",
-    Inputs:         []swagger.NewSolidityStructParam{...},
-})
+newTx, err := c.ContractMethods().Create(ctx, swagger.EChain(1), "0x123...", "wallet-id", "My Transaction", "Description of my transaction", "transfer", swagger.ESolidityStateMutability("nonpayable"), []swagger.NewSolidityStructParam{...}, nil, nil)
 
 // Execute a transaction
-execution, err := c.Transactions().Execute(ctx, "transaction-id", map[string]interface{}{
+execution, err := c.ContractMethods().Execute(ctx, "contract-method-id", map[string]interface{}{
     "amount": "1000000000000000000", // 1 ETH in wei
-    "to": "0x456...",
-})
+    "to":     "0x456...",
+}, nil, nil, nil)
 ```
 
 ### Working with Wallets
 
 ```go
 // List wallets
-wallets, err := c.Wallets().List(ctx, nil, nil, nil)
+wallets, err := c.Wallets().List(ctx, nil, nil, nil, nil)
 if err != nil {
     log.Fatalf("Failed to list wallets: %v", err)
 }
 
 // Create a new wallet
-newWallet, err := c.Wallets().Create(ctx, &swagger.NewEscrowWallet{
-    Chain:        swagger.EChain(1), // Ethereum Mainnet
-    Name:         "My Wallet",
-    Description:  "Description of my wallet",
-})
+description := "Description of my wallet"
+	newWallet, err := c.Wallets().Create(ctx, swagger.EChain(1), "My Wallet", &description)
 
 // Get wallet details
 wallet, err := c.Wallets().Get(ctx, "wallet-id", nil)
@@ -108,13 +97,13 @@ wallet, err := c.Wallets().Get(ctx, "wallet-id", nil)
 
 ```go
 // List executions
-executions, err := c.Executions().List(ctx, nil, nil, nil, nil, nil, nil, nil)
-if err != nil {
-    log.Fatalf("Failed to list executions: %v", err)
-}
+executions, err := c.ContractMethods().List(ctx, nil, nil, nil, nil, nil, nil, nil, nil)
+	if err != nil {
+		log.Fatalf("Failed to list executions: %v", err)
+	}
 
 // Get execution details
-execution, err := c.Executions().Get(ctx, "execution-id")
+execution, err := c.ContractMethods().Get(ctx, "contract-method-id")
 ```
 
 ## Versioning

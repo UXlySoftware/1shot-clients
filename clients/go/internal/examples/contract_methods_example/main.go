@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/UXlySoftware/1shot-clients/clients/go/pkg/client"
+	oneshot "github.com/UXlySoftware/1shot-clients/clients/go"
 	"github.com/joho/godotenv"
 )
 
@@ -26,7 +26,7 @@ func main() {
 	}
 
 	// Create a new client
-	c, err := client.NewClient(client.ClientConfig{
+	c, err := oneshot.NewClient(oneshot.ClientConfig{
 		ClientID:     clientID,
 		ClientSecret: clientSecret,
 		BusinessID:   businessID,
@@ -40,7 +40,7 @@ func main() {
 
 	// Example: List transactions
 	// All parameters are optional, so we can pass nil for all of them
-	transactions, err := c.ContractMethods().List(ctx, nil, nil, nil, nil, nil, nil, nil)
+	transactions, err := c.ContractMethods().List(ctx, nil, nil, nil, nil, nil, nil, nil, nil)
 	if err != nil {
 		log.Fatalf("Failed to list transactions: %v", err)
 	}
