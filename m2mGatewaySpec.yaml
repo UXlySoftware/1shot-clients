@@ -20,6 +20,7 @@ servers:
 paths:
   /token:
     post:
+      security: []
       tags: 
         - Authentication
         - OAuth2
@@ -77,6 +78,7 @@ paths:
       tags:
         - Chains
         - List
+      summary: Get all supported chains
       description: Returns a listing of all chains supported by 1Shot API
       parameters:
         - name: pageSize
@@ -114,6 +116,7 @@ paths:
     post:
       tags:
         - Contract Methods
+      summary: Test contract method execution
       description: This method simulates the execution of a contract method. No gas will be spent and nothing on chain will change, but it will let you know whether or not an execution would succeed. Internally, this method relies on staticCall.
       parameters:
         - name: contractMethodId
@@ -163,6 +166,7 @@ paths:
     post:
       tags:
         - Contract Methods
+      summary: Encode contract method transaction data
       description: This method encodes the transaction data for a Contract Method. It returns a hex string of the bytes of the encoded data. This can be used to call the Contract Method directly on the blockchain.
       parameters:
         - name: contractMethodId
@@ -209,6 +213,7 @@ paths:
       tags:
         - Contract Methods
         - Contract Methods
+      summary: Estimate contract method execution cost
       description: Estimates the cost of executing the Contract Method with the given parameters. Returns data about the fees and amount of gas.
       parameters:
         - name: contractMethodId
@@ -216,6 +221,9 @@ paths:
           required: true
           schema:
             $ref: "#/components/schemas/ContractMethodId"
+      security:
+        - OAuth2ClientCredentials:
+          - read:api
       requestBody:
         required: true
         content:
@@ -251,6 +259,7 @@ paths:
     post:
       tags:
         - Contract Methods
+      summary: Execute contract method
       description: Starts the execution of the Contract Method, and returns a Transaction. You can only execute Contract Methods that are payable or nonpayable. Use /read for view and pure Contract Methods.
       parameters:
         - name: contractMethodId
@@ -303,6 +312,7 @@ paths:
     post:
       tags:
         - Contract Methods
+      summary: Execute contract method as delegator
       description: Starts the execution of the Contract Method as a delegator, and returns a Transaction. You can only execute Contract Methods that are payable or nonpayable. Use /read for view and pure Contract Methods. This method executes the transaction on behalf of the specified delegator address.
       parameters:
         - name: contractMethodId
@@ -352,6 +362,7 @@ paths:
     post:
       tags:
         - Contract Methods
+      summary: Read contract method result
       description: Gets the result of a view or pure function; this will error on payable and nonpayable Contract Methods.
       parameters:
         - name: contractMethodId
@@ -387,6 +398,7 @@ paths:
       tags:
         - Contract Methods
         - Create
+      summary: Create new contract method
       description: Create a new Contract Method. A Contract Method is sometimes referred to as an Endpoint. A Contract Method corresponds to a single method on a smart contract, and most of the required information to create one can be pulled from an Ethereum EBI. Contract Methods can be configured with static values for input parameters, which is useful for controlling how the Contract Method is called. For instance, you may set the "amount" parameter to a constant value on a "mint" call so that you always mint the same amount of tokens and can't cheat. You can have multiple Contract Methods for the same underlying method on a smart contract, if you want to configure them with different static parameters.
       parameters:
         - name: businessId
@@ -465,6 +477,7 @@ paths:
       tags:
         - Contract Methods
         - List
+      summary: List contract methods for business
       description: Lists Contract Methods for a business
       parameters:
         - name: businessId
@@ -547,6 +560,7 @@ paths:
       tags:
         - Contract Methods
         - Create
+      summary: Import ABI and create contract methods
       description: Imports a complete ethereum ABI and creates Contract Methods for each "function" type entry. Every Contract Method will be associated with the same Wallet
       parameters:
         - name: businessId
@@ -609,6 +623,7 @@ paths:
       tags:
         - Contract Methods
         - Assure
+      summary: Ensure contract methods exist for prompt
       description: Assures that Contract Methods exist for a given Prompt. This is based on the verified contract ABI and either the highest-ranked Prompt or the promptId provided. If Contract Methods already exist, they are not modified. If they do not exist, any methods that are in the Prompt will be created with the details from the Prompt. We return every Contract Method for methods defined in the Prompt.
       parameters:
         - name: businessId
@@ -660,6 +675,7 @@ paths:
       tags:
         - Contract Methods
         - Get
+      summary: Get contract method by ID
       description: Gets a single Contract Method via its ContractMethodId
       parameters:
         - name: contractMethodId
@@ -686,6 +702,7 @@ paths:
       tags:
        - Contract Methods
        - Update
+      summary: Update contract method by ID
       description: Updates a Contract Method. You can update most of the properties of a Contract Method via this method, but you can't change the inputs or outputs. Use the Struct API calls for that instead.
       parameters:
         - name: contractMethodId
@@ -694,6 +711,9 @@ paths:
           required: true
           schema:
             $ref: "#/components/schemas/ContractMethodId"
+      security:
+        - OAuth2ClientCredentials:
+          - read:api
       requestBody:
         required: true
         content:
@@ -740,6 +760,7 @@ paths:
       tags:
         - Contract Methods
         - Delete
+      summary: Delete contract method by ID
       description: Deletes a Contract Method
       parameters:
         - name: contractMethodId
@@ -762,6 +783,7 @@ paths:
       tags:
         - Transactions
         - List
+      summary: List transactions for business
       description: Gets a paged list of Transactions, which are records of changes made to the blockchain from executing a Contract Method. You can see the status of the Transaction and your history.
       parameters:
         - name: businessId
@@ -869,6 +891,7 @@ paths:
       tags:
         - Transactions
         - Get
+      summary: Get transaction by ID
       description: Gets a specific Transaction
       parameters:
         - name: transactionId
@@ -895,6 +918,7 @@ paths:
       tags:
         - Wallets
         - List
+      summary: List wallets for business
       description: Lists wallets for the business- NOT BusinessWallets. These are almost identical but Wallet has more stuff.
       parameters:
         - name: businessId
@@ -948,6 +972,7 @@ paths:
       tags:
         - Wallets
         - Create
+      summary: Create new wallet for business
       description: Creates a new Wallet. Wallets are owned by a single Business and are linked a single Chain.
       parameters:
         - name: businessId
@@ -993,6 +1018,7 @@ paths:
       tags:
         - Wallets
         - Get
+      summary: Get wallet by ID
       description: Gets n Wallet by the ID. Doesn't matter what chain it's on.
       parameters:
         - name: walletId
@@ -1023,6 +1049,7 @@ paths:
       tags:
         - Wallets
         - Delete
+      summary: Delete wallet by ID
       description: Deletes a Wallet with the provided ID. The API Credential must have Admin level permissions on the Business that owns this Wallet, and the Wallet must be near empty.
       parameters:
         - name: walletId
@@ -1052,6 +1079,7 @@ paths:
       tags:
         - Wallets
         - Update
+      summary: Update wallet by ID
       description: Updates a Wallet. Will only update properties that are not null
       parameters:
         - name: walletId
@@ -1088,6 +1116,7 @@ paths:
     post:
       tags:
         - Wallets
+      summary: Transfer native token from wallet
       description: Initiates a tranfer of the chains' native token from the Wallet. This is almost the same as executing a Contract Method except there is no contract involved.
       parameters:
         - name: walletId
@@ -1135,6 +1164,7 @@ paths:
         - Wallets
         - Delegations
         - List
+      summary: List delegations for wallet
       description: Lists delegations for a wallet. Returns a paged response of delegations associated with the specified wallet.
       parameters:
         - name: walletId
@@ -1177,7 +1207,8 @@ paths:
       tags:
         - Wallets
         - Delegations
-      description: Creates a new delegation for a wallet. A delegation allows the wallet to execute transactions on behalf of specified contract addresses and methods.
+      summary: Create delegation for wallet
+      description: Creates a new delegation for the specified wallet.
       parameters:
         - name: walletId
           in: path
@@ -1239,6 +1270,7 @@ paths:
       tags:
         - Solidity Structs
         - Update
+      summary: Update solidity struct
       description: Updates an existing solidity struct. You can get the structId from the SolidityStructParam.typeStructId, which are either input or output params of a Contract Method.
       parameters:
         - name: structId
@@ -1279,6 +1311,7 @@ paths:
       tags:
         - Solidity Structs
         - Create
+      summary: Add param to solidity struct
       description: Adds a param to an existing struct. Because of the way the indexes work, you can only add params to the end of a struct. You can use /structs/{structId}/params to later rearrange all the indexes of the params if required.
       parameters:
         - name: structId
@@ -1314,6 +1347,7 @@ paths:
       tags:
         - Solidity Structs
         - Update
+      summary: Update params of solidity struct
       description: Update the params of an existing struct. Normally, you would do updates one at a time, but since the parameter indexes must be kept in order, you can update multiple params at once with this call.
       parameters:
         - name: structId
@@ -1365,6 +1399,7 @@ paths:
       tags:
         - Solidity Structs
         - Delete
+      summary: Remove param from solidity struct
       description: Removes a param from an existing solidity struct. Because the indexes must be kept valid at all times, you can only practically remove the last param from the struct. If you need to remove a param in the middle, call PUT /structs/{structId}/params and rearrange the param indexes first. 
       parameters:
         - name: structId
@@ -1403,6 +1438,7 @@ paths:
       tags:
         - Search
         - Prompts
+      summary: Search prompts
       description: Performs a semantic search on prompts to find the most relevant contracts.
       requestBody:
         required: true
