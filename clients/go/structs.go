@@ -1,10 +1,10 @@
-package client
+package oneshot
 
 import (
 	"context"
 	"fmt"
 
-	swagger "github.com/UXlySoftware/1shot-clients/clients/go/internal/generated"
+	swagger "github.com/UXlySoftware/1shot-clients/clients/go/gen"
 )
 
 // Structs handles all solidity struct-related operations
