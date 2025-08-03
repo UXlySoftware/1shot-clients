@@ -58,10 +58,10 @@ docker run -v $(pwd):/local openapitools/openapi-generator-cli generate \
     -o /local/clients/python
 
 # Generate Go client
-docker run -v $(pwd):/local openapitools/openapi-generator-cli generate \
+docker run -v $(pwd):/local swaggerapi/swagger-codegen-cli-v3 generate \
     -i /local/m2mGatewaySpec.yaml \
-    -g go \
-    -o /local/clients/go
+    -l go \
+    -o /local/clients/go/gen
 ```
 
 ### Validating the OpenAPI Spec

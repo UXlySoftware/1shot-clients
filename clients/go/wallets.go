@@ -1,9 +1,9 @@
-package client
+package oneshot
 
 import (
 	"context"
 
-	swagger "github.com/UXlySoftware/1shot-clients/clients/go/internal/generated"
+	swagger "github.com/UXlySoftware/1shot-clients/clients/go/gen"
 	"github.com/antihax/optional"
 )
 
