@@ -63,8 +63,8 @@ export const walletListSchema = z
 // Validation for wallet update parameters
 export const walletUpdateSchema = z
   .object({
-    name: z.string().optional().describe('New name for the wallet'),
-    description: z.string().optional().describe('New description for the wallet'),
+    name: z.string().optional().nullable().describe('New name for the wallet'),
+    description: z.string().optional().nullable().describe('New description for the wallet'),
   })
   .describe('Parameters for updating a wallet');
 
@@ -77,7 +77,7 @@ export const walletCreateSchema = z
       .positive()
       .describe('ID of the blockchain network where the wallet will be created'),
     name: z.string().describe('Name for the new wallet'),
-    description: z.string().optional().describe('Description for the new wallet'),
+    description: z.string().optional().nullable().describe('Description for the new wallet'),
   })
   .describe('Parameters for creating a new wallet');
 
@@ -91,9 +91,15 @@ export const listWalletsSchema = z
       .positive()
       .optional()
       .describe('Filter wallets by blockchain network ID'),
-    pageSize: z.number().int().positive().optional().describe('Number of items per page'),
-    page: z.number().int().positive().optional().describe('Page number to retrieve'),
-    name: z.string().optional().describe('Filter wallets by name'),
+    pageSize: z
+      .number()
+      .int()
+      .positive()
+      .optional()
+      .nullable()
+      .describe('Number of items per page'),
+    page: z.number().int().positive().optional().nullable().describe('Page number to retrieve'),
+    name: z.string().optional().nullable().describe('Filter wallets by name'),
   })
   .describe('Parameters for listing wallets');
 
@@ -118,6 +124,7 @@ export const getWalletSchema = z
     includeBalances: z
       .boolean()
       .optional()
+      .nullable()
       .describe('Whether to include balance information in the response'),
   })
   .describe('Parameters for retrieving a wallet');
@@ -126,8 +133,8 @@ export const getWalletSchema = z
 export const updateWalletSchema = z
   .object({
     walletId: z.string().uuid().describe('ID of the wallet to update'),
-    name: z.string().optional().describe('New name for the wallet'),
-    description: z.string().optional().describe('New description for the wallet'),
+    name: z.string().optional().nullable().describe('New name for the wallet'),
+    description: z.string().optional().nullable().describe('New description for the wallet'),
   })
   .describe('Parameters for updating a wallet');
 
@@ -146,6 +153,7 @@ export const transferWalletSchema = z
     transferAmount: z
       .string()
       .optional()
+      .nullable()
       .describe(
         'The amount of native token to transfer. If omitted, 1Shot API will calculate the maximum amount that can be transferred, getting as close to zeroing out the wallet as possible'
       ),
@@ -205,8 +213,14 @@ export const delegationListSchema = z
 export const listDelegationsSchema = z
   .object({
     walletId: z.string().uuid().describe('ID of the wallet to list delegations for'),
-    pageSize: z.number().int().positive().optional().describe('Number of items per page'),
-    page: z.number().int().positive().optional().describe('Page number to retrieve'),
+    pageSize: z
+      .number()
+      .int()
+      .positive()
+      .optional()
+      .nullable()
+      .describe('Number of items per page'),
+    page: z.number().int().positive().optional().nullable().describe('Page number to retrieve'),
   })
   .describe('Parameters for listing delegations for a wallet');
 
@@ -217,12 +231,14 @@ export const createDelegationSchema = z
     startTime: z
       .number()
       .optional()
+      .nullable()
       .describe(
         'The start time for the delegation. If not provided, the delegation starts immediately'
       ),
     endTime: z
       .number()
       .optional()
+      .nullable()
       .describe(
         'The end time for the delegation. If not provided, the delegation has no expiration'
       ),
@@ -233,6 +249,7 @@ export const createDelegationSchema = z
     methods: z
       .array(z.string())
       .optional()
+      .nullable()
       .describe(
         'Array of method names that the wallet can execute. If empty, all methods are allowed'
       ),

@@ -202,7 +202,7 @@ export class ContractMethods {
 
     const queryParams = new URLSearchParams();
     Object.entries(validatedParams).forEach(([key, value]) => {
-      if (value !== undefined && key !== 'businessId') {
+      if (value != undefined && key != 'businessId') {
         queryParams.append(key, value.toString());
       }
     });

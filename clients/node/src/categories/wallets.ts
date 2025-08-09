@@ -111,7 +111,7 @@ export class Wallets {
     });
 
     const queryParams = new URLSearchParams();
-    if (validatedParams.includeBalances !== undefined) {
+    if (validatedParams.includeBalances != undefined) {
       queryParams.append('includeBalances', validatedParams.includeBalances.toString());
     }
     const queryString = queryParams.toString();

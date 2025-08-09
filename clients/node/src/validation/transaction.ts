@@ -159,29 +159,34 @@ export const listTransactionsSchema = z
       .int()
       .positive()
       .optional()
+      .nullable()
       .describe('Number of items per page. Optional parameter for pagination control'),
     page: z
       .number()
       .int()
       .positive()
       .optional()
+      .nullable()
       .describe('Page number to retrieve (1-indexed). Optional parameter for pagination control'),
     chainId: z
       .number()
       .int()
       .positive()
       .optional()
+      .nullable()
       .describe(
         'Filter executions by blockchain network ID. Optional parameter to get executions for a specific chainId'
       ),
     status: z
       .enum(['Pending', 'Submitted', 'Completed', 'Retrying', 'Failed'])
       .optional()
+      .nullable()
       .describe('Filter executions by status. Optional parameter to filter by execution state'),
     walletId: z
       .string()
       .uuid()
       .optional()
+      .nullable()
       .describe(
         'Filter executions by wallet ID. Optional parameter to get executions for a specific wallet'
       ),
@@ -189,6 +194,7 @@ export const listTransactionsSchema = z
       .string()
       .uuid()
       .optional()
+      .nullable()
       .describe(
         'Filter executions by contract method ID. Optional parameter to get executions of a specific contract method'
       ),
@@ -196,6 +202,7 @@ export const listTransactionsSchema = z
       .string()
       .uuid()
       .optional()
+      .nullable()
       .describe(
         'Filter executions by API credential ID. Optional parameter to get executions made with a specific API key'
       ),
@@ -203,22 +210,26 @@ export const listTransactionsSchema = z
       .string()
       .uuid()
       .optional()
+      .nullable()
       .describe(
         'Filter executions by user ID. Optional parameter to get executions made by a specific user'
       ),
     memo: z
       .string()
       .optional()
+      .nullable()
       .describe('Filter executions by memo text. Optional parameter to search for specific memos'),
     createdAfter: z
       .number()
       .optional()
+      .nullable()
       .describe(
         'Filter executions created after this timestamp. Optional parameter for time-based filtering'
       ),
     createdBefore: z
       .number()
       .optional()
+      .nullable()
       .describe(
         'Filter executions created before this timestamp. Optional parameter for time-based filtering'
       ),
