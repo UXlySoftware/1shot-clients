@@ -90,6 +90,7 @@ export const listWalletsSchema = z
       .int()
       .positive()
       .optional()
+      .nullable()
       .describe('Filter wallets by blockchain network ID'),
     pageSize: z
       .number()
@@ -113,7 +114,7 @@ export const createWalletSchema = z
       .positive()
       .describe('ID of the blockchain network where the wallet will be created'),
     name: z.string().describe('Name for the new wallet'),
-    description: z.string().optional().describe('Description for the new wallet'),
+    description: z.string().optional().nullable().describe('Description for the new wallet'),
   })
   .describe('Parameters for creating a new wallet');
 
@@ -181,9 +182,13 @@ export const delegationSchema = z
       .describe('The end time for the delegation. If null, the delegation has no expiration'),
     contractAddresses: z
       .array(z.string())
+      .optional()
+      .nullable()
       .describe('Array of contract addresses that the wallet can execute transactions for'),
     methods: z
       .array(z.string())
+      .optional()
+      .nullable()
       .describe(
         'Array of method names that the wallet can execute. If empty, all methods are allowed'
       ),
@@ -245,7 +250,10 @@ export const createDelegationSchema = z
     contractAddresses: z
       .array(z.string())
       .optional()
-      .describe('Array of contract addresses that the wallet can execute transactions for'),
+      .nullable()
+      .describe(
+        'Array of contract addresses that the wallet can execute transactions for. Leave this empty to allow all contracts'
+      ),
     methods: z
       .array(z.string())
       .optional()
