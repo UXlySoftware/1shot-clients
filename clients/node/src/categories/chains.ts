@@ -1,5 +1,5 @@
 import { IOneShotClient } from '../types/client.js';
-import { ChainInfo } from '../types/chain.js';
+import { ChainInfo, ListChains } from '../types/chain.js';
 import { PagedResponse } from '../types/common.js';
 import { chainListSchema, listChainsSchema } from '../validation/chain.js';
 
@@ -12,7 +12,7 @@ export class Chains {
    * @returns Promise<PagedResponse<ChainInfo>>
    * @throws {ZodError} If the parameters are invalid
    */
-  async list(params?: { pageSize?: number; page?: number }): Promise<PagedResponse<ChainInfo>> {
+  async list(params?: ListChains): Promise<PagedResponse<ChainInfo>> {
     // Validate all parameters using the schema
     const validatedParams = listChainsSchema.parse(params || {});
 

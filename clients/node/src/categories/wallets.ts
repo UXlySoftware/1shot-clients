@@ -16,6 +16,10 @@ import {
   listDelegationsSchema,
   createDelegationSchema,
 } from '../validation/wallet.js';
+import { z } from 'zod/index.js';
+
+const listWalletsSchemaOptions = listWalletsSchema.omit({ businessId: true });
+const getWalletSchemaOptions = getWalletSchema.omit({ walletId: true });
 
 export class Wallets {
   constructor(private client: IOneShotClient) {}
@@ -29,12 +33,7 @@ export class Wallets {
    */
   async list(
     businessId: string,
-    params?: {
-      chainId?: number;
-      pageSize?: number;
-      page?: number;
-      name?: string;
-    }
+    params?: z.infer<typeof listWalletsSchemaOptions>
   ): Promise<PagedResponse<Wallet>> {
     // Validate all parameters using the schema
     const validatedParams = listWalletsSchema.parse({
@@ -45,7 +44,7 @@ export class Wallets {
     const queryParams = new URLSearchParams();
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined) {
+        if (value != undefined) {
           queryParams.append(key, value.toString());
         }
       });
@@ -103,7 +102,10 @@ export class Wallets {
    * @returns Promise<Wallet>
    * @throws {ZodError} If the parameters are invalid
    */
-  async get(walletId: string, includeBalances?: boolean): Promise<Wallet> {
+  async get(
+    walletId: string,
+    includeBalances?: z.infer<typeof getWalletSchemaOptions>
+  ): Promise<Wallet> {
     // Validate all parameters using the schema
     const validatedParams = getWalletSchema.parse({
       walletId,
