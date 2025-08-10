@@ -41,7 +41,13 @@ export const chainListSchema = z
 // Validation for list chains parameters
 export const listChainsSchema = z
   .object({
-    pageSize: z.number().int().positive().optional().describe('Number of items per page'),
-    page: z.number().int().positive().optional().describe('Page number to retrieve'),
+    pageSize: z
+      .number()
+      .int()
+      .positive()
+      .optional()
+      .nullable()
+      .describe('Number of items per page'),
+    page: z.number().int().positive().optional().nullable().describe('Page number to retrieve'),
   })
   .describe('Parameters for listing chains');

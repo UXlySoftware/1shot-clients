@@ -17,10 +17,10 @@ export class Chains {
     const validatedParams = listChainsSchema.parse(params || {});
 
     const queryParams = new URLSearchParams();
-    if (validatedParams.pageSize !== undefined) {
+    if (validatedParams.pageSize != undefined) {
       queryParams.append('pageSize', validatedParams.pageSize.toString());
     }
-    if (validatedParams.page !== undefined) {
+    if (validatedParams.page != undefined) {
       queryParams.append('page', validatedParams.page.toString());
     }
 
