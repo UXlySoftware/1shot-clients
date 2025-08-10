@@ -20,6 +20,7 @@ import { z } from 'zod/index.js';
 
 const listWalletsSchemaOptions = listWalletsSchema.omit({ businessId: true });
 const getWalletSchemaOptions = getWalletSchema.omit({ walletId: true });
+const listDelegationsSchemaOptions = listDelegationsSchema.omit({ walletId: true });
 
 export class Wallets {
   constructor(private client: IOneShotClient) {}
@@ -222,10 +223,7 @@ export class Wallets {
    */
   async listDelegations(
     walletId: string,
-    params?: {
-      pageSize?: number;
-      page?: number;
-    }
+    params?: z.infer<typeof listDelegationsSchemaOptions>
   ): Promise<PagedResponse<Delegation>> {
     // Validate all parameters using the schema
     const validatedParams = listDelegationsSchema.parse({
@@ -236,7 +234,7 @@ export class Wallets {
     const queryParams = new URLSearchParams();
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined) {
+        if (value != undefined) {
           queryParams.append(key, value.toString());
         }
       });
