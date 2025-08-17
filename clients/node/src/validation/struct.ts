@@ -8,7 +8,7 @@ export const solidityTypeSchema = z
 // Base schema for Solidity struct parameters
 const baseSolidityStructParamSchema = z.object({
   name: z.string().describe('The name of the parameter'),
-  description: z.string().optional().describe('Description of the parameter'),
+  description: z.string().optional().nullable().describe('Description of the parameter'),
   type: solidityTypeSchema,
   index: z
     .number()
@@ -46,6 +46,7 @@ const baseSolidityStructParamSchema = z.object({
     .boolean()
     .default(false)
     .optional()
+    .nullable()
     .describe(
       "If this parameter is an array type set this to true. By default, arrays can be of any size so you don't need to set arraySize."
     ),
@@ -217,23 +218,26 @@ export const structUpdateSchema = z
 // Validation for updating a struct parameter
 export const solidityStructParamUpdateSchema: z.ZodType = z
   .object({
-    name: z.string().optional().describe('The name of the parameter'),
-    description: z.string().optional().describe('Optional description of the parameter'),
+    name: z.string().optional().nullable().describe('The name of the parameter'),
+    description: z.string().optional().nullable().describe('Optional description of the parameter'),
     type: z
       .enum(['address', 'bool', 'bytes', 'int', 'string', 'uint', 'struct'])
       .optional()
+      .nullable()
       .describe('The Solidity type of the parameter'),
     index: z
       .number()
       .int()
       .min(0)
       .optional()
+      .nullable()
       .describe(
         'This is the relative index in the contract function. It should start at 0, and must not skip any numbers.'
       ),
     value: z
       .string()
       .optional()
+      .nullable()
       .describe(
         'This is an optional, static value for the parameter. If you set this, you will never be required or able to pass a value for this parameter when you execute the transaction, it will use the set value.'
       ),
@@ -242,6 +246,7 @@ export const solidityStructParamUpdateSchema: z.ZodType = z
       .int()
       .positive()
       .optional()
+      .nullable()
       .describe(
         'Optional size for the Solidity type (e.g., uint8, bytes32). Valid values: 1-32 for bytes, 8-256 for others'
       ),
@@ -250,18 +255,21 @@ export const solidityStructParamUpdateSchema: z.ZodType = z
       .int()
       .positive()
       .optional()
+      .nullable()
       .describe('Optional second size for fixed/ufixed types (e.g., fixed8x18)'),
-    isArray: z.boolean().optional().describe('Whether this parameter is an array type'),
+    isArray: z.boolean().optional().nullable().describe('Whether this parameter is an array type'),
     arraySize: z
       .number()
       .int()
       .positive()
       .optional()
+      .nullable()
       .describe('Fixed size of the array, if applicable'),
     typeStructId: z
       .string()
       .uuid()
       .optional()
+      .nullable()
       .describe('ID of an existing struct to use as the type, if type is "struct"'),
     typeStruct: z
       .object({
@@ -271,6 +279,7 @@ export const solidityStructParamUpdateSchema: z.ZodType = z
           .describe('Parameters for the new struct'),
       })
       .optional()
+      .nullable()
       .describe(
         'The sub-struct if the type is "struct", which will be created for use by this parameter. When creating a param, you must set only one of either typeStructId (to re-use an existing Solidity Struct) or typeStruct (creates a new struct for the param)'
       ),
