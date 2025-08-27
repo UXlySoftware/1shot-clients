@@ -94,6 +94,7 @@ export class ContractMethods {
         authorizationList: validatedParams.authorizationList,
         value: validatedParams.value,
         contractAddress: validatedParams.contractAddress,
+        authorizationDataAddress: validatedParams.authorizationDataAddress,
       }
     );
 

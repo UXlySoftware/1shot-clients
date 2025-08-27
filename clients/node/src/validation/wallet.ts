@@ -41,6 +41,10 @@ export const walletSchema = z
     accountBalanceDetails: accountBalanceDetailsSchema
       .nullable()
       .describe('Current balance details of the wallet'),
+    erc7702ContractAddress: z
+      .string()
+      .nullable()
+      .describe('Address of the ERC-7702 contract that the Wallet has been upgraded to'),
     updated: z.number().describe('Unix timestamp of the last update to this wallet'),
     created: z.number().describe('Unix timestamp when this wallet was created'),
   })
