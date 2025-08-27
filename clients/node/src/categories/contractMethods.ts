@@ -36,6 +36,31 @@ import {
 } from '../validation/contractMethod.js';
 import { Transaction } from '../types/transaction.js';
 import { transactionSchema } from '../validation/transaction.js';
+import { z } from 'zod/index.js';
+
+const listContractMethodsSchemaOptions = listContractMethodsSchema.omit({
+  businessId: true,
+});
+
+const assureContractMethodsFromPromptSchemaOptions = assureContractMethodsFromPromptSchema.omit({
+  businessId: true,
+});
+
+const encodeContractMethodSchemaOptions = encodeContractMethodSchema.omit({
+  contractMethodId: true,
+  params: true,
+});
+
+const executeContractMethodSchemaOptions = executeContractMethodSchema.omit({
+  contractMethodId: true,
+  params: true,
+});
+
+const executeAsDelegatorContractMethodSchemaOptions = executeAsDelegatorContractMethodSchema.omit({
+  contractMethodId: true,
+  params: true,
+  delegatorAddress: true,
+});
 
 export class ContractMethods {
   constructor(private client: IOneShotClient) {}
@@ -51,13 +76,7 @@ export class ContractMethods {
   async execute(
     contractMethodId: string,
     params: ContractMethodParams,
-    options?: {
-      walletId?: string;
-      memo?: string;
-      authorizationList?: ERC7702Authorization[];
-      value?: string;
-      contractAddress?: string;
-    }
+    options?: z.infer<typeof executeContractMethodSchemaOptions>
   ): Promise<Transaction> {
     const validatedParams = executeContractMethodSchema.parse({
       contractMethodId,
@@ -75,6 +94,7 @@ export class ContractMethods {
         authorizationList: validatedParams.authorizationList,
         value: validatedParams.value,
         contractAddress: validatedParams.contractAddress,
+        authorizationDataAddress: validatedParams.authorizationDataAddress,
       }
     );
 
@@ -93,11 +113,7 @@ export class ContractMethods {
     contractMethodId: string,
     delegatorAddress: string,
     params: ContractMethodParams,
-    options: {
-      walletId?: string;
-      memo?: string;
-      value?: string;
-    }
+    options: z.infer<typeof executeAsDelegatorContractMethodSchemaOptions>
   ): Promise<Transaction> {
     const validatedParams = executeAsDelegatorContractMethodSchema.parse({
       contractMethodId,
@@ -184,15 +200,7 @@ export class ContractMethods {
    */
   async list(
     businessId: string,
-    params?: {
-      pageSize?: number;
-      page?: number;
-      chainId?: number;
-      name?: string;
-      status?: 'live' | 'archived' | 'both';
-      contractAddress?: string;
-      promptId?: string;
-    }
+    params?: z.infer<typeof listContractMethodsSchemaOptions>
   ): Promise<ContractMethodList> {
     // Validate all parameters using the schema
     const validatedParams = listContractMethodsSchema.parse({
@@ -202,7 +210,7 @@ export class ContractMethods {
 
     const queryParams = new URLSearchParams();
     Object.entries(validatedParams).forEach(([key, value]) => {
-      if (value !== undefined && key !== 'businessId') {
+      if (value != undefined && key != 'businessId') {
         queryParams.append(key, value.toString());
       }
     });
@@ -263,10 +271,7 @@ export class ContractMethods {
   async encode(
     contractMethodId: string,
     params: ContractMethodParams,
-    options?: {
-      authorizationList?: ERC7702Authorization[];
-      value?: string;
-    }
+    options?: z.infer<typeof encodeContractMethodSchemaOptions>
   ): Promise<ContractMethodEncodeResult> {
     const validatedParams = encodeContractMethodSchema.parse({
       contractMethodId,
@@ -456,12 +461,7 @@ export class ContractMethods {
    */
   async assureContractMethodsFromPrompt(
     businessId: string,
-    params: {
-      chainId: number;
-      contractAddress: string;
-      walletId: string;
-      promptId?: string;
-    }
+    params: z.infer<typeof assureContractMethodsFromPromptSchemaOptions>
   ): Promise<ContractMethod[]> {
     const validatedParams = assureContractMethodsFromPromptSchema.parse({
       businessId,

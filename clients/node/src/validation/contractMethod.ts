@@ -76,12 +76,14 @@ export const contractMethodUpdateSchema = z
       .int()
       .positive()
       .optional()
+      .nullable()
       .describe(
         'The ChainId of a supported chainId on 1Shot API. Can be updated to change which blockchain network the contractMethod operates on'
       ),
     contractAddress: z
       .string()
       .optional()
+      .nullable()
       .describe(
         'The address of the smart contract. Can be updated to point to a different contract'
       ),
@@ -89,29 +91,34 @@ export const contractMethodUpdateSchema = z
       .string()
       .uuid()
       .optional()
+      .nullable()
       .describe(
         'The ID of the wallet that will execute the contractMethod. Must be for the same chainId as the contractMethod'
       ),
     name: z
       .string()
       .optional()
+      .nullable()
       .describe(
         'Name of contractMethod, used for display purposes and lookup. Helps identify the contractMethod in lists and logs'
       ),
     description: z
       .string()
       .optional()
+      .nullable()
       .describe(
         'Description of contractMethod, including details about what it does and when it should be called. Useful for documentation and understanding contractMethod purpose'
       ),
     functionName: z
       .string()
       .optional()
+      .nullable()
       .describe(
         'The actual method name on the smart contract. Solidity names are case sensitive and must match precisely. Cannot be changed after creation'
       ),
     stateMutability: contractMethodStateMutabilitySchema
       .optional()
+      .nullable()
       .describe(
         'The state mutability of the Solidity function. Determines if the function can modify state, receive native tokens, or only read data'
       ),
@@ -261,36 +268,42 @@ export const listContractMethodsSchema = z
       .int()
       .positive()
       .optional()
+      .nullable()
       .describe('Number of items per page. Optional parameter for pagination control'),
     page: z
       .number()
       .int()
       .positive()
       .optional()
+      .nullable()
       .describe('Page number (1-indexed). Optional parameter for pagination control'),
     chainId: z
       .number()
       .int()
       .positive()
       .optional()
+      .nullable()
       .describe(
         'Filter by chainId ID. Optional parameter to get contractMethods for a specific blockchain'
       ),
     name: z
       .string()
       .optional()
+      .nullable()
       .describe(
         'Filter by contractMethod name. Optional parameter for searching contractMethods by name'
       ),
     status: z
       .enum(['live', 'archived', 'both'])
       .optional()
+      .nullable()
       .describe(
         'Filter by contractMethod status - live for active contractMethods, archived for deleted ones, or both. Optional parameter for filtering by status'
       ),
     contractAddress: z
       .string()
       .optional()
+      .nullable()
       .describe(
         'Filter by contract address. Optional parameter to get contractMethods for a specific contract'
       ),
@@ -298,12 +311,14 @@ export const listContractMethodsSchema = z
       .string()
       .uuid()
       .optional()
+      .nullable()
       .describe(
         'Filter by contract description ID. If provided, only contractMethods created from this Contract Description will be returned'
       ),
     methodType: z
       .enum(['read', 'write'])
       .optional()
+      .nullable()
       .describe(
         'Which type of contract method you want to filter by - read or write methods. If not provided, all contract methods will be returned'
       ),
@@ -351,31 +366,43 @@ export const executeContractMethodSchema = z
       .string()
       .uuid()
       .optional()
+      .nullable()
       .describe(
         'The ID of the escrow wallet that will execute the contractMethod. If not provided, the default escrow wallet for the contractMethod will be used'
       ),
     memo: z
       .string()
       .optional()
+      .nullable()
       .describe(
         "Optional text supplied when the contractMethod is executed. This can be a note to the user about why the execution was done, or formatted information such as JSON that can be used by the user's system"
       ),
     authorizationList: z
       .array(erc7702AuthorizationSchema)
       .optional()
+      .nullable()
       .describe(
         'A list of authorizations for the contractMethod. If you are using ERC-7702, you must provide at least one authorization'
       ),
     value: z
       .string()
       .optional()
+      .nullable()
       .describe(
         'The amount of native token to send along with the contractMethod. This is only applicable for contractMethods that are payable. Including this value for a nonpayable method will result in an error'
       ),
     contractAddress: z
       .string()
       .optional()
+      .nullable()
       .describe('The address of the smart contract. Can be overridden for this specific execution'),
+    authorizationDataAddress: z
+      .string()
+      .optional()
+      .nullable()
+      .describe(
+        'The address of the ERC-7702 contract to upgrade the Wallet that executes this transaction to. This is basically the same as the authorization list, but allows you to upgrade the Wallet, instead of an external EOA. The signature and nonce params for the AuthorizationList entry are generated by the server. Providing this parameter also requires that you set the contractAddress to the address of the Wallet or it will cause an error.'
+      ),
   })
   .describe(
     'Parameters required to execute a contractMethod. Includes the function parameters, optional escrow wallet override, optional memo, optional value for payable methods, and optional contract address override'
@@ -395,12 +422,14 @@ export const executeAsDelegatorContractMethodSchema = z
       .string()
       .uuid()
       .optional()
+      .nullable()
       .describe(
         'The ID of the escrow wallet that will execute the contractMethod. If not provided, the default escrow wallet for the contractMethod will be used'
       ),
     memo: z
       .string()
       .optional()
+      .nullable()
       .describe(
         "Optional text supplied when the contractMethod is executed. This can be a note to the user about why the execution was done, or formatted information such as JSON that can be used by the user's system"
       ),
@@ -410,6 +439,7 @@ export const executeAsDelegatorContractMethodSchema = z
     value: z
       .string()
       .optional()
+      .nullable()
       .describe(
         'The amount of native token to send along with the contractMethod. This is only applicable for contractMethods that are payable. Including this value for a nonpayable method will result in an error'
       ),
@@ -431,18 +461,21 @@ export const testContractMethodSchema = z
     authorizationList: z
       .array(erc7702AuthorizationSchema)
       .optional()
+      .nullable()
       .describe(
         'A list of authorizations for the contractMethod. If you are using ERC-7702, you must provide at least one authorization'
       ),
     value: z
       .string()
       .optional()
+      .nullable()
       .describe(
         'The amount of native token to send along with the contractMethod. This is only applicable for contractMethods that are payable. Including this value for a nonpayable method will result in an error'
       ),
     contractAddress: z
       .string()
       .optional()
+      .nullable()
       .describe('The address of the smart contract. Can be overridden for this specific test'),
   })
   .describe(
@@ -474,12 +507,14 @@ export const estimateContractMethodSchema = z
     authorizationList: z
       .array(erc7702AuthorizationSchema)
       .optional()
+      .nullable()
       .describe(
         'A list of authorizations for the contractMethod. If you are using ERC-7702, you must provide at least one authorization'
       ),
     value: z
       .string()
       .optional()
+      .nullable()
       .describe(
         'The amount of native token to send along with the contractMethod. This is only applicable for contractMethods that are payable. Including this value for a nonpayable method will result in an error'
       ),
@@ -501,12 +536,14 @@ export const encodeContractMethodSchema = z
     authorizationList: z
       .array(erc7702AuthorizationSchema)
       .optional()
+      .nullable()
       .describe(
         'A list of authorizations for the contractMethod. If you are using ERC-7702, you must provide at least one authorization'
       ),
     value: z
       .string()
       .optional()
+      .nullable()
       .describe(
         'The amount of native token to send along with the contractMethod. This is only applicable for contractMethods that are payable. Including this value for a nonpayable method will result in an error'
       ),
@@ -616,10 +653,12 @@ export const importFromABISchema = z
     name: z
       .string()
       .optional()
+      .nullable()
       .describe("The name of the smart contract, if it doesn't already exist"),
     description: z
       .string()
       .optional()
+      .nullable()
       .describe("A description of the smart contract, if it doesn't already exist"),
     tags: z.array(z.string()).optional().describe('Tags to add to the smart contract'),
   })
@@ -770,6 +809,7 @@ export const contractSearchSchema = z
       .int()
       .positive()
       .optional()
+      .nullable()
       .describe('The ChainId of a supported chainId on 1Shot API'),
   })
   .describe('Parameters for searching contract descriptions');
@@ -803,6 +843,7 @@ export const contractContractMethodsSchema = z
       .string()
       .uuid()
       .optional()
+      .nullable()
       .describe(
         'The ID of the contract description that you want to use. If not provided, the highest-ranked Contract Description for the chainId and contract address will be used. This is optional, and a ContractMethod can drift from the original Contract Description but retain this association'
       ),
@@ -853,6 +894,7 @@ export const assureContractMethodsFromPromptSchema = z
       .string()
       .uuid()
       .optional()
+      .nullable()
       .describe('ID of the prompt to use. If not provided, the highest-ranked Prompt will be used'),
   })
   .describe('Parameters for assuring contract methods exist for a given Prompt');
