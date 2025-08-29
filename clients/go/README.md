@@ -140,9 +140,11 @@ execution, err := c.ContractMethods().Execute(
         "amount": "1000000000000000000", // 1 ETH in wei
         "to":     "0x456...",
     },
-    nil,
-    nil,
-    nil,
+    nil, // walletId
+    nil, // memo
+    nil, // authorizationList
+    nil, // value
+    nil, // contractAddress
 )
 
 // Get method details

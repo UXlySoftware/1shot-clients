@@ -21,6 +21,8 @@ func (t *ContractMethods) Execute(
 	params map[string]interface{},
 	walletId, memo *string,
 	authorizationList []swagger.Erc7702Authorization,
+	value *string,
+	contractAddress *string,
 ) (*swagger.Transaction, error) {
 	body := swagger.ContractMethodIdExecuteBody{}
 	if params != nil {
@@ -42,6 +44,12 @@ func (t *ContractMethods) Execute(
 	}
 	if authorizationList != nil {
 		body.AuthorizationList = authorizationList
+	}
+	if value != nil {
+		body.Value = *value
+	}
+	if contractAddress != nil {
+		body.ContractAddress = *contractAddress
 	}
 	resp, _, err := t.api.MethodsContractMethodIdExecutePost(ctx, body, contractMethodId)
 	if err != nil {
