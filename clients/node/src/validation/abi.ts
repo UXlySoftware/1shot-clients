@@ -76,6 +76,18 @@ export const abiFallbackSchema = z.object({
 });
 
 /**
+ * Schema for validating an error
+ */
+export const abiErrorSchema = z.object({
+  /** Type identifier (always 'error') */
+  type: z.literal('error'),
+  /** Name of the error */
+  name: z.string(),
+  /** Array of error parameters */
+  inputs: z.array(abiParameterSchema),
+});
+
+/**
  * Schema for validating an Ethereum ABI
  * Uses a discriminated union based on the 'type' property to validate different ABI entries
  */
@@ -85,5 +97,6 @@ export const ethereumAbiSchema = z.array(
     abiEventSchema,
     abiConstructorSchema,
     abiFallbackSchema,
+    abiErrorSchema,
   ])
 );
