@@ -88,6 +88,17 @@ export const abiErrorSchema = z.object({
 });
 
 /**
+ * Schema for validating the structure of a smart contract receive function
+ * This is a special function that is used to receive native tokens
+ */
+export const abiReceiveSchema = z.object({
+  /** Type identifier (always 'receive') */
+  type: z.literal('receive'),
+  /** State mutability of the receive function */
+  stateMutability: z.literal('payable'),
+});
+
+/**
  * Schema for validating an Ethereum ABI
  * Uses a discriminated union based on the 'type' property to validate different ABI entries
  */
@@ -98,5 +109,6 @@ export const ethereumAbiSchema = z.array(
     abiConstructorSchema,
     abiFallbackSchema,
     abiErrorSchema,
+    abiReceiveSchema,
   ])
 );
