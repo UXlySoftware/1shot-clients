@@ -1,7 +1,12 @@
 import { IOneShotClient } from '../types/client.js';
-import { ChainInfo, ListChains } from '../types/chain.js';
+import { ChainInfo, ListChains, GasFees } from '../types/chain.js';
 import { PagedResponse } from '../types/common.js';
-import { chainListSchema, listChainsSchema } from '../validation/chain.js';
+import {
+  chainListSchema,
+  listChainsSchema,
+  gasFeesSchema,
+  getFeesSchema,
+} from '../validation/chain.js';
 
 export class Chains {
   constructor(private client: IOneShotClient) {}
@@ -31,5 +36,26 @@ export class Chains {
 
     // Validate the response
     return chainListSchema.parse(response);
+  }
+
+  /**
+   * Get current gas fees for a specific chain
+   * @param chainId The ChainId of the chain to get fees for
+   * @returns Promise<GasFees>
+   * @throws {ZodError} If the chainId is invalid
+   */
+  async getFees(chainId: number): Promise<GasFees> {
+    // Validate all parameters using the schema
+    const validatedParams = getFeesSchema.parse({
+      chainId,
+    });
+
+    const response = await this.client.request<GasFees>(
+      'GET',
+      `/chains/${validatedParams.chainId}/fees`
+    );
+
+    // Validate the response
+    return gasFeesSchema.parse(response);
   }
 }

@@ -15,6 +15,7 @@ import {
   delegationListSchema,
   listDelegationsSchema,
   createDelegationSchema,
+  deleteDelegationSchema,
 } from '../validation/wallet.js';
 import { z } from 'zod/index.js';
 
@@ -287,5 +288,23 @@ export class Wallets {
 
     // Validate the response
     return delegationSchema.parse(response);
+  }
+
+  /**
+   * Delete a delegation by its ID
+   * @param delegationId The ID of the delegation to delete
+   * @returns Promise<{ success: boolean }>
+   * @throws {ZodError} If the delegation ID is invalid
+   */
+  async deleteDelegation(delegationId: string): Promise<{ success: boolean }> {
+    // Validate all parameters using the schema
+    const validatedParams = deleteDelegationSchema.parse({
+      delegationId,
+    });
+
+    return this.client.request<{ success: boolean }>(
+      'DELETE',
+      `/delegation/${validatedParams.delegationId}`
+    );
   }
 }

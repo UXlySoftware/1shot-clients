@@ -1,5 +1,15 @@
 import { z } from 'zod';
 
+// Validation for log description
+export const logDescriptionSchema = z
+  .object({
+    name: z.string().describe('Name of the log event'),
+    signature: z.string().describe('Signature of the log event'),
+    topic: z.string().describe('Topic of the log event'),
+    args: z.array(z.string()).describe('Arguments of the log event'),
+  })
+  .describe('A description of a log event');
+
 // Validation for transaction status
 export const transactionStatusSchema = z
   .enum(['Submitted', 'Completed', 'Retrying', 'Failed', 'Pending'])
@@ -93,6 +103,11 @@ export const transactionSchema = z
       .string()
       .nullable()
       .describe('The max priority fee per gas of the transaction'),
+    gasUsed: z.string().nullable().describe('The gas used by the transaction'),
+    logs: z
+      .array(logDescriptionSchema)
+      .nullable()
+      .describe('The logs, if any, emitted by the transaction'),
     updated: z
       .number()
       .describe('Unix timestamp of the last update to this execution. Used for tracking changes'),

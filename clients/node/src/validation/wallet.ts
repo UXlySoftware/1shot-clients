@@ -272,3 +272,10 @@ export const createDelegationSchema = z
       ),
   })
   .describe('Parameters for creating a new delegation for a wallet');
+
+// Validation for delete delegation parameters
+export const deleteDelegationSchema = z
+  .object({
+    delegationId: z.string().uuid().describe('ID of the delegation to delete'),
+  })
+  .describe('Parameters for deleting a delegation');

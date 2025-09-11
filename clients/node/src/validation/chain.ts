@@ -1,5 +1,31 @@
 import { z } from 'zod';
 
+// Validation for gas fees
+export const gasFeesSchema = z
+  .object({
+    gasPrice: z
+      .string()
+      .nullable()
+      .describe(
+        'Gas price in wei for non-EIP-1559 chains (e.g., Binance). Will be null for EIP-1559 chains'
+      ),
+    maxFeePerGas: z
+      .string()
+      .nullable()
+      .describe(
+        'Maximum fee per gas in wei for EIP-1559 chains. Will be null for non-EIP-1559 chains'
+      ),
+    maxPriorityFeePerGas: z
+      .string()
+      .nullable()
+      .describe(
+        'Maximum priority fee per gas in wei for EIP-1559 chains. Will be null for non-EIP-1559 chains'
+      ),
+  })
+  .describe(
+    'Current gas fees for a blockchain. Contains either gasPrice for non-EIP-1559 chains or maxFeePerGas and maxPriorityFeePerGas for EIP-1559 enabled chains'
+  );
+
 // Validation for native currency information
 export const nativeCurrencyInformationSchema = z
   .object({
@@ -51,3 +77,10 @@ export const listChainsSchema = z
     page: z.number().int().positive().optional().nullable().describe('Page number to retrieve'),
   })
   .describe('Parameters for listing chains');
+
+// Validation for get fees parameters
+export const getFeesSchema = z
+  .object({
+    chainId: z.number().int().positive().describe('The ChainId of a supported chain on 1Shot API'),
+  })
+  .describe('Parameters for getting gas fees for a specific chain');
