@@ -1,5 +1,10 @@
 This is the Node JS version of the client SDK for 1Shot API.
 
+# General Instructions
+Do not bother trying to fix linting errors yourself, just use `npm run format` and leave it alone. 
+
+# Architecture
+
 The client SDK is based on m2mGatewaySpec.yaml, an OpenAPI/swagger spec at the root of this repository. The SDK should contain all the methods in the m2m (machine to machine) API for 1Shot API.
 
 For all versions of the client, methods are split into 5 categories: Contract Methods, Wallets, Transactions, Structs, and Chains. For this Node JS version, we have 3 main layers in the `/clients/node/src` directory: validation, types, and categories. The validation layer contains Zod schemas based on the m2mGatewaySpec, with both the requests and the responses specified in files matching the categories. This is where you should start when adding or updating things from the m2mGatewaySpec.

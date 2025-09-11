@@ -109,6 +109,31 @@ paths:
 
         500:
           $ref: "#/components/responses/DatabaseError"
+
+  /chains/{chainId}/fees:
+    get:
+      tags:
+        - Chains
+        - Get
+      description: Gets the current gas fees for the specified chain. Returns either gasPrice for non-EIP-1559 chains (like Binance) or maxFeePerGas and maxPriorityFeePerGas for EIP-1559 enabled chains.
+      parameters:
+        - name: chainId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/EChain"
+      security:
+        - OAuth2ClientCredentials:
+          - read:api
+      responses:
+        200:
+          description: Returns the current gas fees for the chain.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GasFees"
+        500:
+          $ref: "#/components/responses/DatabaseError"
   
   /methods/{contractMethodId}/test:  
     post:
@@ -1260,6 +1285,42 @@ paths:
                 $ref: "#/components/schemas/Delegation"
         500:
           $ref: "#/components/responses/DatabaseError"
+
+  /delegation/{delegationId}:
+    delete:
+      tags:
+        - Wallets
+        - Delegations
+        - Delete
+      description: Deletes a delegation by its ID. This operation cannot be undone.
+      parameters:
+        - name: delegationId
+          in: path
+          description: The internal uuid of the delegation to delete
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 8a6e0804-2bd0-4672-b79d-d97027f90720
+      security:
+        - OAuth2ClientCredentials:
+          - read:api
+      responses:
+        200:
+          description: Successfully deleted the delegation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: Whether or not the delete was successful
+                    example: true
+        403:
+          $ref: "#/components/responses/PermissionError"
+        500:
+          $ref: "#/components/responses/DatabaseError"
   
   /structs/{structId}:
     put:
@@ -1596,9 +1657,7 @@ components:
         - 43114
         - 43113
         - 80002
-        - 100
         - 56
-        - 1284
         - 42161
         - 10
         - 592
@@ -1613,6 +1672,9 @@ components:
         - 130
         - 480
         - 81457
+        - 1952
+        - 196
+        - 59144
 
     EChainTechnology:
       type: integer
@@ -2003,6 +2065,16 @@ components:
               format: big-number-string
               description: The max priority fee per gas of the transaction.
               example: "123400000000000000000"
+            gasUsed:
+              type: string
+              format: big-number-string
+              description: The gas used by the transaction.
+              example: "123400000000000000000"
+            logs:
+              type: array
+              description: The logs, if any, emitted by the transaction.
+              items:
+                $ref: "#/components/schemas/LogDescription"
           required:
             - id
             - contractMethodId
@@ -2466,3 +2538,46 @@ components:
         decimals:
           type: number
           description: The number of decimals of the currency
+
+    GasFees:
+      description: Current gas fees for a blockchain. Contains either gasPrice for non-EIP-1559 chains or maxFeePerGas and maxPriorityFeePerGas for EIP-1559 enabled chains.
+      type: object
+      properties:
+        gasPrice:
+          type: string
+          format: big-number-string
+          description: Gas price in wei for non-EIP-1559 chains (e.g., Binance). Will be null for EIP-1559 chains.
+          example: "20000000000"
+          nullable: true
+        maxFeePerGas:
+          type: string
+          format: big-number-string
+          description: Maximum fee per gas in wei for EIP-1559 chains. Will be null for non-EIP-1559 chains.
+          example: "30000000000"
+          nullable: true
+        maxPriorityFeePerGas:
+          type: string
+          format: big-number-string
+          description: Maximum priority fee per gas in wei for EIP-1559 chains. Will be null for non-EIP-1559 chains.
+          example: "2000000000"
+          nullable: true
+
+    LogDescription:
+      description: A description of a log event
+      type: object
+      properties:
+        name:
+          type: string
+        signature:
+          type: string
+        topic:
+          type: string
+        args:
+          type: array
+          items:
+            type: string
+      required:
+        - name
+        - signature
+        - topic
+        - args
