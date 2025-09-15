@@ -6,9 +6,16 @@ export const logDescriptionSchema = z
     name: z.string().describe('Name of the log event'),
     signature: z.string().describe('Signature of the log event'),
     topic: z.string().describe('Topic of the log event'),
-    args: z.array(z.string()).describe('Arguments of the log event'),
+    args: z
+      .lazy(() => z.array(z.union([z.string(), logDescriptionArgsSchema])))
+      .describe('Arguments of the log event - can be strings or nested arrays of strings'),
   })
   .describe('A description of a log event');
+
+// Recursive schema for log description args
+export const logDescriptionArgsSchema: z.ZodType<string | Array<string | any>> = z.lazy(() =>
+  z.union([z.string(), z.array(z.union([z.string(), logDescriptionArgsSchema]))])
+);
 
 // Validation for transaction status
 export const transactionStatusSchema = z

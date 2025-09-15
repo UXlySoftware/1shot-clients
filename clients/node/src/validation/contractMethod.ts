@@ -31,7 +31,16 @@ export const contractMethodParamsSchema: z.ZodType<{
     z.null(),
     z.undefined(),
     z.lazy(() => contractMethodParamsSchema),
-    z.array(z.lazy(() => contractMethodParamsSchema)),
+    z.array(
+      z.union([
+        z.string(),
+        z.number(),
+        z.boolean(),
+        z.null(),
+        z.undefined(),
+        z.lazy(() => contractMethodParamsSchema),
+      ])
+    ),
   ])
 );
 
