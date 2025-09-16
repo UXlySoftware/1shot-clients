@@ -442,6 +442,13 @@ export const executeAsDelegatorContractMethodSchema = z
       .describe(
         "Optional text supplied when the contractMethod is executed. This can be a note to the user about why the execution was done, or formatted information such as JSON that can be used by the user's system"
       ),
+    authorizationList: z
+      .array(erc7702AuthorizationSchema)
+      .optional()
+      .nullable()
+      .describe(
+        'A list of authorizations for the contractMethod. If you are using ERC-7702, you must provide at least one authorization'
+      ),
     delegatorAddress: z
       .string()
       .describe('The address of the delegator on whose behalf the transaction will be executed'),
