@@ -31,7 +31,16 @@ export const contractMethodParamsSchema: z.ZodType<{
     z.null(),
     z.undefined(),
     z.lazy(() => contractMethodParamsSchema),
-    z.array(z.lazy(() => contractMethodParamsSchema)),
+    z.array(
+      z.union([
+        z.string(),
+        z.number(),
+        z.boolean(),
+        z.null(),
+        z.undefined(),
+        z.lazy(() => contractMethodParamsSchema),
+      ])
+    ),
   ])
 );
 
@@ -432,6 +441,13 @@ export const executeAsDelegatorContractMethodSchema = z
       .nullable()
       .describe(
         "Optional text supplied when the contractMethod is executed. This can be a note to the user about why the execution was done, or formatted information such as JSON that can be used by the user's system"
+      ),
+    authorizationList: z
+      .array(erc7702AuthorizationSchema)
+      .optional()
+      .nullable()
+      .describe(
+        'A list of authorizations for the contractMethod. If you are using ERC-7702, you must provide at least one authorization'
       ),
     delegatorAddress: z
       .string()

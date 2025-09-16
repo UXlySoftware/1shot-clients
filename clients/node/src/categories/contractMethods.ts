@@ -129,6 +129,7 @@ export class ContractMethods {
         params: validatedParams.params,
         walletId: validatedParams.walletId,
         memo: validatedParams.memo,
+        authorizationList: validatedParams.authorizationList,
         delegatorAddress: validatedParams.delegatorAddress,
         value: validatedParams.value,
       }
