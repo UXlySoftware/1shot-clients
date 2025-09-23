@@ -11,6 +11,8 @@ import {
   ContractMethodParams,
   ContractMethodStateMutability,
   ERC7702Authorization,
+  ExecuteBatchContractMethod,
+  ExecuteBatchAsDelegatorContractMethod,
 } from '../types/contractMethod.js';
 import {
   contractMethodSchema,
@@ -19,6 +21,8 @@ import {
   listContractMethodsSchema,
   executeContractMethodSchema,
   executeAsDelegatorContractMethodSchema,
+  executeBatchContractMethodSchema,
+  executeBatchAsDelegatorContractMethodSchema,
   testContractMethodSchema,
   getContractMethodSchema,
   estimateContractMethodSchema,
@@ -132,6 +136,54 @@ export class ContractMethods {
         authorizationList: validatedParams.authorizationList,
         delegatorAddress: validatedParams.delegatorAddress,
         value: validatedParams.value,
+      }
+    );
+
+    return transactionSchema.parse(response);
+  }
+
+  /**
+   * Execute multiple contract methods in a single batch transaction
+   * @param params Batch execution parameters including contract methods and wallet ID
+   * @returns Promise<Transaction>
+   * @throws {ZodError} If the parameters are invalid
+   */
+  async executeBatch(params: ExecuteBatchContractMethod): Promise<Transaction> {
+    const validatedParams = executeBatchContractMethodSchema.parse(params);
+
+    const response = await this.client.request<Transaction>('POST', '/methods/executeBatch', {
+      contractMethods: validatedParams.contractMethods,
+      walletId: validatedParams.walletId,
+      atomic: validatedParams.atomic,
+      memo: validatedParams.memo,
+      authorizationList: validatedParams.authorizationList,
+      gasLimit: validatedParams.gasLimit,
+    });
+
+    return transactionSchema.parse(response);
+  }
+
+  /**
+   * Execute multiple contract methods in a single batch transaction as delegator
+   * @param params Batch execution parameters including contract methods, wallet ID, and delegator addresses
+   * @returns Promise<Transaction>
+   * @throws {ZodError} If the parameters are invalid
+   */
+  async executeBatchAsDelegator(
+    params: ExecuteBatchAsDelegatorContractMethod
+  ): Promise<Transaction> {
+    const validatedParams = executeBatchAsDelegatorContractMethodSchema.parse(params);
+
+    const response = await this.client.request<Transaction>(
+      'POST',
+      '/methods/executeAsDelegatorBatch',
+      {
+        contractMethods: validatedParams.contractMethods,
+        walletId: validatedParams.walletId,
+        atomic: validatedParams.atomic,
+        memo: validatedParams.memo,
+        authorizationList: validatedParams.authorizationList,
+        gasLimit: validatedParams.gasLimit,
       }
     );
 

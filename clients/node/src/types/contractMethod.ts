@@ -10,6 +10,10 @@ import {
   listContractMethodsSchema,
   executeContractMethodSchema,
   executeAsDelegatorContractMethodSchema,
+  batchContractMethodSchema,
+  batchContractMethodAsDelegatorSchema,
+  executeBatchContractMethodSchema,
+  executeBatchAsDelegatorContractMethodSchema,
   testContractMethodSchema,
   getContractMethodSchema,
   estimateContractMethodSchema,
@@ -38,6 +42,12 @@ export type ListContractMethods = z.infer<typeof listContractMethodsSchema>;
 export type ExecuteContractMethod = z.infer<typeof executeContractMethodSchema>;
 export type ExecuteAsDelegatorContractMethod = z.infer<
   typeof executeAsDelegatorContractMethodSchema
+>;
+export type BatchContractMethod = z.infer<typeof batchContractMethodSchema>;
+export type BatchContractMethodAsDelegator = z.infer<typeof batchContractMethodAsDelegatorSchema>;
+export type ExecuteBatchContractMethod = z.infer<typeof executeBatchContractMethodSchema>;
+export type ExecuteBatchAsDelegatorContractMethod = z.infer<
+  typeof executeBatchAsDelegatorContractMethodSchema
 >;
 export type TestContractMethod = z.infer<typeof testContractMethodSchema>;
 export type GetContractMethod = z.infer<typeof getContractMethodSchema>;
