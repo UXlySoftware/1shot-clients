@@ -464,6 +464,145 @@ export const executeAsDelegatorContractMethodSchema = z
     'Parameters required to execute a contractMethod as a delegator. Similar to regular execution but executes the transaction on behalf of the specified delegator address'
   );
 
+// Validation for batch contract method execution
+export const batchContractMethodSchema = z
+  .object({
+    contractMethodId: z
+      .string()
+      .uuid()
+      .describe('The ID of the contractMethod to execute. Identifies which contractMethod to run'),
+    executionIndex: z
+      .number()
+      .int()
+      .nonnegative()
+      .describe(
+        'The order in which to execute this method. Must start at 0 and increment by 1. Must be unique. Provided in case the array gets shuffled in transmission'
+      ),
+    params: contractMethodParamsSchema,
+    value: z
+      .string()
+      .optional()
+      .nullable()
+      .describe(
+        'The amount of native token to send along with the contractMethod. This is only applicable for contractMethods that are payable. Including this value for a nonpayable method will result in an error'
+      ),
+    contractAddress: z
+      .string()
+      .optional()
+      .nullable()
+      .describe('The address of the smart contract. Can be overridden for this specific execution'),
+  })
+  .describe('A single contract method execution within a batch');
+
+// Validation for batch contract method execution as delegator
+export const batchContractMethodAsDelegatorSchema = z
+  .object({
+    contractMethodId: z
+      .string()
+      .uuid()
+      .describe('The ID of the contractMethod to execute. Identifies which contractMethod to run'),
+    executionIndex: z
+      .number()
+      .int()
+      .nonnegative()
+      .describe(
+        'The order in which to execute this method. Must start at 0 and increment by 1. Must be unique. Provided in case the array gets shuffled in transmission'
+      ),
+    params: contractMethodParamsSchema,
+    delegatorAddress: z
+      .string()
+      .describe('The address of the delegator on whose behalf the transaction will be executed'),
+    value: z
+      .string()
+      .optional()
+      .nullable()
+      .describe(
+        'The amount of native token to send along with the contractMethod. This is only applicable for contractMethods that are payable. Including this value for a nonpayable method will result in an error'
+      ),
+    contractAddress: z
+      .string()
+      .optional()
+      .nullable()
+      .describe('The address of the smart contract. Can be overridden for this specific execution'),
+  })
+  .describe('A single contract method execution within a batch as delegator');
+
+// Validation for executing batch contract methods
+export const executeBatchContractMethodSchema = z
+  .object({
+    contractMethods: z
+      .array(batchContractMethodSchema)
+      .describe('Array of contract methods to execute in batch'),
+    walletId: z.string().uuid().describe('The ID of the escrow wallet that will execute the batch'),
+    atomic: z
+      .boolean()
+      .optional()
+      .describe(
+        'If true, all transactions in the batch must succeed, or the entire batch is rolled back. If false, the executions that succeed will complete, but no transactions after the first failure will be executed'
+      ),
+    memo: z
+      .string()
+      .optional()
+      .nullable()
+      .describe(
+        "Optional text supplied when the batch is executed. This can be a note to the user about why the execution was done, or formatted information such as JSON that can be used by the user's system"
+      ),
+    authorizationList: z
+      .array(erc7702AuthorizationSchema)
+      .optional()
+      .nullable()
+      .describe(
+        'A list of authorizations for the batch. If you are using ERC-7702, you must provide at least one authorization'
+      ),
+    gasLimit: z
+      .string()
+      .optional()
+      .nullable()
+      .describe(
+        'The gas limit for the transaction. The transaction will revert if it uses more gas than this, and you will spend the gas in the process. Ordinarily, you do not need this, 1Shot will calculate it for you. However, for some very complicated transactions, you may need to set the gas limit manually as the normal estimation process may underestimate the gas amount'
+      ),
+  })
+  .describe('Parameters for executing multiple contract methods in a single batch transaction');
+
+// Validation for executing batch contract methods as delegator
+export const executeBatchAsDelegatorContractMethodSchema = z
+  .object({
+    contractMethods: z
+      .array(batchContractMethodAsDelegatorSchema)
+      .describe('Array of contract methods to execute in batch as delegator'),
+    walletId: z.string().uuid().describe('The ID of the escrow wallet that will execute the batch'),
+    atomic: z
+      .boolean()
+      .optional()
+      .describe(
+        'If true, all transactions in the batch must succeed, or the entire batch is rolled back. If false, the executions that succeed will complete, but no transactions after the first failure will be executed'
+      ),
+    memo: z
+      .string()
+      .optional()
+      .nullable()
+      .describe(
+        "Optional text supplied when the batch is executed. This can be a note to the user about why the execution was done, or formatted information such as JSON that can be used by the user's system"
+      ),
+    authorizationList: z
+      .array(erc7702AuthorizationSchema)
+      .optional()
+      .nullable()
+      .describe(
+        'A list of authorizations for the batch. If you are using ERC-7702, you must provide at least one authorization'
+      ),
+    gasLimit: z
+      .string()
+      .optional()
+      .nullable()
+      .describe(
+        'The gas limit for the transaction. The transaction will revert if it uses more gas than this, and you will spend the gas in the process. Ordinarily, you do not need this, 1Shot will calculate it for you. However, for some very complicated transactions, you may need to set the gas limit manually as the normal estimation process may underestimate the gas amount'
+      ),
+  })
+  .describe(
+    'Parameters for executing multiple contract methods in a single batch transaction as delegator'
+  );
+
 // Validation for testing a contractMethod
 export const testContractMethodSchema = z
   .object({
